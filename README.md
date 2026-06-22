@@ -44,29 +44,58 @@ Two processes, two terminals:
 
 ```
 # terminal 1 — API
-./venv/bin/uvicorn app:app --reload
+make api
 
 # terminal 2 — Telegram bot
-./venv/bin/python bot.py
+make bot
 ```
+
+(Or call uvicorn / python directly — see the Makefile.)
 
 Then in Telegram, send or forward any message to your bot. The bot replies
 `saved #N as <source> (processing…)` and the worker fills in the gist
 asynchronously.
 
-## Verify
+## How to test
 
-```
-curl localhost:8000/items | jq '.[0]'
-```
+End-to-end without Telegram, in three steps:
 
-End-to-end smoke (no Telegram needed):
+1. **Start the API.** In one terminal: `make api`. Wait for
+   `Application startup complete`.
 
-```
-curl -X POST localhost:8000/capture \
-  -H 'Content-Type: application/json' \
-  -d '{"payload":"https://www.instagram.com/reels/<id>/"}'
-```
+2. **Capture one of each source** with curl:
+
+   ```
+   # IG reel — exercises yt-dlp + Gemini Files API
+   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
+     -d '{"payload":"https://www.instagram.com/reels/<id>/"}'
+
+   # Web article — exercises trafilatura + Gemini text
+   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
+     -d '{"payload":"https://en.wikipedia.org/wiki/Kalman_filter"}'
+
+   # Free-form note — exercises Gemini text only
+   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
+     -d '{"payload":"random idea I want to come back to later"}'
+
+   # Tweet — stub, returns done immediately
+   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
+     -d '{"payload":"https://x.com/some/status/123","note":"context"}'
+   ```
+
+   Each call returns `{"id":N,"source":...,"status":"pending"}` fast.
+
+3. **Eyeball the result.** Open <http://localhost:8000/items/pretty> in a
+   browser — newest first, columns for source / status / category /
+   summary / on-screen text. Refresh as the worker fills rows in
+   (IG reels take ~20–40s; text gists are a few seconds).
+
+   For raw JSON: `curl localhost:8000/items | jq`.
+
+**Telegram path:** once the bot is running (`make bot`), forward an IG reel
+post to your bot. You should get a `saved #N as ig_reel (processing…)`
+reply, and the row should appear on `/items/pretty` with a gist shortly
+after.
 
 ## Notes
 

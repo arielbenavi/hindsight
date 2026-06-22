@@ -1,6 +1,7 @@
 """FastAPI app: POST /capture, GET /items, background worker."""
 from __future__ import annotations
 
+import html
 import logging
 import threading
 from contextlib import asynccontextmanager
@@ -8,6 +9,7 @@ from typing import Any, Optional
 
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 import adapters
@@ -79,6 +81,59 @@ def capture(body: CaptureIn, bg: BackgroundTasks):
 @app.get("/items")
 def items():
     return db.list_items()
+
+
+_PRETTY_CSS = """
+body { font: 14px/1.4 -apple-system, system-ui, sans-serif; margin: 1.5rem; color: #222; }
+h1 { font-size: 1.1rem; margin: 0 0 1rem; color: #555; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+th { background: #fafafa; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #666; }
+tr:hover td { background: #f6faff; }
+td.id { color: #999; font-variant-numeric: tabular-nums; }
+td.src, td.cat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+td.status-done { color: #1b7a3a; }
+td.status-failed { color: #b00020; }
+td.status-pending { color: #b07a00; }
+td.summary { max-width: 480px; }
+td.ost { max-width: 320px; color: #555; font-size: 13px; white-space: pre-wrap; }
+.empty { color: #999; font-style: italic; margin-top: 1rem; }
+"""
+
+
+@app.get("/items/pretty", response_class=HTMLResponse)
+def items_pretty():
+    rows = db.list_items()
+    body_rows: list[str] = []
+    for r in rows:
+        status = r.get("status") or ""
+        body_rows.append(
+            "<tr>"
+            f"<td class='id'>#{r['id']}</td>"
+            f"<td class='src'>{html.escape(r.get('source') or '')}</td>"
+            f"<td class='status-{html.escape(status)}'>{html.escape(status)}</td>"
+            f"<td class='cat'>{html.escape(r.get('category') or '')}</td>"
+            f"<td class='summary'>{html.escape(r.get('summary') or '')}</td>"
+            f"<td class='ost'>{html.escape(r.get('on_screen_text') or '')}</td>"
+            "</tr>"
+        )
+    table = (
+        "<table>"
+        "<thead><tr><th>id</th><th>source</th><th>status</th>"
+        "<th>category</th><th>summary</th><th>on-screen text</th></tr></thead>"
+        f"<tbody>{''.join(body_rows)}</tbody>"
+        "</table>"
+        if body_rows
+        else "<p class='empty'>no items yet</p>"
+    )
+    return (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<title>savefeed</title>"
+        f"<style>{_PRETTY_CSS}</style></head><body>"
+        f"<h1>savefeed — {len(rows)} item(s), newest first</h1>"
+        f"{table}"
+        "</body></html>"
+    )
 
 
 @app.get("/items/{item_id}")
