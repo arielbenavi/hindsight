@@ -70,21 +70,27 @@ def mark_failed(item_id: int, error: str) -> None:
     _update(item_id, {"status": "failed", "summary": f"FAILED: {error[:500]}"})
 
 
+JSON_FIELDS = {"key_takeaways"}  # decoded back to objects on read
+
+
 def _update(item_id: int, fields: dict[str, Any]) -> None:
-    if "key_takeaways" in fields and not isinstance(fields["key_takeaways"], (str, type(None))):
-        fields["key_takeaways"] = json.dumps(fields["key_takeaways"], ensure_ascii=False)
-    cols = ", ".join(f"{k}=?" for k in fields)
+    serialized = {
+        k: (json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else v)
+        for k, v in fields.items()
+    }
+    cols = ", ".join(f"{k}=?" for k in serialized)
     with connect() as c:
-        c.execute(f"UPDATE items SET {cols} WHERE id=?", (*fields.values(), item_id))
+        c.execute(f"UPDATE items SET {cols} WHERE id=?", (*serialized.values(), item_id))
 
 
 def _row_to_dict(r: sqlite3.Row) -> dict[str, Any]:
     d = dict(r)
-    if d.get("key_takeaways"):
-        try:
-            d["key_takeaways"] = json.loads(d["key_takeaways"])
-        except (json.JSONDecodeError, TypeError):
-            pass
+    for f in JSON_FIELDS:
+        if d.get(f):
+            try:
+                d[f] = json.loads(d[f])
+            except (json.JSONDecodeError, TypeError):
+                pass
     return d
 
 

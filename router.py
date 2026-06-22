@@ -23,7 +23,7 @@ def classify(payload: str) -> tuple[str, Optional[str]]:
     parsed = urlparse(url)
     host = (parsed.hostname or "").lower()
     path = parsed.path.lower()
-    if "instagram.com" in host and ("/reel/" in path or "/reels/" in path):
+    if "instagram.com" in host and any(seg in path for seg in ("/reel/", "/reels/", "/p/")):
         return "ig_reel", url
     if host in {"x.com", "twitter.com"} or host.endswith(".x.com") or host.endswith(".twitter.com"):
         return "tweet", url

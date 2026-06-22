@@ -18,13 +18,39 @@ log = logging.getLogger("savefeed.adapters")
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 
 
+VIDEO_EXTS = {".mp4", ".mov", ".webm", ".mkv"}
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+LOGIN_WALL_MARKERS = (
+    "log in",
+    "sign up",
+    "create an account",
+    "enable javascript",
+    "please enable cookies",
+    "verifying you are human",
+    "captcha",
+    "register to continue",
+    "you need to log in",
+)
+
+
 def process_ig_reel(item_id: int, url: str) -> None:
     with tempfile.TemporaryDirectory(prefix="savefeed-ig-") as td:
-        mp4 = _ytdlp_download(url, Path(td))
-        g = gemini.gist_video(mp4)
+        td_path = Path(td)
+        mp4 = _ytdlp_video(url, td_path)
+        if mp4 is not None:
+            g = gemini.gist_video(mp4)
+            kind = "video"
+        else:
+            images = _gallery_dl_images(url, td_path)
+            if not images:
+                raise RuntimeError(
+                    f"could not fetch as video (yt-dlp) or images (gallery-dl) for {url}"
+                )
+            g = gemini.gist_images(images)
+            kind = "images"
     db.mark_done(
         item_id,
-        kind="video",
+        kind=kind,
         summary=g.get("summary"),
         on_screen_text=g.get("on_screen_text"),
         transcript=g.get("spoken_transcript"),
@@ -33,8 +59,8 @@ def process_ig_reel(item_id: int, url: str) -> None:
     )
 
 
-def _ytdlp_download(url: str, into: Path) -> Path:
-    last_err = ""
+def _ytdlp_video(url: str, into: Path) -> Optional[Path]:
+    """Try to download a video. Returns Path on success, None on any failure (caller may fall back)."""
     for browser in ("chrome", "firefox"):
         cmd = [
             *YTDLP_CMD,
@@ -48,15 +74,51 @@ def _ytdlp_download(url: str, into: Path) -> Path:
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=240)
         except subprocess.TimeoutExpired:
-            last_err = f"yt-dlp timed out after 240s ({browser})"
+            log.warning("yt-dlp timed out (%s) for %s", browser, url)
             continue
         if r.returncode == 0:
             lines = r.stdout.strip().splitlines()
-            if lines and Path(lines[-1]).exists():
-                return Path(lines[-1])
-        last_err = f"yt-dlp exit {r.returncode} ({browser}) stderr: {r.stderr[-800:]}"
-        log.warning(last_err)
-    raise RuntimeError(f"yt-dlp failed (chrome+firefox). last: {last_err}")
+            if lines:
+                p = Path(lines[-1])
+                if p.exists() and p.suffix.lower() in VIDEO_EXTS:
+                    return p
+        log.warning("yt-dlp exit %s (%s) stderr: %s", r.returncode, browser, r.stderr[-400:])
+    return None
+
+
+def _gallery_dl_images(url: str, into: Path) -> list[Path]:
+    """Fetch a carousel as images via gallery-dl. Returns sorted list, [] on failure."""
+    for browser in ("chrome", "firefox"):
+        cmd = [
+            sys.executable, "-m", "gallery_dl",
+            "--cookies-from-browser", browser,
+            "-d", str(into),
+            "--quiet",
+            url,
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        except subprocess.TimeoutExpired:
+            log.warning("gallery-dl timed out (%s) for %s", browser, url)
+            continue
+        if r.returncode == 0:
+            images = sorted(
+                p for p in into.rglob("*")
+                if p.is_file() and p.suffix.lower() in IMAGE_EXTS
+            )
+            if images:
+                return images
+        log.warning("gallery-dl exit %s (%s) stderr: %s", r.returncode, browser, r.stderr[-400:])
+    return []
+
+
+def _is_login_wall(text: str) -> bool:
+    t = (text or "").lower().strip()
+    if len(t) < 60:
+        return True
+    if len(t) < 600:
+        return any(m in t for m in LOGIN_WALL_MARKERS)
+    return False
 
 
 def process_web(item_id: int, url: str) -> None:
@@ -64,8 +126,8 @@ def process_web(item_id: int, url: str) -> None:
     if not html:
         raise RuntimeError(f"trafilatura fetch returned nothing for {url}")
     text = trafilatura.extract(html) or ""
-    if not text.strip():
-        raise RuntimeError("trafilatura extracted empty text")
+    if _is_login_wall(text):
+        raise RuntimeError(f"blocked/login wall (extracted {len(text)} chars)")
     g = gemini.gist_text(text[:50000])
     db.mark_done(
         item_id,
