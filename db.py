@@ -109,3 +109,28 @@ def list_items() -> list[dict[str, Any]]:
 def list_pending_ids() -> list[int]:
     with connect() as c:
         return [r["id"] for r in c.execute("SELECT id FROM items WHERE status='pending'")]
+
+
+def find_active_by_url(source_url: str) -> Optional[dict[str, Any]]:
+    """Latest non-failed row with this exact source_url, or None.
+
+    Failed rows don't block a fresh capture — re-forwarding a URL that
+    previously errored should retry naturally.
+    """
+    with connect() as c:
+        r = c.execute(
+            "SELECT * FROM items WHERE source_url=? AND status IN ('pending','done') "
+            "ORDER BY id DESC LIMIT 1",
+            (source_url,),
+        ).fetchone()
+    return _row_to_dict(r) if r else None
+
+
+def reset_to_pending(item_id: int) -> None:
+    """Clear gist fields and flip status back to pending — used by /retry."""
+    with connect() as c:
+        c.execute(
+            "UPDATE items SET status='pending', summary=NULL, on_screen_text=NULL, "
+            "transcript=NULL, category=NULL, key_takeaways=NULL WHERE id=?",
+            (item_id,),
+        )
