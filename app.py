@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import html
 import logging
+import os
 import threading
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, Optional
 
 from dotenv import load_dotenv
@@ -58,11 +60,28 @@ def _drain_pending() -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
+    _check_cookies_file()
     pending = db.list_pending_ids()
     if pending:
         log.info("re-enqueueing %d pending items on startup", len(pending))
         threading.Thread(target=_drain_pending, daemon=True).start()
     yield
+
+
+def _check_cookies_file() -> None:
+    raw = os.environ.get("IG_COOKIES_FILE")
+    if not raw:
+        log.info("IG_COOKIES_FILE not set; using --cookies-from-browser (may prompt for keychain)")
+        return
+    p = Path(raw).expanduser()
+    if not p.is_file() or p.stat().st_size == 0:
+        log.warning(
+            "IG_COOKIES_FILE=%s is missing or empty — falling back to --cookies-from-browser; "
+            "keychain prompts will appear until you export a Netscape cookies.txt to this path",
+            raw,
+        )
+    else:
+        log.info("IG_COOKIES_FILE=%s (%d bytes) — keychain access disabled", raw, p.stat().st_size)
 
 
 app = FastAPI(title="savefeed", lifespan=lifespan)

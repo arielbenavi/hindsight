@@ -4,6 +4,7 @@ from __future__ import annotations
 import html as html_lib
 import json
 import logging
+import os
 import re
 import subprocess
 import sys
@@ -23,6 +24,27 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 GALLERY_DL_CMD = [sys.executable, "-m", "gallery_dl"]
 
 OEMBED_URL = "https://publish.x.com/oembed"
+COOKIES_FILE_ENV = "IG_COOKIES_FILE"
+
+
+def _cookies_file() -> Optional[Path]:
+    """Path to a Netscape cookies file if IG_COOKIES_FILE is set and points at a non-empty file."""
+    raw = os.environ.get(COOKIES_FILE_ENV)
+    if not raw:
+        return None
+    p = Path(raw).expanduser()
+    return p if p.is_file() and p.stat().st_size > 0 else None
+
+
+def _cookie_args(browser: str) -> list[str]:
+    """`--cookies <file>` when IG_COOKIES_FILE is usable, else `--cookies-from-browser <browser>`."""
+    cf = _cookies_file()
+    return ["--cookies", str(cf)] if cf else ["--cookies-from-browser", browser]
+
+
+def _cookie_browsers() -> tuple[str, ...]:
+    """Single iteration when using a static cookies file; chrome→firefox otherwise."""
+    return ("file",) if _cookies_file() else ("chrome", "firefox")
 
 
 VIDEO_EXTS = {".mp4", ".mov", ".webm", ".mkv"}
@@ -68,10 +90,10 @@ def process_ig_reel(item_id: int, url: str) -> None:
 
 def _ytdlp_video(url: str, into: Path, timeout: int = 240) -> Optional[Path]:
     """Try to download a video. Returns Path on success, None on any failure (caller may fall back)."""
-    for browser in ("chrome", "firefox"):
+    for browser in _cookie_browsers():
         cmd = [
             *YTDLP_CMD,
-            "--cookies-from-browser", browser,
+            *_cookie_args(browser),
             "-o", str(into / "%(id)s.%(ext)s"),
             "--merge-output-format", "mp4",
             "--quiet", "--no-warnings",
@@ -99,10 +121,10 @@ def _ytdlp_video(url: str, into: Path, timeout: int = 240) -> Optional[Path]:
 
 def _gallery_dl_images(url: str, into: Path) -> list[Path]:
     """Fetch a carousel as images via gallery-dl. Returns sorted list, [] on failure."""
-    for browser in ("chrome", "firefox"):
+    for browser in _cookie_browsers():
         cmd = [
             *GALLERY_DL_CMD,
-            "--cookies-from-browser", browser,
+            *_cookie_args(browser),
             "-d", str(into),
             "--quiet",
             url,

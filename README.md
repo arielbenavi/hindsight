@@ -33,10 +33,37 @@ Required env vars:
 | `GEMINI_API_KEY` | API          | https://aistudio.google.com/apikey      |
 | `BOT_TOKEN`      | bot          | @BotFather on Telegram, `/newbot`       |
 
-Optional: `SAVEFEED_API_URL` (default `http://localhost:8000`) — used by
-the bot to find the API.
+Optional:
+
+| var                | default                  | purpose                                  |
+|--------------------|--------------------------|------------------------------------------|
+| `SAVEFEED_API_URL` | `http://localhost:8000`  | where the bot finds the API              |
+| `IG_COOKIES_FILE`  | unset                    | path to a Netscape cookies.txt for IG + X — bypasses the macOS keychain prompts that `--cookies-from-browser` triggers on every capture. See **Getting cookies.txt** below. |
 
 `.env` is loaded automatically by both processes via `python-dotenv`.
+
+### Getting cookies.txt
+
+`yt-dlp` and `gallery-dl` both accept Netscape-format cookies.txt files via
+`--cookies <file>`. With `IG_COOKIES_FILE` pointing at one, captures stop
+reaching into Chrome's keychain (no more "savefeed wants to access
+keychain" popups) and authenticate via the file instead.
+
+1. Install a Netscape cookie-export extension in your browser. **Get
+   cookies.txt LOCALLY** (Chrome / Firefox) is the common pick — it runs
+   entirely client-side, no upload.
+2. Log into **instagram.com** in that browser, click the extension, export
+   cookies for the current site to a file, e.g. `~/.savefeed/cookies.txt`.
+3. Log into **x.com** in the same browser, export again — most extensions
+   append to the same file if you give it the same name, or you can
+   concatenate two exports yourself (the format is one cookie per line and
+   cookies are scoped by domain, so order doesn't matter).
+4. Set `IG_COOKIES_FILE=/abs/path/to/cookies.txt` in `.env`.
+
+Cookies expire (IG/X rotate session cookies on a multi-week cadence). When
+captures start failing with auth errors, log in again in the browser and
+re-export the file. The API logs a clear warning at boot if the path is
+set but the file is missing or empty.
 
 ## Run
 
