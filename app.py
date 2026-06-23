@@ -132,6 +132,8 @@ th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; ver
 th { background: #fafafa; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #666; }
 tr:hover td { background: #f6faff; }
 td.id { color: #999; font-variant-numeric: tabular-nums; }
+td.id a { color: inherit; text-decoration: none; }
+td.id a:hover { color: #0a66c2; text-decoration: underline; }
 td.src, td.cat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 td.status-done { color: #1b7a3a; }
 td.status-failed { color: #b00020; }
@@ -141,6 +143,21 @@ td.ost { max-width: 320px; color: #555; font-size: 13px; white-space: pre-wrap; 
 .empty { color: #999; font-style: italic; margin-top: 1rem; }
 button.retry { margin-left: 6px; font-size: 11px; padding: 2px 6px; border: 1px solid #b00020; background: #fff; color: #b00020; border-radius: 3px; cursor: pointer; }
 button.retry:hover { background: #b00020; color: #fff; }
+.crumb { color: #888; font-size: 12px; margin-bottom: 0.5rem; }
+.crumb a { color: #0a66c2; text-decoration: none; }
+.meta { color: #666; font-size: 12px; margin: 0.25rem 0 1.5rem; }
+.meta .chip { display: inline-block; padding: 1px 7px; background: #f0f0f0; border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; margin-right: 6px; }
+.meta .chip.status-done { background: #def0e3; color: #1b7a3a; }
+.meta .chip.status-failed { background: #fce0e4; color: #b00020; }
+.meta .chip.status-pending { background: #fdf0d5; color: #b07a00; }
+.meta a { color: #0a66c2; word-break: break-all; }
+section { margin: 1.25rem 0; }
+section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #888; font-weight: 600; margin: 0 0 0.4rem; }
+section .body { white-space: pre-wrap; }
+section.mono .body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: #fafafa; padding: 8px 10px; border-radius: 4px; }
+section ul { margin: 0; padding-left: 1.25rem; }
+details { margin-top: 0.4rem; }
+details summary { cursor: pointer; color: #888; font-size: 12px; }
 """
 
 _PRETTY_JS = """
@@ -165,7 +182,7 @@ def items_pretty():
         )
         body_rows.append(
             "<tr>"
-            f"<td class='id'>#{r['id']}</td>"
+            f"<td class='id'><a href='/items/{r['id']}/pretty'>#{r['id']}</a></td>"
             f"<td class='src'>{html.escape(r.get('source') or '')}</td>"
             f"<td class='status-{html.escape(status)}'>{html.escape(status)}{retry_btn}</td>"
             f"<td class='cat'>{html.escape(r.get('category') or '')}</td>"
@@ -193,9 +210,91 @@ def items_pretty():
     )
 
 
+@app.get("/items/{item_id}/pretty", response_class=HTMLResponse)
+def item_pretty(item_id: int):
+    row = db.get_item(item_id)
+    if not row:
+        return HTMLResponse(
+            f"<!doctype html><body style='font:14px sans-serif;margin:2rem'>"
+            f"<p><a href='/items/pretty'>← back</a></p>"
+            f"<p>item #{item_id} not found.</p></body>",
+            status_code=404,
+        )
+    return _render_item_detail(row)
+
+
 @app.get("/items/{item_id}")
 def item(item_id: int):
     row = db.get_item(item_id)
     if not row:
-        return {"error": "not found"}, 404
+        raise HTTPException(404, "not found")
     return row
+
+
+def _render_item_detail(r: dict[str, Any]) -> str:
+    status = r.get("status") or ""
+    url = r.get("source_url")
+    url_html = (
+        f"<a href='{html.escape(url)}' target='_blank' rel='noopener'>{html.escape(url)}</a>"
+        if url
+        else "<span style='color:#bbb'>—</span>"
+    )
+    chips = " ".join(
+        [
+            f"<span class='chip'>{html.escape(r.get('source') or '')}</span>",
+            f"<span class='chip'>kind: {html.escape(r.get('kind') or '—')}</span>",
+            f"<span class='chip'>{html.escape(r.get('category') or '—')}</span>",
+            f"<span class='chip status-{html.escape(status)}'>{html.escape(status)}</span>",
+        ]
+    )
+    parts: list[str] = [
+        f"<p class='crumb'><a href='/items/pretty'>← items</a></p>",
+        f"<h1>item #{r['id']}</h1>",
+        f"<div class='meta'>{chips}</div>",
+        f"<div class='meta'>url: {url_html}<br>saved: {html.escape(r.get('saved_at') or '')}</div>",
+    ]
+    if status == "failed":
+        parts.append(
+            f"<p><button class='retry' onclick='retry({r['id']})'>retry</button> "
+            "<span style='color:#888;font-size:12px'>re-runs the adapter</span></p>"
+        )
+    if r.get("summary"):
+        parts.append(_section("summary", r["summary"]))
+    takeaways = r.get("key_takeaways")
+    if isinstance(takeaways, list) and takeaways:
+        items_html = "".join(f"<li>{html.escape(str(t))}</li>" for t in takeaways)
+        parts.append(f"<section><h2>key takeaways</h2><ul>{items_html}</ul></section>")
+    if r.get("on_screen_text"):
+        parts.append(_section("on-screen text", r["on_screen_text"], mono=True))
+    if r.get("transcript"):
+        parts.append(_collapsible_section("transcript", r["transcript"]))
+    if r.get("raw_text"):
+        parts.append(_collapsible_section("raw text", r["raw_text"], mono=True))
+    body = "".join(parts)
+    return (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        f"<title>savefeed · #{r['id']}</title>"
+        f"<style>{_PRETTY_CSS}</style></head><body>"
+        f"{body}"
+        f"<script>{_PRETTY_JS}</script>"
+        "</body></html>"
+    )
+
+
+def _section(label: str, text: str, mono: bool = False) -> str:
+    cls = "mono" if mono else ""
+    return (
+        f"<section class='{cls}'><h2>{html.escape(label)}</h2>"
+        f"<div class='body'>{html.escape(text)}</div></section>"
+    )
+
+
+def _collapsible_section(label: str, text: str, mono: bool = False) -> str:
+    cls = "mono" if mono else ""
+    preview = text[:120] + ("…" if len(text) > 120 else "")
+    return (
+        f"<section class='{cls}'><h2>{html.escape(label)}</h2>"
+        f"<details><summary>{html.escape(preview)}</summary>"
+        f"<div class='body' style='margin-top:0.5rem'>{html.escape(text)}</div>"
+        f"</details></section>"
+    )
