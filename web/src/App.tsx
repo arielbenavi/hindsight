@@ -74,13 +74,25 @@ export default function App() {
             </button>
           </div>
 
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="search summary, transcript, on-screen text…"
-            className="w-full px-3 py-2 rounded-md border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:text-stone-100"
-          />
+          <div className="relative">
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="search summary, transcript, on-screen text…"
+              className="w-full px-3 py-2 pr-8 rounded-md border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:text-stone-100"
+            />
+            {q && (
+              <button
+                type="button"
+                onClick={() => setQ("")}
+                aria-label="clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-lg leading-none px-1"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
           <PillRow label="cat" options={CATEGORIES} value={category} onChange={setCategory} />
           <PillRow label="src" options={SOURCES} value={source} onChange={setSource} />
