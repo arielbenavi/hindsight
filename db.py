@@ -100,9 +100,26 @@ def get_item(item_id: int) -> Optional[dict[str, Any]]:
     return _row_to_dict(r) if r else None
 
 
-def list_items() -> list[dict[str, Any]]:
+def list_items(
+    category: Optional[str] = None,
+    source: Optional[str] = None,
+    q: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    sql = "SELECT * FROM items WHERE 1=1"
+    params: list[Any] = []
+    if category:
+        sql += " AND category = ?"
+        params.append(category)
+    if source:
+        sql += " AND source = ?"
+        params.append(source)
+    if q:
+        like = f"%{q}%"
+        sql += " AND (summary LIKE ? OR transcript LIKE ? OR raw_text LIKE ? OR on_screen_text LIKE ?)"
+        params.extend([like, like, like, like])
+    sql += " ORDER BY saved_at DESC, id DESC"
     with connect() as c:
-        rows = c.execute("SELECT * FROM items ORDER BY saved_at DESC, id DESC").fetchall()
+        rows = c.execute(sql, params).fetchall()
     return [_row_to_dict(r) for r in rows]
 
 

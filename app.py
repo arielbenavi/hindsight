@@ -11,6 +11,7 @@ from typing import Any, Optional
 
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -86,6 +87,16 @@ def _check_cookies_file() -> None:
 
 app = FastAPI(title="savefeed", lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
 
 @app.post("/capture")
 def capture(body: CaptureIn, bg: BackgroundTasks):
@@ -120,8 +131,12 @@ def retry(item_id: int, bg: BackgroundTasks):
 
 
 @app.get("/items")
-def items():
-    return db.list_items()
+def items(
+    category: Optional[str] = None,
+    source: Optional[str] = None,
+    q: Optional[str] = None,
+):
+    return db.list_items(category=category, source=source, q=q)
 
 
 _PRETTY_CSS = """
