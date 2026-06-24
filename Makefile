@@ -1,4 +1,4 @@
-.PHONY: api bot
+.PHONY: api bot web
 
 VENV := venv
 
@@ -7,3 +7,6 @@ api:
 
 bot:
 	$(VENV)/bin/python bot.py
+
+web:
+	cd web && npm run dev

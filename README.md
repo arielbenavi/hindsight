@@ -67,21 +67,52 @@ set but the file is missing or empty.
 
 ## Run
 
-Two processes, two terminals:
+Three processes, three terminals:
 
 ```
-# terminal 1 — API
-make api
-
-# terminal 2 — Telegram bot
-make bot
+make api     # tab 1 — FastAPI on :8000
+make bot     # tab 2 — Telegram polling
+make web     # tab 3 — Vite dev server on :5173 (optional, see Frontend)
 ```
 
-(Or call uvicorn / python directly — see the Makefile.)
+(Or call uvicorn / python / npm directly — see the Makefile.)
 
 Then in Telegram, send or forward any message to your bot. The bot replies
 `saved #N as <source> (processing…)` and the worker fills in the gist
 asynchronously.
+
+## Frontend
+
+A Vite + React + TypeScript + Tailwind feed lives in [./web](./web). It
+reads the FastAPI backend over the wire — no SSR, just a SPA hitting
+`/items` with `?category=`, `?source=`, `?q=` filters.
+
+First-time setup:
+
+```
+cd web
+npm install
+```
+
+Run the dev server (in a separate terminal from `make api`):
+
+```
+make web        # or: cd web && npm run dev
+```
+
+Open <http://localhost:5173>. The page is mobile-friendly (same `max-w-2xl`
+single-column layout at every width — it's a feed, not a dashboard) and
+polls the API every 15s so newly-forwarded items appear without a manual
+refresh.
+
+The API URL is hard-coded to `http://localhost:8000` but can be overridden
+at build time with `VITE_API_URL=...` in `web/.env.local`. CORS for the
+Vite origin is wired up in [app.py](app.py).
+
+Failed rows get an inline `↻ retry` button (POSTs `/items/{id}/retry`).
+Card actions: `↗ open original` opens the source URL in a new tab,
+`details →` opens the existing `/items/{id}/pretty` page served by the
+API.
 
 ## How to test
 

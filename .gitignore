@@ -7,3 +7,8 @@ venv/
 savefeed.db
 savefeed.db-*
 tmp/
+
+# frontend
+web/node_modules/
+web/dist/
+web/.vite/
