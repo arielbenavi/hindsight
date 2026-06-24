@@ -12,6 +12,7 @@ export type Item = {
   transcript: string | null;
   category: string | null;
   key_takeaways: string[] | null;
+  tags: string[] | null;
   saved_at: string;
   status: Status;
 };

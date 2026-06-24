@@ -85,6 +85,7 @@ def process_ig_reel(item_id: int, url: str) -> None:
         transcript=g.get("spoken_transcript"),
         category=g.get("category"),
         key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
     )
 
 
@@ -169,6 +170,7 @@ def process_web(item_id: int, url: str) -> None:
         summary=g.get("summary"),
         category=g.get("category"),
         key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
     )
 
 
@@ -180,6 +182,7 @@ def process_note(item_id: int, text: str) -> None:
         summary=g.get("summary"),
         category=g.get("category"),
         key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
     )
 
 
@@ -214,6 +217,7 @@ def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
         transcript=g.get("spoken_transcript"),
         category=g.get("category"),
         key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
     )
 
 

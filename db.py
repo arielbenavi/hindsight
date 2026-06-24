@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS items (
     transcript TEXT,
     category TEXT,
     key_takeaways TEXT,
+    tags TEXT DEFAULT '[]',
     saved_at TEXT NOT NULL,
     status TEXT NOT NULL CHECK(status IN ('pending','done','failed'))
 );
@@ -44,6 +45,11 @@ def connect() -> Iterator[sqlite3.Connection]:
 def init_db() -> None:
     with connect() as c:
         c.executescript(SCHEMA)
+        # Idempotent migration: add `tags` to pre-existing tables.
+        cols = {r[1] for r in c.execute("PRAGMA table_info(items)").fetchall()}
+        if "tags" not in cols:
+            c.execute("ALTER TABLE items ADD COLUMN tags TEXT DEFAULT '[]'")
+        c.execute("UPDATE items SET tags='[]' WHERE tags IS NULL")
 
 
 def insert_pending(
@@ -70,7 +76,7 @@ def mark_failed(item_id: int, error: str) -> None:
     _update(item_id, {"status": "failed", "summary": f"FAILED: {error[:500]}"})
 
 
-JSON_FIELDS = {"key_takeaways"}  # decoded back to objects on read
+JSON_FIELDS = {"key_takeaways", "tags"}  # decoded back to objects on read
 
 
 def _update(item_id: int, fields: dict[str, Any]) -> None:
@@ -104,6 +110,7 @@ def list_items(
     category: Optional[str] = None,
     source: Optional[str] = None,
     q: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> list[dict[str, Any]]:
     sql = "SELECT * FROM items WHERE 1=1"
     params: list[Any] = []
@@ -113,6 +120,10 @@ def list_items(
     if source:
         sql += " AND source = ?"
         params.append(source)
+    if tag:
+        # tags is a JSON array stored as text; match on the quoted token.
+        sql += " AND tags LIKE ?"
+        params.append(f'%"{tag.strip().lower()}"%')
     if q:
         like = f"%{q}%"
         sql += " AND (summary LIKE ? OR transcript LIKE ? OR raw_text LIKE ? OR on_screen_text LIKE ?)"
@@ -121,6 +132,14 @@ def list_items(
     with connect() as c:
         rows = c.execute(sql, params).fetchall()
     return [_row_to_dict(r) for r in rows]
+
+
+def set_tags(item_id: int, tags: list[str]) -> None:
+    with connect() as c:
+        c.execute(
+            "UPDATE items SET tags=? WHERE id=?",
+            (json.dumps(tags, ensure_ascii=False), item_id),
+        )
 
 
 def list_pending_ids() -> list[int]:

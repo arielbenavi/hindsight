@@ -16,12 +16,21 @@ MODEL = "gemini-3.5-flash"
 ALLOWED_CATEGORIES = ["coding", "quant", "music", "life-hack", "productivity", "other"]
 _CATEGORY_LIST_STR = ", ".join(ALLOWED_CATEGORIES)
 
+_TAGS_INSTRUCTION = (
+    'tags: array of 2-4 short, specific, lowercase topic tags. Free-form '
+    '(NOT constrained to the category list above). Prefer hyphenated '
+    'multi-word tags over generic single words. Examples: '
+    '["black-scholes","vol-surface"], ["sourdough","fermentation"], '
+    '["docker","compose"].'
+)
+
 VIDEO_PROMPT = f"""\
 You are analyzing a short video (e.g. an Instagram reel). Return ONLY a JSON object (no code fences, no prose) with these keys:
 - summary: <= 40 words
 - spoken_transcript: full transcript of any speech (empty string if has_speech is false)
 - on_screen_text: a single string with ALL visible text overlays / captions / signs, separated by newlines. Many reels are silent text-overlay videos — read overlays carefully even when has_speech is false.
 - category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 - has_speech: boolean
 """
@@ -32,6 +41,7 @@ You are analyzing an Instagram post carousel (a series of images, no video). Ret
 - spoken_transcript: "" (carousels have no audio)
 - on_screen_text: a single string with ALL visible text across the images, separated by newlines.
 - category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 - has_speech: false
 """
@@ -40,6 +50,7 @@ TEXT_PROMPT_HEADER = f"""\
 Return ONLY a JSON object (no code fences, no prose) with these keys:
 - summary: <= 40 words
 - category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 
 Text to summarize follows:
@@ -91,7 +102,25 @@ def _normalize_result(result: dict[str, Any]) -> dict[str, Any]:
         result["key_takeaways"] = [kt]
     elif not isinstance(kt, list):
         result["key_takeaways"] = []
+    result["tags"] = _normalize_tags(result.get("tags"))
     return result
+
+
+def _normalize_tags(tags: Any) -> list[str]:
+    if isinstance(tags, str):
+        tags = [tags]
+    elif not isinstance(tags, list):
+        return []
+    clean: list[str] = []
+    seen: set[str] = set()
+    for t in tags:
+        if not isinstance(t, str):
+            continue
+        n = t.strip().lower()
+        if n and n not in seen:
+            seen.add(n)
+            clean.append(n)
+    return clean[:6]
 
 
 def _generate(contents: list[Any]) -> dict[str, Any]:

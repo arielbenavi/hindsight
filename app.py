@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import json
 import logging
 import os
 import threading
@@ -28,6 +29,10 @@ log = logging.getLogger("savefeed")
 class CaptureIn(BaseModel):
     payload: str
     note: Optional[str] = None
+
+
+class TagsIn(BaseModel):
+    tags: list[str]
 
 
 def _process(item: dict[str, Any]) -> None:
@@ -135,8 +140,25 @@ def items(
     category: Optional[str] = None,
     source: Optional[str] = None,
     q: Optional[str] = None,
+    tag: Optional[str] = None,
 ):
-    return db.list_items(category=category, source=source, q=q)
+    return db.list_items(category=category, source=source, q=q, tag=tag)
+
+
+@app.post("/items/{item_id}/tags")
+def set_item_tags(item_id: int, body: TagsIn):
+    row = db.get_item(item_id)
+    if not row:
+        raise HTTPException(404, "not found")
+    clean: list[str] = []
+    seen: set[str] = set()
+    for t in body.tags:
+        n = (t or "").strip().lower()
+        if n and n not in seen:
+            seen.add(n)
+            clean.append(n)
+    db.set_tags(item_id, clean[:20])
+    return {"id": item_id, "tags": clean[:20]}
 
 
 _PRETTY_CSS = """
@@ -173,6 +195,13 @@ section.mono .body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace
 section ul { margin: 0; padding-left: 1.25rem; }
 details { margin-top: 0.4rem; }
 details summary { cursor: pointer; color: #888; font-size: 12px; }
+.tag-chip { display: inline-flex; align-items: center; padding: 2px 4px 2px 8px; background: #eef2ff; color: #3730a3; border-radius: 10px; font-size: 12px; margin: 0 4px 4px 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.tag-chip .tag-x { background: transparent; border: 0; color: inherit; opacity: 0.5; cursor: pointer; padding: 0 4px; font-size: 14px; line-height: 1; }
+.tag-chip .tag-x:hover { opacity: 1; }
+form.tag-form { margin-top: 6px; display: flex; gap: 6px; }
+form.tag-form input { padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; min-width: 0; flex: 1; max-width: 240px; }
+form.tag-form button { padding: 4px 10px; border: 1px solid #ddd; background: #fafafa; border-radius: 4px; font-size: 12px; cursor: pointer; }
+form.tag-form button:hover { background: #f0f0f0; }
 """
 
 _PRETTY_JS = """
@@ -180,6 +209,25 @@ function retry(id) {
   fetch('/items/' + id + '/retry', {method: 'POST'})
     .then(r => r.json())
     .then(() => location.reload());
+}
+function postTags(id, tags) {
+  fetch('/items/' + id + '/tags', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({tags: tags}),
+  }).then(() => location.reload());
+}
+function removeTag(id, t) {
+  postTags(id, (window.__TAGS || []).filter(x => x !== t));
+}
+function addTag(e, id) {
+  e.preventDefault();
+  const input = document.getElementById('new-tag');
+  const t = (input.value || '').trim().toLowerCase();
+  if (!t) return;
+  const cur = window.__TAGS || [];
+  if (cur.includes(t)) { input.value = ''; return; }
+  postTags(id, cur.concat([t]));
 }
 """
 
@@ -275,6 +323,7 @@ def _render_item_detail(r: dict[str, Any]) -> str:
         )
     if r.get("summary"):
         parts.append(_section("summary", r["summary"]))
+    parts.append(_tags_section(r.get("tags") or [], r["id"]))
     takeaways = r.get("key_takeaways")
     if isinstance(takeaways, list) and takeaways:
         items_html = "".join(f"<li>{html.escape(str(t))}</li>" for t in takeaways)
@@ -286,12 +335,13 @@ def _render_item_detail(r: dict[str, Any]) -> str:
     if r.get("raw_text"):
         parts.append(_collapsible_section("raw text", r["raw_text"], mono=True))
     body = "".join(parts)
+    tags_seed = json.dumps(r.get("tags") or [])
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
         f"<title>savefeed · #{r['id']}</title>"
         f"<style>{_PRETTY_CSS}</style></head><body>"
         f"{body}"
-        f"<script>{_PRETTY_JS}</script>"
+        f"<script>window.__TAGS = {tags_seed};{_PRETTY_JS}</script>"
         "</body></html>"
     )
 
@@ -301,6 +351,26 @@ def _section(label: str, text: str, mono: bool = False) -> str:
     return (
         f"<section class='{cls}'><h2>{html.escape(label)}</h2>"
         f"<div class='body'>{html.escape(text)}</div></section>"
+    )
+
+
+def _tags_section(tags: list[str], item_id: int) -> str:
+    if tags:
+        chips = "".join(
+            f"<span class='tag-chip'>{html.escape(t)}"
+            f"<button class='tag-x' onclick=\"removeTag({item_id}, {json.dumps(t)})\" "
+            "title='remove tag'>×</button></span>"
+            for t in tags
+        )
+    else:
+        chips = "<span style='color:#bbb;font-size:13px'>(none yet)</span>"
+    return (
+        "<section><h2>tags</h2>"
+        f"<div>{chips}</div>"
+        f"<form class='tag-form' onsubmit='addTag(event, {item_id})'>"
+        "<input id='new-tag' type='text' placeholder='add tag…' autocomplete='off'/>"
+        "<button type='submit'>add</button>"
+        "</form></section>"
     )
 
 

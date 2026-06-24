@@ -7,6 +7,7 @@ export default function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [category, setCategory] = useState<string>("");
   const [source, setSource] = useState<string>("");
+  const [tag, setTag] = useState<string>("");
   const [q, setQ] = useState<string>("");
   const [debouncedQ, setDebouncedQ] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,6 +24,7 @@ export default function App() {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
     if (source) params.set("source", source);
+    if (tag) params.set("tag", tag);
     if (debouncedQ) params.set("q", debouncedQ);
     try {
       const r = await fetch(`${API}/items?${params.toString()}`);
@@ -33,7 +35,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [category, source, debouncedQ]);
+  }, [category, source, tag, debouncedQ]);
 
   useEffect(() => {
     refetch();
@@ -83,6 +85,19 @@ export default function App() {
           <PillRow label="cat" options={CATEGORIES} value={category} onChange={setCategory} />
           <PillRow label="src" options={SOURCES} value={source} onChange={setSource} />
 
+          {tag && (
+            <div className="flex items-center gap-1 text-xs">
+              <span className="text-stone-400 mr-1 shrink-0">tag:</span>
+              <button
+                onClick={() => setTag("")}
+                className="px-2.5 py-0.5 rounded-full whitespace-nowrap font-mono text-[11px] bg-indigo-600 text-white hover:bg-indigo-700"
+                title="clear tag filter"
+              >
+                {tag} ×
+              </button>
+            </div>
+          )}
+
           {err && (
             <p className="text-xs text-red-600 dark:text-red-400">
               api error: {err} — is uvicorn running on {API}?
@@ -93,7 +108,7 @@ export default function App() {
 
       <main className="max-w-2xl mx-auto px-3 py-3 space-y-2.5">
         {items.map((item) => (
-          <Card key={item.id} item={item} onRetry={onRetry} />
+          <Card key={item.id} item={item} onRetry={onRetry} onTagClick={setTag} />
         ))}
         {!loading && items.length === 0 && !err && (
           <p className="text-stone-400 text-sm text-center py-8">
@@ -152,7 +167,15 @@ function Pill({
   );
 }
 
-function Card({ item, onRetry }: { item: Item; onRetry: (id: number) => void }) {
+function Card({
+  item,
+  onRetry,
+  onTagClick,
+}: {
+  item: Item;
+  onRetry: (id: number) => void;
+  onTagClick: (tag: string) => void;
+}) {
   const failed = item.status === "failed";
   const pending = item.status === "pending";
   const preview =
@@ -190,6 +213,21 @@ function Card({ item, onRetry }: { item: Item; onRetry: (id: number) => void }) 
         <p className="text-sm text-stone-500 dark:text-stone-400 mb-2 line-clamp-3 whitespace-pre-wrap">
           {preview}
         </p>
+      )}
+
+      {item.tags && item.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {item.tags.map((t) => (
+            <button
+              key={t}
+              onClick={() => onTagClick(t)}
+              className="px-1.5 py-0.5 rounded font-mono text-[11px] bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-300 dark:hover:bg-indigo-900"
+              title={`filter by #${t}`}
+            >
+              #{t}
+            </button>
+          ))}
+        </div>
       )}
 
       <div className="flex items-center gap-3 text-xs pt-1">
