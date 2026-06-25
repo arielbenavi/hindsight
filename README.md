@@ -155,6 +155,19 @@ post to your bot. You should get a `saved #N as ig_reel (processing…)`
 reply, and the row should appear on `/items/pretty` with a gist shortly
 after.
 
+## API endpoints
+
+| method | path | what it does |
+|---|---|---|
+| `POST` | `/capture` | Body `{payload, note?}`. Classifies, enqueues, returns `{id, source, status}`. Re-POSTing a known URL returns the existing row with `deduped: true` instead of duplicating. |
+| `GET`  | `/items` | All items, newest first. Composable query params: `?category=`, `?source=`, `?tag=`, `?q=` (LIKE across summary/transcript/raw_text/on_screen_text). |
+| `GET`  | `/items/{id}` | Raw JSON for one item. |
+| `GET`  | `/items/{id}/pretty` | HTML detail view with chips, full summary, key-takeaways list, on-screen text, collapsible transcript + raw text, and the tag editor. |
+| `GET`  | `/items/pretty` | HTML table view of all items (no filters). |
+| `POST` | `/items/{id}/retry` | Resets a `failed` row to `pending` and re-runs the adapter. No-op on `done`/`pending`. |
+| `POST` | `/items/{id}/tags` | Body `{tags: [...]}` — replaces the tag array. Server lowercases, strips, dedupes, caps at 20. |
+| `GET`  | `/health` | Looks at the last 10 ig_reel/tweet captures and flags `warn: true` if ≥3 of the last 5 failed with an auth-wall signature ("login required", "restricted video", "rate-limit", etc.). The frontend banner reads this. Use it to detect expired cookies. |
+
 ## Notes
 
 - yt-dlp uses `--cookies-from-browser chrome`, falling back to firefox.

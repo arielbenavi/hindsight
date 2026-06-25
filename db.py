@@ -147,6 +147,17 @@ def list_pending_ids() -> list[int]:
         return [r["id"] for r in c.execute("SELECT id FROM items WHERE status='pending'")]
 
 
+def recent_ingestion_items(n: int = 10) -> list[dict[str, Any]]:
+    """Most recent ig_reel + tweet captures, newest first. Used by /health."""
+    with connect() as c:
+        rows = c.execute(
+            "SELECT * FROM items WHERE source IN ('ig_reel','tweet') "
+            "ORDER BY saved_at DESC, id DESC LIMIT ?",
+            (n,),
+        ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
 def find_active_by_url(source_url: str) -> Optional[dict[str, Any]]:
     """Latest non-failed row with this exact source_url, or None.
 

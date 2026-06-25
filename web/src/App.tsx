@@ -3,6 +3,13 @@ import { CATEGORIES, SOURCES, type Item, type Source } from "./types";
 
 const API = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:8000";
 
+type Health = {
+  ok: boolean;
+  warn: boolean;
+  message: string;
+  last_5_auth_failed: number;
+};
+
 export default function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [category, setCategory] = useState<string>("");
@@ -12,6 +19,8 @@ export default function App() {
   const [debouncedQ, setDebouncedQ] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string | null>(null);
+  const [health, setHealth] = useState<Health | null>(null);
+  const [healthDismissed, setHealthDismissed] = useState<boolean>(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 250);
@@ -46,6 +55,26 @@ export default function App() {
     return () => clearInterval(t);
   }, [refetch]);
 
+  useEffect(() => {
+    let alive = true;
+    const fetchHealth = async () => {
+      try {
+        const r = await fetch(`${API}/health`);
+        if (!r.ok) return;
+        const h = (await r.json()) as Health;
+        if (alive) setHealth(h);
+      } catch {
+        // network errors handled by the items fetch's err banner
+      }
+    };
+    fetchHealth();
+    const t = setInterval(fetchHealth, 60_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, []);
+
   const onRetry = async (id: number) => {
     try {
       await fetch(`${API}/items/${id}/retry`, { method: "POST" });
@@ -55,8 +84,25 @@ export default function App() {
     }
   };
 
+  const showHealthBanner = health?.warn && !healthDismissed;
+
   return (
     <div className="min-h-full">
+      {showHealthBanner && (
+        <div className="bg-amber-100 dark:bg-amber-950 border-b border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+          <div className="max-w-2xl mx-auto px-3 py-2 flex items-start gap-2 text-sm">
+            <span className="font-semibold shrink-0">⚠</span>
+            <p className="flex-1">{health!.message}</p>
+            <button
+              onClick={() => setHealthDismissed(true)}
+              className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 px-1 text-lg leading-none shrink-0"
+              aria-label="dismiss"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-10 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur border-b border-stone-200 dark:border-stone-800">
         <div className="max-w-2xl mx-auto px-3 py-2.5 space-y-2">
           <div className="flex items-center gap-2">

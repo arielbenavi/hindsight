@@ -145,6 +145,56 @@ def items(
     return db.list_items(category=category, source=source, q=q, tag=tag)
 
 
+AUTH_FAILURE_MARKERS = (
+    "blocked/login wall",
+    "login required",
+    "login wall",
+    "restricted video",
+    "rate-limit",
+    "rate limit",
+    "log in",
+    "sign in",
+    "401",
+    "403",
+    "no video could be found",  # IG cookies expired → yt-dlp loses video
+)
+
+
+def _looks_like_auth_failure(summary: Optional[str]) -> bool:
+    s = (summary or "").lower()
+    return any(m in s for m in AUTH_FAILURE_MARKERS)
+
+
+@app.get("/health")
+def health():
+    recent = db.recent_ingestion_items(n=10)
+    last_5 = recent[:5]
+    last_5_auth_failed = sum(
+        1
+        for r in last_5
+        if r["status"] == "failed" and _looks_like_auth_failure(r.get("summary"))
+    )
+    total_auth_failed = sum(
+        1
+        for r in recent
+        if r["status"] == "failed" and _looks_like_auth_failure(r.get("summary"))
+    )
+    warn = last_5_auth_failed >= 3
+    return {
+        "ok": not warn,
+        "warn": warn,
+        "checked": len(recent),
+        "last_5_auth_failed": last_5_auth_failed,
+        "total_auth_failed_in_last_10": total_auth_failed,
+        "message": (
+            "Instagram/X captures are failing — cookies may have expired, "
+            "re-export cookies.txt."
+            if warn
+            else "ok"
+        ),
+    }
+
+
 @app.post("/items/{item_id}/tags")
 def set_item_tags(item_id: int, body: TagsIn):
     row = db.get_item(item_id)
