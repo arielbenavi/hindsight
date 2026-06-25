@@ -85,11 +85,25 @@ def _coerce_str(v: Any, joiner: str = "\n") -> Optional[str]:
     return str(v)
 
 
+_CATEGORY_ALIASES = {
+    "tech": "coding",
+    "technology": "coding",
+    "science": "coding",
+    "programming": "coding",
+    "finance": "quant",
+    "trading": "quant",
+    "lifehack": "life-hack",
+    "life hack": "life-hack",
+}
+
+
 def _normalize_category(c: Any) -> str:
     if not isinstance(c, str):
         return "other"
     c = c.strip().lower()
-    return c if c in ALLOWED_CATEGORIES else "other"
+    if c in ALLOWED_CATEGORIES:
+        return c
+    return _CATEGORY_ALIASES.get(c, "other")
 
 
 def _normalize_result(result: dict[str, Any]) -> dict[str, Any]:

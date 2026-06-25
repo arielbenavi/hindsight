@@ -78,8 +78,31 @@ def mark_failed(item_id: int, error: str) -> None:
 
 JSON_FIELDS = {"key_takeaways", "tags"}  # decoded back to objects on read
 
+ALLOWED_CATEGORIES = {"coding", "quant", "music", "life-hack", "productivity", "other"}
+_CATEGORY_ALIASES = {
+    "tech": "coding",
+    "technology": "coding",
+    "science": "coding",
+    "programming": "coding",
+    "finance": "quant",
+    "trading": "quant",
+    "lifehack": "life-hack",
+    "life hack": "life-hack",
+}
+
+
+def _normalize_category(c: Any) -> str:
+    if not isinstance(c, str) or not c.strip():
+        return "other"
+    c = c.strip().lower()
+    if c in ALLOWED_CATEGORIES:
+        return c
+    return _CATEGORY_ALIASES.get(c, "other")
+
 
 def _update(item_id: int, fields: dict[str, Any]) -> None:
+    if "category" in fields:
+        fields["category"] = _normalize_category(fields["category"])
     serialized = {
         k: (json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else v)
         for k, v in fields.items()
