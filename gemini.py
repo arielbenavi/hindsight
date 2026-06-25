@@ -1,4 +1,4 @@
-"""Gemini Files API + text/image gist helpers. Model: gemini-3.5-flash."""
+"""Gemini Files API + text/image gist helpers. Model: gemini-2.5-flash."""
 from __future__ import annotations
 
 import json
@@ -11,7 +11,7 @@ from typing import Any, Optional
 from google import genai
 from google.genai import types
 
-MODEL = "gemini-3.5-flash"
+MODEL = "gemini-2.5-flash"
 
 ALLOWED_CATEGORIES = ["coding", "quant", "music", "life-hack", "productivity", "other"]
 _CATEGORY_LIST_STR = ", ".join(ALLOWED_CATEGORIES)
