@@ -46,6 +46,15 @@ You are analyzing an Instagram post carousel (a series of images, no video). Ret
 - has_speech: false
 """
 
+IMAGE_WITH_CONTEXT_PROMPT = f"""\
+You are analyzing images attached to a social media post. The post text is provided below the images as additional context. Return ONLY a JSON object (no code fences, no prose) with these keys:
+- summary: <= 40 words (cover BOTH the images and the text)
+- on_screen_text: a single string with ALL visible text in the images, separated by newlines.
+- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- {_TAGS_INSTRUCTION}
+- key_takeaways: array of 1-5 short strings
+"""
+
 TEXT_PROMPT_HEADER = f"""\
 Return ONLY a JSON object (no code fences, no prose) with these keys:
 - summary: <= 40 words
@@ -167,12 +176,15 @@ def gist_video(mp4: Path) -> dict[str, Any]:
     return _generate([f, VIDEO_PROMPT])
 
 
-def gist_images(paths: list[Path]) -> dict[str, Any]:
+def gist_images(paths: list[Path], context: Optional[str] = None) -> dict[str, Any]:
     parts: list[Any] = []
     for p in paths:
         mt = mimetypes.guess_type(str(p))[0] or "image/jpeg"
         parts.append(types.Part.from_bytes(data=p.read_bytes(), mime_type=mt))
-    parts.append(IMAGE_PROMPT)
+    if context:
+        parts.append(IMAGE_WITH_CONTEXT_PROMPT + f"\n\nPost text:\n---\n{context}")
+    else:
+        parts.append(IMAGE_PROMPT)
     return _generate(parts)
 
 

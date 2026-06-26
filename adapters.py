@@ -24,6 +24,8 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 GALLERY_DL_CMD = [sys.executable, "-m", "gallery_dl"]
 
 OEMBED_URL = "https://publish.x.com/oembed"
+SYNDICATION_URL = "https://cdn.syndication.twimg.com/tweet-result"
+_BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 COOKIES_FILE_ENV = "IG_COOKIES_FILE"
 
 
@@ -186,18 +188,128 @@ def process_note(item_id: int, text: str) -> None:
     )
 
 
+def _extract_tweet_id(url: str) -> Optional[str]:
+    """Extract the numeric tweet ID from an x.com or twitter.com URL."""
+    clean = url.split("?")[0].rstrip("/")
+    m = re.search(r"/status/(\d+)", clean)
+    return m.group(1) if m else None
+
+
+def _twitter_syndication(url: str) -> dict:
+    """Fetch tweet data via the syndication endpoint. Returns parsed JSON or empty dict."""
+    tweet_id = _extract_tweet_id(url)
+    if not tweet_id:
+        log.warning("could not extract tweet ID from %s", url)
+        return {}
+    try:
+        with httpx.Client(timeout=15, follow_redirects=True) as cx:
+            r = cx.get(
+                SYNDICATION_URL,
+                params={"id": tweet_id, "token": "x"},
+                headers={"User-Agent": _BROWSER_UA},
+            )
+    except httpx.HTTPError as e:
+        log.warning("syndication fetch failed for %s: %s", url, e)
+        return {}
+    if r.status_code != 200:
+        log.warning("syndication returned %s for %s", r.status_code, url)
+        return {}
+    try:
+        return r.json()
+    except json.JSONDecodeError:
+        return {}
+
+
+def _twitter_oembed(url: str) -> tuple[str, Optional[str]]:
+    """Fallback: fetch tweet text + author via oEmbed."""
+    try:
+        with httpx.Client(timeout=15, follow_redirects=True) as cx:
+            r = cx.get(OEMBED_URL, params={"url": url, "omit_script": "true"})
+    except httpx.HTTPError as e:
+        log.warning("oEmbed fetch failed for %s: %s", url, e)
+        return "", None
+    if r.status_code != 200:
+        return "", None
+    try:
+        data = r.json()
+    except json.JSONDecodeError:
+        return "", None
+    m = re.search(r"<p[^>]*>(.*?)</p>", data.get("html") or "", re.DOTALL)
+    if not m:
+        return "", data.get("author_name")
+    inner = re.sub(r"<br\s*/?>", "\n", m.group(1), flags=re.IGNORECASE)
+    inner = re.sub(r"<[^>]+>", "", inner)
+    return html_lib.unescape(inner).strip().rstrip("…").strip(), data.get("author_name")
+
+
+def _download_images(urls: list[str], into: Path) -> list[Path]:
+    """Download image URLs to a directory. Skips individual failures."""
+    paths: list[Path] = []
+    with httpx.Client(timeout=30, follow_redirects=True) as cx:
+        for i, img_url in enumerate(urls):
+            try:
+                r = cx.get(img_url)
+                if r.status_code != 200:
+                    log.warning("image download %s returned %s", img_url, r.status_code)
+                    continue
+                ext = Path(img_url.split("?")[0]).suffix or ".jpg"
+                p = into / f"tweet_img_{i}{ext}"
+                p.write_bytes(r.content)
+                paths.append(p)
+            except httpx.HTTPError as e:
+                log.warning("image download failed for %s: %s", img_url, e)
+    return paths
+
+
 def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
-    text, author = _twitter_oembed(url)
+    syn = _twitter_syndication(url)
+
+    if syn:
+        text = syn.get("text") or ""
+        user = syn.get("user") or {}
+        author = user.get("screen_name") or user.get("name")
+        media = syn.get("mediaDetails") or []
+        photos = [m for m in media if m.get("type") == "photo"]
+        videos = [m for m in media if m.get("type") == "video"]
+    else:
+        log.warning("syndication failed for %s, falling back to oEmbed", url)
+        text, author = _twitter_oembed(url)
+        photos, videos = [], []
+
     with tempfile.TemporaryDirectory(prefix="savefeed-tw-") as td:
-        mp4 = _ytdlp_video(url, Path(td), timeout=45)
-        if mp4 is not None:
-            g = gemini.gist_video(mp4)
-            kind = "video"
+        td_path = Path(td)
+
+        if videos:
+            mp4 = _ytdlp_video(url, td_path, timeout=45)
+            if mp4 is not None:
+                g = gemini.gist_video(mp4)
+                kind = "video"
+            elif text:
+                g = gemini.gist_text(text)
+                kind = "text"
+            else:
+                raise RuntimeError(f"video tweet but yt-dlp failed and no text for {url}")
+        elif photos:
+            img_urls = [p.get("media_url_https") for p in photos if p.get("media_url_https")]
+            downloaded = _download_images(img_urls, td_path)
+            if downloaded:
+                g = gemini.gist_images(downloaded, context=text if text else None)
+                kind = "images"
+            elif text:
+                g = gemini.gist_text(text)
+                kind = "text"
+            else:
+                raise RuntimeError(f"image tweet but downloads failed and no text for {url}")
         elif text:
             g = gemini.gist_text(text)
-            kind = "post"
+            kind = "text"
         else:
-            raise RuntimeError(f"no video via yt-dlp and no text via oEmbed for {url}")
+            mp4 = _ytdlp_video(url, td_path, timeout=45)
+            if mp4 is not None:
+                g = gemini.gist_video(mp4)
+                kind = "video"
+            else:
+                raise RuntimeError(f"no text, media, or video for {url}")
 
     raw_parts: list[str] = []
     if author:
@@ -219,32 +331,3 @@ def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
         key_takeaways=g.get("key_takeaways") or [],
         tags=g.get("tags") or [],
     )
-
-
-def _twitter_oembed(url: str) -> tuple[str, Optional[str]]:
-    """Fetch a tweet's text + author via Twitter's public oEmbed endpoint."""
-    try:
-        with httpx.Client(timeout=15, follow_redirects=True) as cx:
-            r = cx.get(OEMBED_URL, params={"url": url, "omit_script": "true"})
-    except httpx.HTTPError as e:
-        log.warning("oEmbed fetch failed for %s: %s", url, e)
-        return "", None
-    if r.status_code != 200:
-        log.warning("oEmbed %s returned %s for %s", OEMBED_URL, r.status_code, url)
-        return "", None
-    try:
-        data = r.json()
-    except json.JSONDecodeError:
-        return "", None
-    text = _strip_oembed_html(data.get("html") or "")
-    return text, data.get("author_name")
-
-
-def _strip_oembed_html(blob: str) -> str:
-    m = re.search(r"<p[^>]*>(.*?)</p>", blob, re.DOTALL)
-    if not m:
-        return ""
-    inner = m.group(1)
-    inner = re.sub(r"<br\s*/?>", "\n", inner, flags=re.IGNORECASE)
-    inner = re.sub(r"<[^>]+>", "", inner)
-    return html_lib.unescape(inner).strip().rstrip("…").strip()
