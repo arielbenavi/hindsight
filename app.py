@@ -1,6 +1,7 @@
 """FastAPI app: POST /capture, GET /items, background worker."""
 from __future__ import annotations
 
+import asyncio
 import html
 import json
 import logging
@@ -17,8 +18,10 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 import adapters
+import auth
 import db
 import router
+import sweep
 
 load_dotenv()
 
@@ -63,6 +66,17 @@ def _drain_pending() -> None:
             _process(item)
 
 
+SWEEP_INTERVAL = 30 * 60
+
+
+async def _sweep_loop() -> None:
+    while True:
+        await asyncio.sleep(SWEEP_INTERVAL)
+        if os.environ.get("X_CLIENT_ID"):
+            log.info("running scheduled Twitter bookmark sweep")
+            await asyncio.to_thread(sweep.sweep_twitter_bookmarks)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
@@ -71,7 +85,9 @@ async def lifespan(_app: FastAPI):
     if pending:
         log.info("re-enqueueing %d pending items on startup", len(pending))
         threading.Thread(target=_drain_pending, daemon=True).start()
+    sweep_task = asyncio.create_task(_sweep_loop())
     yield
+    sweep_task.cancel()
 
 
 def _check_cookies_file() -> None:
@@ -91,6 +107,7 @@ def _check_cookies_file() -> None:
 
 
 app = FastAPI(title="savefeed", lifespan=lifespan)
+app.include_router(auth.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -193,6 +210,22 @@ def health():
             else "ok"
         ),
     }
+
+
+@app.post("/sweep/twitter")
+def trigger_sweep(bg: BackgroundTasks):
+    if not os.environ.get("X_CLIENT_ID"):
+        raise HTTPException(400, "X_CLIENT_ID not set — configure Twitter API credentials first")
+    tokens = auth.load_tokens()
+    if not tokens or "access_token" not in tokens:
+        raise HTTPException(400, "Not authenticated — visit /auth/twitter first")
+    bg.add_task(sweep.sweep_twitter_bookmarks)
+    return {"status": "sweep started"}
+
+
+@app.get("/sweep/status")
+def sweep_status():
+    return sweep.get_status()
 
 
 @app.post("/items/{item_id}/tags")
