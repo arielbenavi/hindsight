@@ -10,6 +10,16 @@ type Health = {
   last_5_auth_failed: number;
 };
 
+type SweepSource = {
+  authenticated: boolean;
+  last_sweep: string | null;
+  last_sweep_result: { processed: number; skipped: number; failed: number } | null;
+};
+
+type SweepStatus = {
+  twitter: SweepSource;
+};
+
 export default function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [category, setCategory] = useState<string>("");
@@ -22,6 +32,7 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null);
   const [healthDismissed, setHealthDismissed] = useState<boolean>(false);
   const [detailId, setDetailId] = useState<number | null>(null);
+  const [sweepStatus, setSweepStatus] = useState<SweepStatus | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 250);
@@ -74,6 +85,21 @@ export default function App() {
       alive = false;
       clearInterval(t);
     };
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    const fetchSweep = async () => {
+      try {
+        const r = await fetch(`${API}/sweep/status`);
+        if (!r.ok) return;
+        const s = (await r.json()) as SweepStatus;
+        if (alive) setSweepStatus(s);
+      } catch { /* ignore */ }
+    };
+    fetchSweep();
+    const t = setInterval(fetchSweep, 60_000);
+    return () => { alive = false; clearInterval(t); };
   }, []);
 
   const onRetry = async (id: number) => {
@@ -164,6 +190,8 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {sweepStatus && <SweepBar status={sweepStatus} />}
 
       <main className="max-w-2xl mx-auto px-3 py-3 space-y-2.5">
         {items.map((item) => (
@@ -544,6 +572,42 @@ function DetailView({
         {!item && !err && (
           <p className="p-4 text-sm text-stone-400">loading…</p>
         )}
+      </div>
+    </div>
+  );
+}
+
+function SweepBar({ status }: { status: SweepStatus }) {
+  const tw = status.twitter;
+  const lastResult = tw.last_sweep_result;
+  const lastTime = tw.last_sweep ? relativeTime(tw.last_sweep) : null;
+
+  return (
+    <div className="max-w-2xl mx-auto px-3 pt-2">
+      <div className="flex items-center gap-2 text-xs text-stone-400">
+        <span className="font-mono">sweeps</span>
+        <span className="flex items-center gap-1">
+          <span className={tw.authenticated ? "text-green-500" : "text-stone-300 dark:text-stone-600"}>
+            {tw.authenticated ? "●" : "○"}
+          </span>
+          {tw.authenticated ? (
+            <span>
+              twitter
+              {lastResult && lastTime && (
+                <span className="text-stone-400 ml-1">
+                  — {lastTime}, {lastResult.processed} new
+                </span>
+              )}
+            </span>
+          ) : (
+            <a
+              href={`${API}/auth/twitter`}
+              className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300"
+            >
+              connect twitter
+            </a>
+          )}
+        </span>
       </div>
     </div>
   );
