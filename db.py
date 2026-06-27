@@ -30,6 +30,32 @@ CREATE INDEX IF NOT EXISTS items_saved_at ON items(saved_at DESC);
 CREATE INDEX IF NOT EXISTS items_status ON items(status);
 """
 
+FTS_SCHEMA = """
+CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
+    summary, raw_text, transcript, on_screen_text,
+    content='items', content_rowid='id'
+);
+
+CREATE TRIGGER IF NOT EXISTS items_ai AFTER INSERT ON items BEGIN
+    INSERT INTO items_fts(rowid, summary, raw_text, transcript, on_screen_text)
+    VALUES (new.id, new.summary, new.raw_text, new.transcript, new.on_screen_text);
+END;
+
+CREATE TRIGGER IF NOT EXISTS items_ad AFTER DELETE ON items BEGIN
+    INSERT INTO items_fts(items_fts, rowid, summary, raw_text, transcript, on_screen_text)
+    VALUES ('delete', old.id, old.summary, old.raw_text, old.transcript, old.on_screen_text);
+END;
+
+CREATE TRIGGER IF NOT EXISTS items_au AFTER UPDATE ON items BEGIN
+    INSERT INTO items_fts(items_fts, rowid, summary, raw_text, transcript, on_screen_text)
+    VALUES ('delete', old.id, old.summary, old.raw_text, old.transcript, old.on_screen_text);
+    INSERT INTO items_fts(rowid, summary, raw_text, transcript, on_screen_text)
+    VALUES (new.id, new.summary, new.raw_text, new.transcript, new.on_screen_text);
+END;
+
+INSERT INTO items_fts(items_fts) VALUES('rebuild');
+"""
+
 
 @contextmanager
 def connect() -> Iterator[sqlite3.Connection]:
@@ -50,6 +76,7 @@ def init_db() -> None:
         if "tags" not in cols:
             c.execute("ALTER TABLE items ADD COLUMN tags TEXT DEFAULT '[]'")
         c.execute("UPDATE items SET tags='[]' WHERE tags IS NULL")
+        c.executescript(FTS_SCHEMA)
 
 
 def insert_pending(
@@ -129,14 +156,25 @@ def get_item(item_id: int) -> Optional[dict[str, Any]]:
     return _row_to_dict(r) if r else None
 
 
+def _fts_query(raw: str) -> str:
+    words = raw.strip().split()
+    if not words:
+        return '""'
+    return " ".join(f'"{w}"' for w in words)
+
+
 def list_items(
     category: Optional[str] = None,
     source: Optional[str] = None,
     q: Optional[str] = None,
     tag: Optional[str] = None,
 ) -> list[dict[str, Any]]:
-    sql = "SELECT * FROM items WHERE 1=1"
-    params: list[Any] = []
+    if q:
+        sql = "SELECT items.* FROM items JOIN items_fts ON items.id = items_fts.rowid WHERE items_fts MATCH ?"
+        params: list[Any] = [_fts_query(q)]
+    else:
+        sql = "SELECT * FROM items WHERE 1=1"
+        params = []
     if category:
         sql += " AND category = ?"
         params.append(category)
@@ -144,13 +182,8 @@ def list_items(
         sql += " AND source = ?"
         params.append(source)
     if tag:
-        # tags is a JSON array stored as text; match on the quoted token.
         sql += " AND tags LIKE ?"
         params.append(f'%"{tag.strip().lower()}"%')
-    if q:
-        like = f"%{q}%"
-        sql += " AND (summary LIKE ? OR transcript LIKE ? OR raw_text LIKE ? OR on_screen_text LIKE ?)"
-        params.extend([like, like, like, like])
     sql += " ORDER BY saved_at DESC, id DESC"
     with connect() as c:
         rows = c.execute(sql, params).fetchall()
