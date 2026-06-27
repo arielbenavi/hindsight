@@ -75,6 +75,9 @@ async def _sweep_loop() -> None:
         if os.environ.get("X_CLIENT_ID"):
             log.info("running scheduled Twitter bookmark sweep")
             await asyncio.to_thread(sweep.sweep_twitter_bookmarks)
+        if os.environ.get("IG_USERNAME"):
+            log.info("running scheduled IG saved posts sweep")
+            await asyncio.to_thread(sweep.sweep_ig_saved)
 
 
 @asynccontextmanager
@@ -221,6 +224,14 @@ def trigger_sweep(bg: BackgroundTasks):
         raise HTTPException(400, "Not authenticated — visit /auth/twitter first")
     bg.add_task(sweep.sweep_twitter_bookmarks)
     return {"status": "sweep started"}
+
+
+@app.post("/sweep/ig")
+def trigger_ig_sweep(bg: BackgroundTasks):
+    if not os.environ.get("IG_USERNAME"):
+        raise HTTPException(400, "IG_USERNAME not set in .env")
+    bg.add_task(sweep.sweep_ig_saved)
+    return {"status": "ig sweep started"}
 
 
 @app.get("/sweep/status")

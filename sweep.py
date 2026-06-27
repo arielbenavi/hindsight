@@ -1,13 +1,14 @@
 """Bookmark sweep: poll platform APIs for new saved content.
 
-Currently supports Twitter/X bookmarks. The sweep runs on a 30-minute
-loop inside the API server, or can be triggered manually via
-POST /sweep/twitter.
+Supports Twitter/X bookmarks and Instagram saved posts. The sweep
+runs on a 30-minute loop inside the API server, or can be triggered
+manually via POST /sweep/twitter or POST /sweep/ig.
 """
 from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,10 @@ import db
 log = logging.getLogger("savefeed.sweep")
 
 STATE_PATH = Path.home() / ".savefeed" / "twitter_sweep_state.json"
+IG_STATE_PATH = Path.home() / ".savefeed" / "ig_sweep_state.json"
+IG_CAP_PER_SWEEP = 30
+IG_INTER_ITEM_DELAY = 5
+IG_PAGINATION_DELAY = 2
 BOOKMARKS_URL = "https://api.x.com/2/users/{user_id}/bookmarks"
 ME_URL = "https://api.x.com/2/users/me"
 BACKFILL_CAP = 200
@@ -229,6 +234,153 @@ def sweep_twitter_bookmarks() -> dict[str, int]:
     return _last_sweep_result
 
 
+# ── Instagram saved posts sweep ──────────────────────────────────
+
+_ig_last_sweep_time: Optional[str] = None
+_ig_last_sweep_result: Optional[dict[str, int]] = None
+
+
+def _ig_username() -> Optional[str]:
+    return os.environ.get("IG_USERNAME") or None
+
+
+def _ig_session_path(username: str) -> Path:
+    return Path.home() / ".config" / "instaloader" / f"session-{username}"
+
+
+def _ig_session_status() -> str:
+    username = _ig_username()
+    if not username:
+        return "not_configured"
+    if not _ig_session_path(username).is_file():
+        return "not_configured"
+    return "valid"
+
+
+def _load_ig_state() -> dict[str, Any]:
+    if IG_STATE_PATH.is_file():
+        try:
+            return json.loads(IG_STATE_PATH.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def _save_ig_state(state: dict[str, Any]) -> None:
+    IG_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    IG_STATE_PATH.write_text(json.dumps(state, indent=2))
+
+
+def sweep_ig_saved() -> dict[str, int]:
+    global _ig_last_sweep_time, _ig_last_sweep_result
+
+    username = _ig_username()
+    if not username:
+        log.info("IG_USERNAME not set — skipping IG sweep")
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    session_file = _ig_session_path(username)
+    if not session_file.is_file():
+        log.info("no Instaloader session for %s — run: instaloader --login %s", username, username)
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    try:
+        import instaloader
+    except ImportError:
+        log.error("instaloader not installed")
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    L = instaloader.Instaloader()
+    try:
+        L.load_session_from_file(username)
+    except Exception as e:
+        log.error("failed to load Instaloader session: %s", e)
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    state = _load_ig_state()
+    last_seen = state.get("last_seen_shortcode")
+
+    processed = 0
+    skipped = 0
+    failed = 0
+    newest_shortcode: Optional[str] = None
+
+    try:
+        saved_iter = L.get_saved_posts()
+    except instaloader.exceptions.LoginRequiredException:
+        log.warning("IG session expired — re-authenticate with: instaloader --login %s", username)
+        _ig_last_sweep_time = datetime.now(timezone.utc).isoformat()
+        _ig_last_sweep_result = {"processed": 0, "skipped": 0, "failed": 0}
+        return _ig_last_sweep_result
+    except instaloader.exceptions.ConnectionException as e:
+        if "401" in str(e) or "checkpoint" in str(e).lower():
+            log.warning("IG session expired/checkpoint — re-authenticate with: instaloader --login %s", username)
+        else:
+            log.warning("IG connection error: %s", e)
+        _ig_last_sweep_time = datetime.now(timezone.utc).isoformat()
+        _ig_last_sweep_result = {"processed": 0, "skipped": 0, "failed": 0}
+        return _ig_last_sweep_result
+
+    try:
+        for post in saved_iter:
+            if processed + skipped + failed >= IG_CAP_PER_SWEEP:
+                log.info("IG sweep capped at %d, will continue next cycle", IG_CAP_PER_SWEEP)
+                break
+
+            shortcode = post.shortcode
+            if newest_shortcode is None:
+                newest_shortcode = shortcode
+
+            if last_seen and shortcode == last_seen:
+                log.info("IG sweep hit watermark at %s", shortcode)
+                break
+
+            url = f"https://www.instagram.com/p/{shortcode}/"
+            existing = db.find_active_by_url(url)
+            reel_url = f"https://www.instagram.com/reel/{shortcode}/"
+            existing_reel = db.find_active_by_url(reel_url) if not existing else None
+
+            if existing or existing_reel:
+                skipped += 1
+                log.info("IG sweep: already in DB, stopping fast-update")
+                break
+
+            log.info("IG sweep: ingesting %s", url)
+            res = _ingest(url)
+            if res.get("deduped"):
+                skipped += 1
+            elif res.get("status") == "failed":
+                failed += 1
+            else:
+                processed += 1
+
+            time.sleep(IG_INTER_ITEM_DELAY)
+            time.sleep(IG_PAGINATION_DELAY)
+
+    except instaloader.exceptions.QueryReturnedNotFoundException:
+        log.warning("IG post not found during sweep, continuing")
+    except instaloader.exceptions.ConnectionException as e:
+        if "429" in str(e) or "too many" in str(e).lower():
+            log.warning("IG rate limited, stopping sweep — will resume next cycle")
+        else:
+            log.warning("IG connection error during sweep: %s", e)
+    except Exception as e:
+        log.exception("unexpected IG sweep error: %s", e)
+
+    if newest_shortcode:
+        _save_ig_state({
+            "last_seen_shortcode": newest_shortcode,
+            "last_sweep_timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+
+    _ig_last_sweep_time = datetime.now(timezone.utc).isoformat()
+    _ig_last_sweep_result = {"processed": processed, "skipped": skipped, "failed": failed}
+    log.info("IG sweep done: processed=%d skipped=%d failed=%d", processed, skipped, failed)
+    return _ig_last_sweep_result
+
+
+# ── status ───────────────────────────────────────────────────────
+
 def get_status() -> dict[str, Any]:
     tokens = auth.load_tokens()
     return {
@@ -236,5 +388,11 @@ def get_status() -> dict[str, Any]:
             "authenticated": tokens is not None and "access_token" in (tokens or {}),
             "last_sweep": _last_sweep_time,
             "last_sweep_result": _last_sweep_result,
-        }
+        },
+        "ig_saved": {
+            "authenticated": _ig_session_status() == "valid",
+            "last_sweep": _ig_last_sweep_time,
+            "last_sweep_result": _ig_last_sweep_result,
+            "session_status": _ig_session_status(),
+        },
     }

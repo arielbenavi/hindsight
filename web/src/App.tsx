@@ -16,8 +16,11 @@ type SweepSource = {
   last_sweep_result: { processed: number; skipped: number; failed: number } | null;
 };
 
+type SweepSource_IG = SweepSource & { session_status: string };
+
 type SweepStatus = {
   twitter: SweepSource;
+  ig_saved: SweepSource_IG;
 };
 
 export default function App() {
@@ -577,35 +580,53 @@ function DetailView({
   );
 }
 
+function SweepDot({ source }: { source: SweepSource; label?: string }) {
+  const last = source.last_sweep_result;
+  const ago = source.last_sweep ? relativeTime(source.last_sweep) : null;
+  if (!source.authenticated) return null;
+  return (
+    <span className="flex items-center gap-1">
+      <span className="text-green-500">●</span>
+      <span>
+        {ago && last ? `${ago}, ${last.processed} new` : "connected"}
+      </span>
+    </span>
+  );
+}
+
 function SweepBar({ status }: { status: SweepStatus }) {
   const tw = status.twitter;
-  const lastResult = tw.last_sweep_result;
-  const lastTime = tw.last_sweep ? relativeTime(tw.last_sweep) : null;
+  const ig = status.ig_saved;
 
   return (
     <div className="max-w-2xl mx-auto px-3 pt-2">
-      <div className="flex items-center gap-2 text-xs text-stone-400">
+      <div className="flex items-center gap-3 text-xs text-stone-400 flex-wrap">
         <span className="font-mono">sweeps</span>
         <span className="flex items-center gap-1">
           <span className={tw.authenticated ? "text-green-500" : "text-stone-300 dark:text-stone-600"}>
             {tw.authenticated ? "●" : "○"}
           </span>
           {tw.authenticated ? (
+            <span>twitter <SweepDot source={tw} /></span>
+          ) : (
+            <a href={`${API}/auth/twitter`} className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300">
+              connect twitter
+            </a>
+          )}
+        </span>
+        <span className="flex items-center gap-1">
+          <span className={ig.authenticated ? "text-green-500" : "text-stone-300 dark:text-stone-600"}>
+            {ig.authenticated ? "●" : "○"}
+          </span>
+          {ig.authenticated ? (
             <span>
-              twitter
-              {lastResult && lastTime && (
-                <span className="text-stone-400 ml-1">
-                  — {lastTime}, {lastResult.processed} new
-                </span>
+              instagram
+              {ig.last_sweep_result && ig.last_sweep && (
+                <span className="ml-1">— {relativeTime(ig.last_sweep)}, {ig.last_sweep_result.processed} new</span>
               )}
             </span>
           ) : (
-            <a
-              href={`${API}/auth/twitter`}
-              className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300"
-            >
-              connect twitter
-            </a>
+            <span>instagram</span>
           )}
         </span>
       </div>
