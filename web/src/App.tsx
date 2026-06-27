@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CATEGORIES, SOURCES, type Item, type Source } from "./types";
 
 const API = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:8000";
@@ -21,6 +21,7 @@ export default function App() {
   const [err, setErr] = useState<string | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
   const [healthDismissed, setHealthDismissed] = useState<boolean>(false);
+  const [detailId, setDetailId] = useState<number | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 250);
@@ -166,7 +167,7 @@ export default function App() {
 
       <main className="max-w-2xl mx-auto px-3 py-3 space-y-2.5">
         {items.map((item) => (
-          <Card key={item.id} item={item} onRetry={onRetry} onTagClick={setTag} />
+          <Card key={item.id} item={item} onRetry={onRetry} onTagClick={setTag} onDetail={setDetailId} />
         ))}
         {!loading && items.length === 0 && !err && (
           <p className="text-stone-400 text-sm text-center py-8">
@@ -174,6 +175,15 @@ export default function App() {
           </p>
         )}
       </main>
+
+      {detailId !== null && (
+        <DetailView
+          itemId={detailId}
+          onClose={() => setDetailId(null)}
+          onTagClick={(t) => { setDetailId(null); setTag(t); }}
+          onTagsChanged={refetch}
+        />
+      )}
     </div>
   );
 }
@@ -229,10 +239,12 @@ function Card({
   item,
   onRetry,
   onTagClick,
+  onDetail,
 }: {
   item: Item;
   onRetry: (id: number) => void;
   onTagClick: (tag: string) => void;
+  onDetail: (id: number) => void;
 }) {
   const failed = item.status === "failed";
   const pending = item.status === "pending";
@@ -299,14 +311,12 @@ function Card({
             ↗ open original
           </a>
         )}
-        <a
-          href={`${API}/items/${item.id}/pretty`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => onDetail(item.id)}
           className="text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100"
         >
           details →
-        </a>
+        </button>
         {failed && (
           <button
             onClick={() => onRetry(item.id)}
@@ -352,4 +362,213 @@ function relativeTime(iso: string): string {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   if (diff < 7 * 86400) return `${Math.floor(diff / 86400)}d`;
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function DetailView({
+  itemId,
+  onClose,
+  onTagClick,
+  onTagsChanged,
+}: {
+  itemId: number;
+  onClose: () => void;
+  onTagClick: (tag: string) => void;
+  onTagsChanged: () => void;
+}) {
+  const [item, setItem] = useState<Item | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [tagInput, setTagInput] = useState("");
+  const [saving, setSaving] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch(`${API}/items/${itemId}`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        if (alive) setItem(data);
+      } catch (e) {
+        if (alive) setErr(e instanceof Error ? e.message : String(e));
+      }
+    })();
+    return () => { alive = false; };
+  }, [itemId]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  const addTag = async () => {
+    const t = tagInput.trim().toLowerCase();
+    if (!t || !item) return;
+    const next = [...(item.tags || []), t].filter((v, i, a) => a.indexOf(v) === i);
+    await saveTags(next);
+  };
+
+  const removeTag = async (tag: string) => {
+    if (!item) return;
+    await saveTags((item.tags || []).filter((t) => t !== tag));
+  };
+
+  const saveTags = async (tags: string[]) => {
+    setSaving(true);
+    try {
+      await fetch(`${API}/items/${itemId}/tags`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags }),
+      });
+      setItem((prev) => prev ? { ...prev, tags } : prev);
+      setTagInput("");
+      onTagsChanged();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="absolute inset-0 bg-black/30" />
+      <div
+        ref={panelRef}
+        className="relative w-full max-w-lg bg-white dark:bg-stone-900 h-full overflow-y-auto shadow-xl animate-slide-in"
+      >
+        <div className="sticky top-0 z-10 bg-white/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 px-4 py-3 flex items-center gap-2">
+          <button
+            onClick={onClose}
+            className="text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 text-lg"
+          >
+            ← back
+          </button>
+          <span className="ml-auto text-xs text-stone-400">#{itemId}</span>
+        </div>
+
+        {err && <p className="p-4 text-red-600 text-sm">{err}</p>}
+
+        {item && (
+          <div className="p-4 space-y-4">
+            <div className="flex items-center gap-1.5 flex-wrap text-xs">
+              <Chip>{labelForSource(item.source)}</Chip>
+              {item.category && <Chip>{item.category}</Chip>}
+              {item.kind && <Chip>{item.kind}</Chip>}
+              <span className="ml-auto text-stone-400">
+                {new Date(item.saved_at).toLocaleString()}
+              </span>
+            </div>
+
+            {item.source_url && (
+              <a
+                href={item.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline break-all"
+              >
+                {item.source_url}
+              </a>
+            )}
+
+            {item.summary && (
+              <Section title="summary">
+                <p className="text-[15px] leading-relaxed text-stone-900 dark:text-stone-100">
+                  {item.summary}
+                </p>
+              </Section>
+            )}
+
+            {item.key_takeaways && item.key_takeaways.length > 0 && (
+              <Section title="key takeaways">
+                <ul className="list-disc list-inside space-y-1 text-sm text-stone-700 dark:text-stone-300">
+                  {item.key_takeaways.map((t, i) => <li key={i}>{t}</li>)}
+                </ul>
+              </Section>
+            )}
+
+            {item.on_screen_text && (
+              <Section title="on-screen text">
+                <p className="text-sm text-stone-600 dark:text-stone-400 whitespace-pre-wrap">
+                  {item.on_screen_text}
+                </p>
+              </Section>
+            )}
+
+            {item.transcript && (
+              <Section title="transcript">
+                <p className="text-sm text-stone-600 dark:text-stone-400 whitespace-pre-wrap">
+                  {item.transcript}
+                </p>
+              </Section>
+            )}
+
+            {item.raw_text && (
+              <Collapsible title="raw text">
+                <p className="text-sm text-stone-500 dark:text-stone-400 whitespace-pre-wrap break-words">
+                  {item.raw_text}
+                </p>
+              </Collapsible>
+            )}
+
+            <Section title="tags">
+              <div className="flex flex-wrap gap-1 mb-2">
+                {(item.tags || []).map((t) => (
+                  <span key={t} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-mono text-[11px] bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                    <button onClick={() => onTagClick(t)} title={`filter by #${t}`}>#{t}</button>
+                    <button onClick={() => removeTag(t)} className="ml-0.5 text-indigo-400 hover:text-red-500" title="remove">×</button>
+                  </span>
+                ))}
+              </div>
+              <form onSubmit={(e) => { e.preventDefault(); addTag(); }} className="flex gap-1">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="add tag…"
+                  className="flex-1 px-2 py-1 text-xs rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                  disabled={saving}
+                />
+                <button
+                  type="submit"
+                  disabled={saving || !tagInput.trim()}
+                  className="px-2 py-1 text-xs rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600 disabled:opacity-40"
+                >
+                  add
+                </button>
+              </form>
+            </Section>
+          </div>
+        )}
+
+        {!item && !err && (
+          <p className="p-4 text-sm text-stone-400">loading…</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function Collapsible({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1 hover:text-stone-600 dark:hover:text-stone-300"
+      >
+        {open ? "▾" : "▸"} {title}
+      </button>
+      {open && children}
+    </div>
+  );
 }
