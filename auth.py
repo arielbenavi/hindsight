@@ -47,7 +47,7 @@ def _client_secret() -> str:
 
 
 def _callback_url(request: Request) -> str:
-    return str(request.url_for("twitter_callback"))
+    return "http://127.0.0.1:8000/auth/twitter/callback"
 
 
 def load_tokens() -> Optional[dict[str, Any]]:

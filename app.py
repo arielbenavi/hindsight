@@ -66,18 +66,24 @@ def _drain_pending() -> None:
             _process(item)
 
 
-SWEEP_INTERVAL = 30 * 60
+IG_SWEEP_INTERVAL = 30 * 60
+TWITTER_SWEEP_INTERVAL = int(os.environ.get("TWITTER_SWEEP_INTERVAL", 30 * 60))
 
 
-async def _sweep_loop() -> None:
+async def _ig_sweep_loop() -> None:
     while True:
-        await asyncio.sleep(SWEEP_INTERVAL)
+        await asyncio.sleep(IG_SWEEP_INTERVAL)
+        if os.environ.get("IG_COOKIES_FILE"):
+            log.info("running scheduled IG saved posts sweep")
+            await asyncio.to_thread(sweep.sweep_ig_saved)
+
+
+async def _twitter_sweep_loop() -> None:
+    while True:
+        await asyncio.sleep(TWITTER_SWEEP_INTERVAL)
         if os.environ.get("X_CLIENT_ID"):
             log.info("running scheduled Twitter bookmark sweep")
             await asyncio.to_thread(sweep.sweep_twitter_bookmarks)
-        if os.environ.get("IG_USERNAME"):
-            log.info("running scheduled IG saved posts sweep")
-            await asyncio.to_thread(sweep.sweep_ig_saved)
 
 
 @asynccontextmanager
@@ -88,9 +94,11 @@ async def lifespan(_app: FastAPI):
     if pending:
         log.info("re-enqueueing %d pending items on startup", len(pending))
         threading.Thread(target=_drain_pending, daemon=True).start()
-    sweep_task = asyncio.create_task(_sweep_loop())
+    ig_sweep_task = asyncio.create_task(_ig_sweep_loop())
+    twitter_sweep_task = asyncio.create_task(_twitter_sweep_loop())
     yield
-    sweep_task.cancel()
+    ig_sweep_task.cancel()
+    twitter_sweep_task.cancel()
 
 
 def _check_cookies_file() -> None:
@@ -228,8 +236,8 @@ def trigger_sweep(bg: BackgroundTasks):
 
 @app.post("/sweep/ig")
 def trigger_ig_sweep(bg: BackgroundTasks):
-    if not os.environ.get("IG_USERNAME"):
-        raise HTTPException(400, "IG_USERNAME not set in .env")
+    if not os.environ.get("IG_COOKIES_FILE"):
+        raise HTTPException(400, "IG_COOKIES_FILE not set in .env")
     bg.add_task(sweep.sweep_ig_saved)
     return {"status": "ig sweep started"}
 
