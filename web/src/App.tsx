@@ -580,55 +580,50 @@ function DetailView({
   );
 }
 
-function SweepDot({ source }: { source: SweepSource; label?: string }) {
-  const last = source.last_sweep_result;
+
+function SweepSourceLabel({ label, source, authLink }: { label: string; source: SweepSource; authLink?: string }) {
   const ago = source.last_sweep ? relativeTime(source.last_sweep) : null;
-  if (!source.authenticated) return null;
+  const res = source.last_sweep_result;
+  const igStatus = (source as SweepSource_IG).session_status;
+  const expired = igStatus === "not_configured" && !source.authenticated;
+
+  const dotColor = source.authenticated
+    ? "text-green-500"
+    : expired
+      ? "text-amber-500"
+      : "text-stone-300 dark:text-stone-600";
+  const dot = source.authenticated ? "●" : expired ? "●" : "○";
+
   return (
     <span className="flex items-center gap-1">
-      <span className="text-green-500">●</span>
-      <span>
-        {ago && last ? `${ago}, ${last.processed} new` : "connected"}
-      </span>
+      <span className={dotColor}>{dot}</span>
+      {source.authenticated ? (
+        <span>
+          {label}
+          {ago && res ? (
+            <span className="ml-1">— {ago}, {res.processed} new</span>
+          ) : ago ? (
+            <span className="ml-1">— {ago}</span>
+          ) : null}
+        </span>
+      ) : authLink ? (
+        <a href={authLink} className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300">
+          connect {label}
+        </a>
+      ) : (
+        <span>{label}{expired ? " — expired" : ""}</span>
+      )}
     </span>
   );
 }
 
 function SweepBar({ status }: { status: SweepStatus }) {
-  const tw = status.twitter;
-  const ig = status.ig_saved;
-
   return (
     <div className="max-w-2xl mx-auto px-3 pt-2">
       <div className="flex items-center gap-3 text-xs text-stone-400 flex-wrap">
         <span className="font-mono">sweeps</span>
-        <span className="flex items-center gap-1">
-          <span className={tw.authenticated ? "text-green-500" : "text-stone-300 dark:text-stone-600"}>
-            {tw.authenticated ? "●" : "○"}
-          </span>
-          {tw.authenticated ? (
-            <span>twitter <SweepDot source={tw} /></span>
-          ) : (
-            <a href={`${API}/auth/twitter`} className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300">
-              connect twitter
-            </a>
-          )}
-        </span>
-        <span className="flex items-center gap-1">
-          <span className={ig.authenticated ? "text-green-500" : "text-stone-300 dark:text-stone-600"}>
-            {ig.authenticated ? "●" : "○"}
-          </span>
-          {ig.authenticated ? (
-            <span>
-              instagram
-              {ig.last_sweep_result && ig.last_sweep && (
-                <span className="ml-1">— {relativeTime(ig.last_sweep)}, {ig.last_sweep_result.processed} new</span>
-              )}
-            </span>
-          ) : (
-            <span>instagram</span>
-          )}
-        </span>
+        <SweepSourceLabel label="twitter" source={status.twitter} authLink={`${API}/auth/twitter`} />
+        <SweepSourceLabel label="instagram" source={status.ig_saved} />
       </div>
     </div>
   );
