@@ -239,20 +239,40 @@ def sweep_twitter_bookmarks() -> dict[str, int]:
 _ig_last_sweep_time: Optional[str] = None
 _ig_last_sweep_result: Optional[dict[str, int]] = None
 
+IG_SAVED_API = "https://www.instagram.com/api/v1/feed/saved/posts/"
+_IG_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
-def _ig_username() -> Optional[str]:
-    return os.environ.get("IG_USERNAME") or None
+
+def _parse_cookies_txt(path: Path) -> dict[str, str]:
+    """Parse a Netscape cookies.txt and return cookies for .instagram.com."""
+    cookies: dict[str, str] = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        domain, _, _, _, _, name, value = parts[:7]
+        if "instagram.com" in domain:
+            cookies[name] = value
+    return cookies
 
 
-def _ig_session_path(username: str) -> Path:
-    return Path.home() / ".config" / "instaloader" / f"session-{username}"
+def _ig_cookies_file() -> Optional[Path]:
+    raw = os.environ.get("IG_COOKIES_FILE")
+    if not raw:
+        return None
+    p = Path(raw).expanduser()
+    return p if p.is_file() and p.stat().st_size > 0 else None
 
 
 def _ig_session_status() -> str:
-    username = _ig_username()
-    if not username:
+    cf = _ig_cookies_file()
+    if not cf:
         return "not_configured"
-    if not _ig_session_path(username).is_file():
+    cookies = _parse_cookies_txt(cf)
+    if "sessionid" not in cookies:
         return "not_configured"
     return "valid"
 
@@ -271,30 +291,49 @@ def _save_ig_state(state: dict[str, Any]) -> None:
     IG_STATE_PATH.write_text(json.dumps(state, indent=2))
 
 
+def _fetch_ig_saved(cookies: dict[str, str], max_id: Optional[str] = None) -> dict[str, Any]:
+    """Fetch one page of saved posts via Instagram's private API."""
+    headers = {
+        "User-Agent": _IG_UA,
+        "X-CSRFToken": cookies.get("csrftoken", ""),
+        "X-IG-App-ID": "936619743392459",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    params: dict[str, str] = {}
+    if max_id:
+        params["max_id"] = max_id
+    try:
+        with httpx.Client(timeout=30) as cx:
+            r = cx.get(
+                IG_SAVED_API,
+                headers=headers,
+                cookies=cookies,
+                params=params,
+            )
+        if r.status_code == 401 or r.status_code == 403:
+            return {"auth_error": True, "status": r.status_code}
+        if r.status_code == 429:
+            return {"rate_limited": True}
+        if r.status_code != 200:
+            log.warning("IG saved API failed: %s %s", r.status_code, r.text[:200])
+            return {"error": r.text[:200]}
+        return r.json()
+    except Exception as e:
+        log.exception("IG saved API error: %s", e)
+        return {"error": str(e)}
+
+
 def sweep_ig_saved() -> dict[str, int]:
     global _ig_last_sweep_time, _ig_last_sweep_result
 
-    username = _ig_username()
-    if not username:
-        log.info("IG_USERNAME not set — skipping IG sweep")
+    cf = _ig_cookies_file()
+    if not cf:
+        log.info("IG_COOKIES_FILE not set or missing — skipping IG sweep")
         return {"processed": 0, "skipped": 0, "failed": 0}
 
-    session_file = _ig_session_path(username)
-    if not session_file.is_file():
-        log.info("no Instaloader session for %s — run: instaloader --login %s", username, username)
-        return {"processed": 0, "skipped": 0, "failed": 0}
-
-    try:
-        import instaloader
-    except ImportError:
-        log.error("instaloader not installed")
-        return {"processed": 0, "skipped": 0, "failed": 0}
-
-    L = instaloader.Instaloader()
-    try:
-        L.load_session_from_file(username)
-    except Exception as e:
-        log.error("failed to load Instaloader session: %s", e)
+    cookies = _parse_cookies_txt(cf)
+    if "sessionid" not in cookies:
+        log.info("no sessionid in cookies.txt — skipping IG sweep")
         return {"processed": 0, "skipped": 0, "failed": 0}
 
     state = _load_ig_state()
@@ -304,30 +343,34 @@ def sweep_ig_saved() -> dict[str, int]:
     skipped = 0
     failed = 0
     newest_shortcode: Optional[str] = None
+    max_id: Optional[str] = None
 
-    try:
-        saved_iter = L.get_saved_posts()
-    except instaloader.exceptions.LoginRequiredException:
-        log.warning("IG session expired — re-authenticate with: instaloader --login %s", username)
-        _ig_last_sweep_time = datetime.now(timezone.utc).isoformat()
-        _ig_last_sweep_result = {"processed": 0, "skipped": 0, "failed": 0}
-        return _ig_last_sweep_result
-    except instaloader.exceptions.ConnectionException as e:
-        if "401" in str(e) or "checkpoint" in str(e).lower():
-            log.warning("IG session expired/checkpoint — re-authenticate with: instaloader --login %s", username)
-        else:
-            log.warning("IG connection error: %s", e)
-        _ig_last_sweep_time = datetime.now(timezone.utc).isoformat()
-        _ig_last_sweep_result = {"processed": 0, "skipped": 0, "failed": 0}
-        return _ig_last_sweep_result
+    while processed + skipped + failed < IG_CAP_PER_SWEEP:
+        result = _fetch_ig_saved(cookies, max_id)
 
-    try:
-        for post in saved_iter:
+        if result.get("auth_error"):
+            log.warning("IG cookies expired (HTTP %s) — re-export cookies.txt", result.get("status"))
+            break
+        if result.get("rate_limited"):
+            log.warning("IG rate limited, stopping sweep — will resume next cycle")
+            break
+        if result.get("error"):
+            break
+
+        items = result.get("items") or []
+        if not items:
+            break
+
+        for item in items:
             if processed + skipped + failed >= IG_CAP_PER_SWEEP:
                 log.info("IG sweep capped at %d, will continue next cycle", IG_CAP_PER_SWEEP)
                 break
 
-            shortcode = post.shortcode
+            media = item.get("media") or item
+            shortcode = media.get("code") or media.get("shortcode")
+            if not shortcode:
+                continue
+
             if newest_shortcode is None:
                 newest_shortcode = shortcode
 
@@ -355,17 +398,15 @@ def sweep_ig_saved() -> dict[str, int]:
                 processed += 1
 
             time.sleep(IG_INTER_ITEM_DELAY)
-            time.sleep(IG_PAGINATION_DELAY)
-
-    except instaloader.exceptions.QueryReturnedNotFoundException:
-        log.warning("IG post not found during sweep, continuing")
-    except instaloader.exceptions.ConnectionException as e:
-        if "429" in str(e) or "too many" in str(e).lower():
-            log.warning("IG rate limited, stopping sweep — will resume next cycle")
         else:
-            log.warning("IG connection error during sweep: %s", e)
-    except Exception as e:
-        log.exception("unexpected IG sweep error: %s", e)
+            more_available = result.get("more_available", False)
+            next_max_id = result.get("next_max_id")
+            if more_available and next_max_id:
+                max_id = str(next_max_id)
+                time.sleep(IG_PAGINATION_DELAY)
+                continue
+            break
+        break
 
     if newest_shortcode:
         _save_ig_state({
