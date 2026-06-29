@@ -12,3 +12,4 @@ tmp/
 web/node_modules/
 web/dist/
 web/.vite/
+x_cookies.txt
