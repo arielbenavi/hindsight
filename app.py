@@ -20,6 +20,7 @@ from pydantic import BaseModel
 import adapters
 import auth
 import db
+import preflight
 import router
 import sweep
 
@@ -221,6 +222,16 @@ def health():
             else "ok"
         ),
     }
+
+
+@app.get("/sweep/dry-run")
+def dry_run():
+    return preflight.run_all_checks()
+
+
+@app.get("/setup", response_class=HTMLResponse)
+def setup_page():
+    return preflight.setup_html()
 
 
 @app.post("/sweep/twitter")
