@@ -41,10 +41,12 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
         }
     }
 
-    /// Last meaningful path component: `/reel/CODE/` → `CODE`, `/status/123` → `123`.
+    /// Last path component of a known platform's URL: `/reel/CODE/` → `CODE`,
+    /// `/status/123` → `123`. Nil for other sites (e.g. a link saved on Facebook),
+    /// where the full URL is the identity.
     static func shortcode(for url: URL) -> String? {
-        let parts = url.pathComponents.filter { $0 != "/" }
-        return parts.last
+        guard Platform(url: url) != nil else { return nil }
+        return url.pathComponents.filter { $0 != "/" }.last
     }
 }
 
@@ -77,7 +79,7 @@ enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
         if host.hasSuffix("instagram.com") { self = .instagram }
         else if host.hasSuffix("facebook.com") || host.hasSuffix("fb.watch") { self = .facebook }
         else if host.hasSuffix("x.com") || host.hasSuffix("twitter.com") { self = .x }
-        else if host.hasSuffix("tiktok.com") { self = .tiktok }
+        else if host.hasSuffix("tiktok.com") || host.hasSuffix("tiktokv.com") { self = .tiktok }
         else { return nil }
     }
 
