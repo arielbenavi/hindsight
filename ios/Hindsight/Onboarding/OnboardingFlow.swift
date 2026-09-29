@@ -61,7 +61,16 @@ struct OnboardingFlow: View {
             .accessibilityElement()
             .accessibilityLabel("Step \(model.step.rawValue + 1) of \(OnboardingModel.Step.allCases.count)")
 
+            #if DEBUG
+            // Dev shortcut: straight to the app with the bundled seed data.
+            Button("Skip", action: onFinish)
+                .font(.system(.caption, design: .rounded, weight: .heavy))
+                .foregroundStyle(OnboardingStyle.muted)
+                .frame(minWidth: 36, minHeight: 36)
+                .accessibilityLabel("Skip onboarding (dev)")
+            #else
             Color.clear.frame(width: 36, height: 36)
+            #endif
         }
         .padding(.horizontal, OnboardingStyle.horizontalPadding - 8)
         .padding(.vertical, 8)
