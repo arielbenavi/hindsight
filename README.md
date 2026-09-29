@@ -26,21 +26,21 @@ Change project settings in `ios/project.yml`, not in Xcode's settings UI. See [i
 
 ## How user data gets in
 
-The main path: each user signs up for **Meta Muse** and gets a `.md` file listing all of their saved posts. The app reads that file.
+Every platform is different; see [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md) for the full picture.
 
-[`data/ig-saved-posts-seed.md`](data/ig-saved-posts-seed.md) shows what that file looks like (1,216 real saved posts). Each entry has the account, post type, date, caption, and URL:
+- **Instagram + Facebook:** through **Meta Muse**. The app opens Muse with our question on the clipboard, Muse replies with a JSON list of saves, and the user pastes it back. This works on a real iPhone today. A Muse MCP connector (needs our backend) would remove the paste.
+- **X:** "Connect X" (OAuth 2.0 PKCE, X's own sign-in page). Pulls the user's bookmarks. Works on device.
+- **TikTok:** no official API for US users. The plan is a share extension ("Share → hindsight") for new saves plus the "Download your data" export for backfill.
+- Everything becomes a Swift `SavedPost` (`ios/Hindsight/Models/SavedPost.swift`). [`data/ig-saved-posts-seed.md`](data/ig-saved-posts-seed.md) (1,216 real IG saves in Muse's markdown format) is bundled so the app has real content during development.
 
-```
-1. **@username** · reel · 2026-09-27
-   Caption text…
-   https://www.instagram.com/reel/CODE/
-```
-
-See [data/README.md](data/README.md) for the full format.
+Next (planned): a hosted **ingestion backend**, ported from `web/backend/`, that turns each save into transcript, on-screen text, summary, tags and embeddings.
 
 ## Docs
 
-- [docs/HANDOFF.md](docs/HANDOFF.md): the state of the project when the web prototype was handed off
+- [docs/HANDOFF.md](docs/HANDOFF.md): current status, open decisions, and the web prototype's handoff notes
+- [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md): how the iOS app gets saves from each platform, what's verified, what's open
+- [docs/LESSONS.md](docs/LESSONS.md): gotchas and dead ends. **Read before starting a session; add to it when something surprises you.**
+- [docs/research/SYNC_RESEARCH_PROMPT.md](docs/research/SYNC_RESEARCH_PROMPT.md): open research brief on the smoothest sync per platform
 - [docs/BACKFILL_STATUS.md](docs/BACKFILL_STATUS.md): what worked and what failed when pulling saved posts from each platform
 - [docs/cookie-refresh-workflow.md](docs/cookie-refresh-workflow.md): notes on the Instagram cookie flow and its UX pain points
 - [web/README.md](web/README.md): how to run the deprecated prototype

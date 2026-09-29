@@ -14,8 +14,12 @@ DATA_FETCHING_RESEARCH.md.)
   `/s/*` and friends into the app. **The bare `https://muse.ai` is not routed**, so
   opening it with `.universalLinksOnly` fails and looks like "not installed". Open
   `https://muse.ai/chat` instead. (2026-09-29)
-- `https://muse.ai/chat?q=…` opens Muse but (first test) didn't show the prompt
-  typed in. Still testing the other params via the DEBUG link lab. (2026-09-29)
+- `https://muse.ai/chat?q=…` opens Muse but **doesn't prefill** the prompt, so we
+  copy it to the clipboard first. Other params are in the DEBUG link lab, not yet
+  all tried. (2026-09-29)
+- The Muse paste flow works end to end on device. Asking only for saves after our
+  newest date made the first real reply tiny (2 posts). That's expected, not a
+  bug. (2026-09-29)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
 
@@ -48,6 +52,14 @@ DATA_FETCHING_RESEARCH.md.)
 - **The Data Portability API only returns data for EEA/UK users.** It's a DMA
   compliance API; US accounts get nothing back. Check a platform API's regional
   scope before recommending it. (2026-09-29)
+
+## Process
+
+- Screenshots of developer consoles leak secrets (X showed consumer secret,
+  bearer token and OAuth 2.0 client secret on creation). Ask for only the specific
+  public value (e.g. client ID) as pasted text, and regenerate anything exposed.
+  Base64 IDs in screenshots are ambiguous (l/I/1), so always ask for text.
+  (2026-09-29)
 
 ## Signing / devices
 

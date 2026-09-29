@@ -15,7 +15,9 @@ N. **@username** · type · YYYY-MM-DD
    https://www.instagram.com/p|reel/CODE/
 ```
 
-Types: `reel`, `post`, `carousel`
+Types: `reel`, `post` (1,216 entries: 792 reels, 424 posts; 58 have no caption)
+
+This is the format Muse happened to produce when asked for saved reels, so it isn't a contract. The app's canonical format is the Swift `SavedPost` model, and new Muse syncs ask for a fixed JSON schema instead (see `ios/Hindsight/Sync/MusePrompt.swift`). `SavedPostParser` reads both.
 
 ## Usage
 
