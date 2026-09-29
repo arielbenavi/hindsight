@@ -1,0 +1,55 @@
+# Lessons log
+
+Things we learned the hard way: bugs, dead ends, setup gotchas. Read this before
+starting a session; add to it when something surprises you. Newest first.
+(Platform-by-platform fetching history lives in BACKFILL_STATUS.md and
+DATA_FETCHING_RESEARCH.md.)
+
+## Muse
+
+- **`muse://new?text=` isn't real.** It only appears in a feature request for an
+  unofficial desktop wrapper. Meta documents no prefill deep link. (2026-09-29)
+- **Muse's iOS app is `com.facebook.hatch`.** muse.ai's
+  `/.well-known/apple-app-site-association` routes `/chat`, `/chat/*`, `/share`,
+  `/s/*` and friends into the app. **The bare `https://muse.ai` is not routed**, so
+  opening it with `.universalLinksOnly` fails and looks like "not installed". Open
+  `https://muse.ai/chat` instead. (2026-09-29)
+- `https://muse.ai/chat?q=…` opens Muse but (first test) didn't show the prompt
+  typed in. Still testing the other params via the DEBUG link lab. (2026-09-29)
+- Users will tap our Paste button with our own prompt still on the clipboard. The
+  sheet now detects that and explains. (2026-09-29)
+
+## iOS / Xcode
+
+- **Fresh Xcode installs have no iOS platform.** `xcodebuild -downloadPlatform iOS`
+  (about 8.4 GB) is needed even to build for a physical device, not just the
+  simulator. It's an Xcode component, not a macOS update. (2026-09-29)
+- **The simulator can't render emoji** (shows `?` boxes, and the wide fallback
+  glyph broke row layouts). Use SF Symbols for UI; emoji in real captions are fine
+  on devices. (2026-09-29)
+- **`YYYY-MM-DD` parsed as UTC midnight shows the previous day** in US timezones.
+  Parse date-only strings as local midnight (`SavedPostParser.parseDate`).
+  (2026-09-29)
+- `Regex` isn't `Sendable`, so a regex literal can't be a `static let` under Swift 6.
+  Use a computed `static var`. (2026-09-29)
+- Long `Data` concatenations with `+` time out the type checker. Build them in
+  steps. (2026-09-29)
+
+## Signing / devices
+
+- **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists
+  the team, but builds fail with `No Account for Team`. The role needs "Access to
+  Certificates, Identifiers & Profiles", or use the Developer role. (2026-09-29)
+- Workaround without touching `project.yml`: build with your free Personal Team and
+  a different bundle ID via command-line overrides:
+  `HINDSIGHT_TEAM=<id> HINDSIGHT_BUNDLE_ID=com.you.hindsight ios/scripts/device.sh install`.
+  First launch needs Settings → General → VPN & Device Management → Trust.
+  Personal Team builds expire after 7 days. (2026-09-29)
+- The phone needs Developer Mode (Settings → Privacy & Security) before Xcode
+  can use it. (2026-09-29)
+
+## Testing loop
+
+- DEBUG builds write `Library/Application Support/debug-log.txt`.
+  `ios/scripts/device.sh log` pulls it off a connected phone, so a tester can just
+  say "check the log". (2026-09-29)

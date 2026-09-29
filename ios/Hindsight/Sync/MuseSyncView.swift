@@ -177,6 +177,11 @@ struct MuseSyncView: View {
     private func importReply(_ text: String) {
         let result = SavedPostParser.parse(text)
         DebugLog.write("paste: \(text.count) chars, \(result.posts.count) posts, \(result.skipped) skipped")
+        if text.hasPrefix("List my saved posts from") {
+            DebugLog.write("paste was our own prompt")
+            phase = .failed("That's our question, not Muse's answer. Paste it into Muse and send it first, then copy Muse's reply.")
+            return
+        }
         guard !result.posts.isEmpty else {
             DebugLog.write("paste failed, text starts: \(text.prefix(400))")
             phase = .failed("Couldn't find any posts in what you pasted. Copy Muse's whole reply and try again.")
