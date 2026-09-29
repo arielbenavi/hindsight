@@ -4,10 +4,10 @@ Last updated: 2026-09-29. This covers how the iOS app gets saved posts from each
 
 | Platform | Recommended path | User effort | Status in iOS app |
 |----------|------------------|-------------|-------------------|
-| Instagram | Muse (built-in IG connector reads saved posts) | 1 tap + 1 paste | Prototype (`Sync/`) |
+| Instagram | Muse (built-in IG connector reads saved posts) | 2 pastes | **Working on device** (paste flow) |
 | Facebook | Muse (same flow, same prompt) | shared with IG | Prototype (`Sync/`) |
-| X | OAuth 2.0 PKCE, using hindsight's own X app | 1 sign-in | Not started ("soon" in onboarding) |
-| TikTok | Data Portability API (needs TikTok approval) | 1 sign-in, once approved | Not started ("soon" in onboarding) |
+| X | OAuth 2.0 PKCE, using hindsight's own X app | 1 sign-in | **Working on device** (97 bookmarks) |
+| TikTok | Share extension + data-download import (API is EEA/UK-only) | 1 tap per save | Export parser built; no UI |
 
 ---
 
@@ -78,10 +78,10 @@ The parser still accepts the markdown format, so the seed and loose replies both
 
 ## TikTok
 
-- **Data Portability API** (official). The `portability.activity.single` / `.ongoing` scopes cover activity, including likes and favorites. It needs an application form and review (about 3–4 weeks), and the data comes back as an asynchronous export the app downloads.
+- **Data Portability API** (official). **It only returns data for TikTok users in the EEA/UK** (it exists for DMA compliance), so it's useless for US users. The `portability.activity.single` / `.ongoing` scopes cover activity, including likes and favorites. Also needs Login Kit approval, a public privacy-policy URL, a business-domain email, 4 UX mockups and a data-deletion description. It needs an application form and review (about 3–4 weeks), and the data comes back as an asynchronous export the app downloads.
 - **Fallback that works today:** the user requests their data download in TikTok (Settings → Account → Download your data, JSON), then shares the file to hindsight. tikfav does the same thing. We'd write a parser for `Activity › Favorite Videos` / `Like List`.
 - Third-party scrapers (Apify, about $6 per 1k) and Chrome extensions (myfaveTT) aren't usable for an iOS consumer app.
-- Recommendation: apply for Data Portability now (it's slow), and ship the data-download import first.
+- Recommendation: a share extension ("Share → hindsight" on a TikTok) for capturing new saves everywhere; data-download import (`DataExportParser`, built) for backfill. Apply for Data Portability only if we target EU/UK users.
 
 ---
 

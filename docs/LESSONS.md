@@ -43,6 +43,12 @@ DATA_FETCHING_RESEARCH.md.)
 - Don't trust remembered test vectors. The "RFC 7636" PKCE challenge I recalled
   was wrong; the test now uses a value computed independently in Python. (2026-09-29)
 
+## TikTok
+
+- **The Data Portability API only returns data for EEA/UK users.** It's a DMA
+  compliance API; US accounts get nothing back. Check a platform API's regional
+  scope before recommending it. (2026-09-29)
+
 ## Signing / devices
 
 - **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists
