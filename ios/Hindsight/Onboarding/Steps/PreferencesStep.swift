@@ -44,7 +44,7 @@ struct PreferencesStep: View {
                     .foregroundStyle(OnboardingStyle.muted)
             }
 
-            section("Bring old saves back") {
+            section("Remind me of old saves") {
                 HStack(spacing: 8) {
                     ForEach(OnboardingPreferences.Resurface.allCases) { cadence in
                         OnboardingChip(label: cadence.title, isSelected: model.preferences.resurface == cadence) {
