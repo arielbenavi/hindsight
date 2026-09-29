@@ -4,7 +4,7 @@ import Foundation
 /// Must be a "Native App" (public client, PKCE, no secret) with callback
 /// `hindsight://oauth/x`. A native client ID is public, so it lives in code.
 enum XConfig {
-    static let clientID = ""
+    static let clientID = "dWd1Z3o2YVlWM0lLZlcyTWllMzk6MTpjaQ"
     static let callbackScheme = "hindsight"
     static let redirectURI = "hindsight://oauth/x"
     static let scopes = "tweet.read users.read bookmark.read offline.access"
