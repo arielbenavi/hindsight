@@ -9,4 +9,4 @@ bot:
 	$(VENV)/bin/python bot.py
 
 web:
-	cd web && npm run dev
+	cd ../frontend && npm run dev

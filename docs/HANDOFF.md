@@ -2,7 +2,11 @@
 
 REPO: /Users/arismac/Sync/win_mac_sync/dev/savefeed
 GITHUB: https://github.com/arielbenavi/hindsight
-READ README.md FIRST.
+READ README.md FIRST (root), then web/README.md for the prototype.
+
+NOTE (2026-09-29): repo restructured. The web prototype below now lives in
+web/ (Python in web/backend/, React in web/frontend/) and is deprecated.
+The iOS app lives in ios/. Seed data stays in data/.
 
 ================================================================
 PROJECT OVERVIEW
@@ -61,7 +65,7 @@ data/ig-saved-posts-seed.md — 1,216 Instagram saved posts
   See data/README.md for format and usage.
 
 ================================================================
-FILE MAP (5,238 lines total)
+FILE MAP (5,238 lines total) — Python paths are relative to web/backend/
 ================================================================
 
 app.py          (701)  FastAPI: /capture, /items, /health, /sweep/*, /chat, auth
@@ -77,8 +81,8 @@ preflight.py    (324)  Dry-run health checks + setup page
 scripts/import_whatsapp.py  (213)  WhatsApp chat export importer
 scripts/import_ig_export.py (199)  IG data download importer
 scripts/import_fb_export.py (227)  FB data download importer
-web/src/App.tsx     (851)  Single-file React frontend (feed, stats, chat)
-web/src/types.ts     (30)  Source/Status/Item types, CATEGORIES, SOURCES
+web/frontend/src/App.tsx (851)  Single-file React frontend (feed, stats, chat)
+web/frontend/src/types.ts (30)  Source/Status/Item types, CATEGORIES, SOURCES
 data/ig-saved-posts-seed.md (4809) 1,216 IG saved posts seed data
 
 ================================================================

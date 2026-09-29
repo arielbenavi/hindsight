@@ -21,21 +21,21 @@ Ensure all three savefeed processes are running. Kill and restart any that are a
    ```bash
    lsof -ti:8000 2>/dev/null | xargs kill -9 2>/dev/null
    sleep 1
-   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed && ./venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000 &
+   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed/web/backend && ./venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000 &
    ```
 
 2. **Telegram bot**:
    ```bash
    pkill -f 'python bot.py' 2>/dev/null
    sleep 1
-   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed && ./venv/bin/python bot.py &
+   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed/web/backend && ./venv/bin/python bot.py &
    ```
 
 3. **Vite dev server** (port 5173):
    ```bash
    lsof -ti:5173 2>/dev/null | xargs kill -9 2>/dev/null
    sleep 1
-   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed/web && npm run dev &
+   cd /Users/arismac/Sync/win_mac_sync/dev/savefeed/web/frontend && npm run dev &
    ```
 
 4. Wait 2 seconds, then verify all three are up:

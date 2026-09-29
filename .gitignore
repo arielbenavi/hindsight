@@ -9,7 +9,7 @@ savefeed.db-*
 tmp/
 
 # frontend
-web/node_modules/
-web/dist/
-web/.vite/
+web/frontend/node_modules/
+web/frontend/dist/
+web/frontend/.vite/
 x_cookies.txt
