@@ -14,10 +14,10 @@ struct MuseSyncTests {
     }
 
     @Test func deepLinkCarriesThePrompt() throws {
-        let url = try #require(MuseLauncher.deepLink(prompt: "list my saves & more"))
-        #expect(url.scheme == "muse")
+        let url = MuseLauncher.chatURL(prompt: "list my saves & more")
+        #expect(url.host() == "muse.ai")
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
-        #expect(items?.first { $0.name == "text" }?.value == "list my saves & more")
+        #expect(items?.first { $0.name == "q" }?.value == "list my saves & more")
     }
 
     @Test func sampleReplyMergesIntoSeedWithoutDuplicates() {

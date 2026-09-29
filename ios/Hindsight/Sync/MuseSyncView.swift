@@ -70,6 +70,10 @@ struct MuseSyncView: View {
                     }
                     .font(OnboardingStyle.caption)
                 }
+
+                #if DEBUG
+                MuseLinkLab()
+                #endif
             } actions: {
                 actions
             }
@@ -137,9 +141,8 @@ struct MuseSyncView: View {
 
     private var openDetail: String {
         switch launchOutcome {
-        case .openedWithPrompt: "Opened with the prompt typed in. Hit send."
-        case .openedWithCopiedPrompt: "Prompt copied. Paste it into Muse and send."
-        case .notInstalled: "Muse isn't installed on this device."
+        case .opened: "Our question is on your clipboard. If it isn't typed in already, paste it and send."
+        case .notInstalled: "Couldn't open Muse. The question is copied, so paste it into Muse yourself."
         case nil: "We'll open it with the question ready."
         }
     }
@@ -164,6 +167,7 @@ struct MuseSyncView: View {
 
     private func openMuse() async {
         let outcome = await MuseLauncher.launch(prompt: prompt)
+        DebugLog.write("muse launch: \(outcome)")
         launchOutcome = outcome
         if outcome == .notInstalled {
             phase = .ready
@@ -172,7 +176,9 @@ struct MuseSyncView: View {
 
     private func importReply(_ text: String) {
         let result = SavedPostParser.parse(text)
+        DebugLog.write("paste: \(text.count) chars, \(result.posts.count) posts, \(result.skipped) skipped")
         guard !result.posts.isEmpty else {
+            DebugLog.write("paste failed, text starts: \(text.prefix(400))")
             phase = .failed("Couldn't find any posts in what you pasted. Copy Muse's whole reply and try again.")
             return
         }
@@ -184,3 +190,48 @@ struct MuseSyncView: View {
 #Preview {
     MuseSyncView(store: SavedPostStore(fileURL: nil))
 }
+
+#if DEBUG
+/// Dev-only: try candidate Muse links on a real device and log which open.
+private struct MuseLinkLab: View {
+    @State private var results: [String: Bool] = [:]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("LINK LAB (DEV)")
+                .font(.system(.caption, design: .rounded, weight: .heavy))
+                .tracking(1.4)
+                .foregroundStyle(OnboardingStyle.muted)
+            Text("Tap each. Note whether Muse opens, and whether \"hello from hindsight\" is already typed.")
+                .font(OnboardingStyle.caption)
+                .foregroundStyle(OnboardingStyle.muted)
+            ForEach(MuseLauncher.linkLabCandidates, id: \.url) { candidate in
+                Button {
+                    Task { await tryLink(candidate.url) }
+                } label: {
+                    HStack {
+                        Text(candidate.label).font(.system(.subheadline, design: .monospaced))
+                        Spacer()
+                        switch results[candidate.url] {
+                        case true?: Image(systemName: "checkmark.circle.fill").foregroundStyle(OnboardingStyle.accent)
+                        case false?: Image(systemName: "xmark.circle").foregroundStyle(.orange)
+                        case nil: Image(systemName: "arrow.up.right").foregroundStyle(OnboardingStyle.muted)
+                        }
+                    }
+                    .onboardingCard(padding: 12)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func tryLink(_ string: String) async {
+        guard let url = URL(string: string) else { return }
+        let options: [UIApplication.OpenExternalURLOptionsKey: Any] =
+            url.scheme == "https" ? [.universalLinksOnly: true] : [:]
+        let opened = await UIApplication.shared.open(url, options: options)
+        results[string] = opened
+        DebugLog.write("link lab: \(string) opened=\(opened)")
+    }
+}
+#endif
