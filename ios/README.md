@@ -37,11 +37,17 @@ Run `xcodegen` again whenever:
 ```
 project.yml         project definition (source of truth)
 Hindsight/          app source
+  Models/           SavedPost + Platform (canonical data format)
+  Import/           parser (Muse JSON + seed markdown) and SavedPostStore
+  Onboarding/       first-run flow; OnboardingStyle.swift holds all its styling
+  Sync/             Muse sync prototype
   Resources/        asset catalog
 HindsightTests/     unit tests (Swift Testing)
 ```
 
-The seed export [`../data/ig-saved-posts-seed.md`](../data/ig-saved-posts-seed.md) is bundled into the app via `project.yml`. That gives the app real saved-post data to build against. `SeedData.swift` loads it.
+The seed export [`../data/ig-saved-posts-seed.md`](../data/ig-saved-posts-seed.md) is bundled into the app via `project.yml`. That gives the app real saved-post data to build against. `SeedData.swift` loads it and `SavedPostParser` turns it into `SavedPost`s.
+
+Launch with the `-resetOnboarding` argument (Scheme → Run → Arguments) to replay the first-run flow.
 
 ## Build & test from the command line
 
