@@ -261,6 +261,62 @@ def _download_images(urls: list[str], into: Path) -> list[Path]:
     return paths
 
 
+def process_tiktok(item_id: int, url: str) -> None:
+    with tempfile.TemporaryDirectory(prefix="savefeed-tt-") as td:
+        td_path = Path(td)
+        mp4 = _ytdlp_video(url, td_path)
+        if mp4 is not None:
+            g = gemini.gist_video(mp4)
+            kind = "video"
+        else:
+            raise RuntimeError(f"could not download TikTok video for {url}")
+    db.mark_done(
+        item_id,
+        kind=kind,
+        summary=g.get("summary"),
+        on_screen_text=g.get("on_screen_text"),
+        transcript=g.get("spoken_transcript"),
+        category=g.get("category"),
+        key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
+    )
+
+
+def process_facebook(item_id: int, url: str) -> None:
+    with tempfile.TemporaryDirectory(prefix="savefeed-fb-") as td:
+        td_path = Path(td)
+        mp4 = _ytdlp_video(url, td_path, timeout=60)
+        if mp4 is not None:
+            g = gemini.gist_video(mp4)
+            db.mark_done(
+                item_id,
+                kind="video",
+                summary=g.get("summary"),
+                on_screen_text=g.get("on_screen_text"),
+                transcript=g.get("spoken_transcript"),
+                category=g.get("category"),
+                key_takeaways=g.get("key_takeaways") or [],
+                tags=g.get("tags") or [],
+            )
+            return
+    html = trafilatura.fetch_url(url)
+    if not html:
+        raise RuntimeError(f"could not fetch Facebook content for {url}")
+    text = trafilatura.extract(html) or ""
+    if _is_login_wall(text):
+        raise RuntimeError(f"Facebook login wall for {url}")
+    g = gemini.gist_text(text[:50000])
+    db.mark_done(
+        item_id,
+        kind="article",
+        raw_text=text[:200000],
+        summary=g.get("summary"),
+        category=g.get("category"),
+        key_takeaways=g.get("key_takeaways") or [],
+        tags=g.get("tags") or [],
+    )
+
+
 def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
     syn = _twitter_syndication(url)
 
@@ -282,7 +338,10 @@ def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
         if videos:
             mp4 = _ytdlp_video(url, td_path, timeout=45)
             if mp4 is not None:
-                g = gemini.gist_video(mp4)
+                if text:
+                    g = gemini.gist_video_with_context(mp4, text)
+                else:
+                    g = gemini.gist_video(mp4)
                 kind = "video"
             elif text:
                 g = gemini.gist_text(text)
@@ -306,7 +365,10 @@ def process_tweet(item_id: int, url: str, note: Optional[str]) -> None:
         else:
             mp4 = _ytdlp_video(url, td_path, timeout=45)
             if mp4 is not None:
-                g = gemini.gist_video(mp4)
+                if text:
+                    g = gemini.gist_video_with_context(mp4, text)
+                else:
+                    g = gemini.gist_video(mp4)
                 kind = "video"
             else:
                 raise RuntimeError(f"no text, media, or video for {url}")

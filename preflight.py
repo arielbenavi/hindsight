@@ -259,6 +259,51 @@ a {{ color: #2563eb; }}
 </div>
 
 <div class="section">
+<h2>Backfill — import your full history</h2>
+<p>Once Twitter and IG are connected above, you can pull <strong>all</strong> your saved items — not just new ones.</p>
+
+<h3 style="font-size:14px;margin-top:1rem">Twitter / X — API backfill</h3>
+<p>Paginates through every bookmark you've ever saved. Resumable if interrupted.</p>
+<ol>
+<li>Make sure the Twitter check above is green</li>
+<li>Go to the <strong>Stats</strong> tab in the app and click <strong>Start backfill</strong> for Twitter, or:<br>
+<code>curl -X POST http://127.0.0.1:8000/sweep/twitter/backfill</code></li>
+<li>Monitor progress: <code>curl http://127.0.0.1:8000/backfill/status</code></li>
+<li>If rate-limited, wait 15 min and resume — it picks up where it left off</li>
+</ol>
+<p style="color:#888;font-size:13px">Speed: ~5s per item (Gemini processing). 500 bookmarks &asymp; 3-4 hours. Runs in background.</p>
+
+<h3 style="font-size:14px;margin-top:1rem">Instagram — API backfill</h3>
+<p>Paginates through all saved posts via the private API. Capped at 100 items per session to avoid bans.</p>
+<ol>
+<li>Make sure the IG cookies check above is green</li>
+<li>Go to the <strong>Stats</strong> tab and click <strong>Start backfill</strong> for IG, or:<br>
+<code>curl -X POST http://127.0.0.1:8000/sweep/ig/backfill</code></li>
+<li>After 100 items it pauses — resume when ready (same command)</li>
+</ol>
+<p style="color:#888;font-size:13px">Speed: ~10s per item. 300 saved posts &asymp; 2-3 sessions of ~1 hour each.</p>
+
+<h3 style="font-size:14px;margin-top:1rem">Instagram — data export (for un-saved items)</h3>
+<p>The API only sees posts still in your Saved. For a complete history, request your data export:</p>
+<ol>
+<li>Open Instagram &rarr; Settings &rarr; Privacy and Security &rarr; <a href="https://accountscenter.instagram.com/info_and_permissions/dyi/" target="_blank">Download Your Information</a></li>
+<li>Select <strong>Saved</strong> only &rarr; JSON format &rarr; Create File</li>
+<li>Wait for the email (24-48 hours), download the ZIP</li>
+<li>Run: <code>python scripts/import_ig_export.py ~/Downloads/instagram-export.zip</code></li>
+</ol>
+
+<h3 style="font-size:14px;margin-top:1rem">Facebook — data export</h3>
+<p>No API available for saved items. Use Facebook's data export:</p>
+<ol>
+<li>Go to Facebook &rarr; Settings &rarr; <a href="https://www.facebook.com/dyi/" target="_blank">Download Your Information</a></li>
+<li>Select <strong>Saved Items and Collections</strong> &rarr; JSON format &rarr; Create File</li>
+<li>Wait for the email (24-48 hours), download the ZIP</li>
+<li>Run: <code>python scripts/import_fb_export.py ~/Downloads/facebook-export.zip</code></li>
+</ol>
+<p style="color:#888;font-size:13px">The script unwraps Facebook's redirect links and skips marketplace/events. Caps at 200 items per run.</p>
+</div>
+
+<div class="section">
 <h2>Auto-start on login (launchd)</h2>
 <p>To have savefeed start automatically when you log in:</p>
 <pre style="background:#f9fafb;padding:12px;border-radius:6px;font-size:12px;overflow-x:auto">launchctl load ~/Library/LaunchAgents/com.savefeed.server.plist</pre>

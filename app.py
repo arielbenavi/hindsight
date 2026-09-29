@@ -19,7 +19,11 @@ from pydantic import BaseModel
 
 import adapters
 import auth
+import backfill
+import chat
 import db
+import embeddings
+import memory_router
 import preflight
 import router
 import sweep
@@ -52,9 +56,20 @@ def _process(item: dict[str, Any]) -> None:
             adapters.process_note(item_id, item["raw_text"])
         elif source == "tweet":
             adapters.process_tweet(item_id, item["source_url"], item.get("raw_text"))
+        elif source == "tiktok":
+            adapters.process_tiktok(item_id, item["source_url"])
+        elif source == "facebook":
+            adapters.process_facebook(item_id, item["source_url"])
         else:
             raise RuntimeError(f"unknown source: {source}")
         log.info("item %s done", item_id)
+        try:
+            done_item = db.get_item(item_id)
+            if done_item:
+                embeddings.embed_item(done_item)
+                memory_router.route_new_item(done_item)
+        except Exception as emb_err:
+            log.warning("post-process item %s failed (non-fatal): %s", item_id, emb_err)
     except Exception as e:
         log.exception("item %s failed", item_id)
         db.mark_failed(item_id, f"{type(e).__name__}: {e}")
@@ -87,9 +102,18 @@ async def _twitter_sweep_loop() -> None:
             await asyncio.to_thread(sweep.sweep_twitter_bookmarks)
 
 
+async def _daily_backup_loop() -> None:
+    while True:
+        await asyncio.sleep(24 * 60 * 60)
+        log.info("running daily DB backup")
+        await asyncio.to_thread(db.backup_db)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
+    embeddings.init_embeddings()
+    memory_router.init_memory()
     _check_cookies_file()
     pending = db.list_pending_ids()
     if pending:
@@ -97,9 +121,11 @@ async def lifespan(_app: FastAPI):
         threading.Thread(target=_drain_pending, daemon=True).start()
     ig_sweep_task = asyncio.create_task(_ig_sweep_loop())
     twitter_sweep_task = asyncio.create_task(_twitter_sweep_loop())
+    backup_task = asyncio.create_task(_daily_backup_loop())
     yield
     ig_sweep_task.cancel()
     twitter_sweep_task.cancel()
+    backup_task.cancel()
 
 
 def _check_cookies_file() -> None:
@@ -170,8 +196,9 @@ def items(
     source: Optional[str] = None,
     q: Optional[str] = None,
     tag: Optional[str] = None,
+    exclude_category: Optional[str] = None,
 ):
-    return db.list_items(category=category, source=source, q=q, tag=tag)
+    return db.list_items(category=category, source=source, q=q, tag=tag, exclude_category=exclude_category)
 
 
 AUTH_FAILURE_MARKERS = (
@@ -224,6 +251,110 @@ def health():
     }
 
 
+@app.get("/stats")
+def stats():
+    return db.get_stats()
+
+
+@app.get("/topics")
+def topics():
+    return db.get_tag_counts()
+
+
+@app.post("/db/backup")
+def trigger_backup():
+    db.backup_db()
+    return {"status": "backup completed"}
+
+
+@app.post("/reclassify")
+def reclassify(bg: BackgroundTasks):
+    """Re-run Gemini classification on all done items using existing text (no re-download)."""
+    import gemini as gem
+
+    def _reclassify_all():
+        items = db.list_items()
+        done = [i for i in items if i["status"] == "done"]
+        count = 0
+        for item in done:
+            text_parts = []
+            if item.get("summary"):
+                text_parts.append(item["summary"])
+            if item.get("raw_text"):
+                text_parts.append(item["raw_text"][:2000])
+            if item.get("on_screen_text"):
+                text_parts.append(item["on_screen_text"][:1000])
+            if item.get("transcript"):
+                text_parts.append(item["transcript"][:1000])
+            if not text_parts:
+                continue
+            combined = "\n\n".join(text_parts)
+            try:
+                g = gem.gist_text(combined[:5000])
+                db._update(item["id"], {
+                    "category": g.get("category"),
+                    "tags": g.get("tags") or [],
+                    "key_takeaways": g.get("key_takeaways") or [],
+                })
+                count += 1
+                import time
+                time.sleep(3)
+            except Exception as e:
+                log.warning("reclassify item %s failed: %s", item["id"], e)
+        log.info("reclassified %d items", count)
+
+    bg.add_task(_reclassify_all)
+    return {"status": "reclassification started"}
+
+
+class ChatIn(BaseModel):
+    message: str
+    history: list[dict[str, str]] | None = None
+
+
+@app.post("/chat")
+def chat_endpoint(body: ChatIn):
+    return chat.answer(body.message, body.history)
+
+
+@app.get("/chat/status")
+def chat_status():
+    return embeddings.get_status()
+
+
+@app.post("/embed/backfill")
+def embed_backfill(bg: BackgroundTasks):
+    bg.add_task(embeddings.backfill)
+    return {"status": "backfill started"}
+
+
+class MemoryRouteIn(BaseModel):
+    project_name: str
+    description: str = ""
+    memory_file_path: str = ""
+    match_tags: list[str] | None = None
+    match_categories: list[str] | None = None
+
+
+@app.get("/memory/routes")
+def memory_routes():
+    return memory_router.list_routes()
+
+
+@app.post("/memory/routes")
+def add_memory_route(body: MemoryRouteIn):
+    route_id = memory_router.add_route(
+        body.project_name, body.description, body.memory_file_path,
+        body.match_tags, body.match_categories,
+    )
+    return {"id": route_id, "status": "created"}
+
+
+@app.get("/memory/suggestions")
+def memory_suggestions():
+    return memory_router.get_suggestions()
+
+
 @app.get("/sweep/dry-run")
 def dry_run():
     return preflight.run_all_checks()
@@ -256,6 +387,50 @@ def trigger_ig_sweep(bg: BackgroundTasks):
 @app.get("/sweep/status")
 def sweep_status():
     return sweep.get_status()
+
+
+@app.post("/sweep/twitter/backfill")
+def twitter_backfill_endpoint(bg: BackgroundTasks):
+    token = auth.get_valid_token()
+    if not token:
+        raise HTTPException(400, "Not authenticated — visit /auth/twitter first")
+    bg.add_task(backfill.twitter_backfill)
+    return {"status": "twitter backfill started"}
+
+
+@app.post("/sweep/ig/backfill")
+def ig_backfill_endpoint(bg: BackgroundTasks):
+    if not os.environ.get("IG_COOKIES_FILE"):
+        raise HTTPException(400, "IG_COOKIES_FILE not set in .env")
+    bg.add_task(backfill.ig_backfill)
+    return {"status": "ig backfill started"}
+
+
+@app.get("/backfill/status")
+def backfill_status():
+    return backfill.get_all_status()
+
+
+@app.post("/backfill/fb-export")
+def fb_export_backfill_endpoint(bg: BackgroundTasks, file_path: str = ""):
+    if not file_path:
+        raise HTTPException(400, "file_path query param required (path to .json or .zip)")
+    p = Path(file_path).expanduser()
+    if not p.is_file():
+        raise HTTPException(400, f"file not found: {p}")
+    bg.add_task(backfill.fb_export_backfill, str(p))
+    return {"status": "fb export backfill started", "file": str(p)}
+
+
+@app.post("/backfill/ig-export")
+def ig_export_backfill_endpoint(bg: BackgroundTasks, file_path: str = ""):
+    if not file_path:
+        raise HTTPException(400, "file_path query param required (path to .json or .zip)")
+    p = Path(file_path).expanduser()
+    if not p.is_file():
+        raise HTTPException(400, f"file not found: {p}")
+    bg.add_task(backfill.ig_export_backfill, str(p))
+    return {"status": "ig export backfill started", "file": str(p)}
 
 
 @app.post("/items/{item_id}/tags")

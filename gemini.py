@@ -13,8 +13,15 @@ from google.genai import types
 
 MODEL = "gemini-2.5-flash"
 
-ALLOWED_CATEGORIES = ["coding", "quant", "music", "life-hack", "productivity", "other"]
+ALLOWED_CATEGORIES = ["coding", "quant", "music", "life-hack", "productivity", "funny", "other"]
 _CATEGORY_LIST_STR = ", ".join(ALLOWED_CATEGORIES)
+
+_HUMOR_INSTRUCTION = (
+    'Use "funny" for memes, jokes, shitposts, ironic/satirical content, or pure entertainment '
+    'with no educational or actionable value. Look at the FULL context (text + media together) '
+    'to detect humor — a serious-looking video paired with a joke caption is still "funny". '
+    'Reserve "other" for genuinely uncategorizable knowledge content.'
+)
 
 _TAGS_INSTRUCTION = (
     'tags: array of 2-4 short, specific, lowercase topic tags. Free-form '
@@ -29,7 +36,8 @@ You are analyzing a short video (e.g. an Instagram reel). Return ONLY a JSON obj
 - summary: <= 40 words
 - spoken_transcript: full transcript of any speech (empty string if has_speech is false)
 - on_screen_text: a single string with ALL visible text overlays / captions / signs, separated by newlines. Many reels are silent text-overlay videos — read overlays carefully even when has_speech is false.
-- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. {_HUMOR_INSTRUCTION}
+- content_intent: one of "knowledge", "entertainment", or "humor" — what is the PRIMARY purpose of this content?
 - {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 - has_speech: boolean
@@ -40,7 +48,8 @@ You are analyzing an Instagram post carousel (a series of images, no video). Ret
 - summary: <= 40 words
 - spoken_transcript: "" (carousels have no audio)
 - on_screen_text: a single string with ALL visible text across the images, separated by newlines.
-- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. {_HUMOR_INSTRUCTION}
+- content_intent: one of "knowledge", "entertainment", or "humor"
 - {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 - has_speech: false
@@ -50,7 +59,8 @@ IMAGE_WITH_CONTEXT_PROMPT = f"""\
 You are analyzing images attached to a social media post. The post text is provided below the images as additional context. Return ONLY a JSON object (no code fences, no prose) with these keys:
 - summary: <= 40 words (cover BOTH the images and the text)
 - on_screen_text: a single string with ALL visible text in the images, separated by newlines.
-- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. {_HUMOR_INSTRUCTION}
+- content_intent: one of "knowledge", "entertainment", or "humor"
 - {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 """
@@ -58,7 +68,8 @@ You are analyzing images attached to a social media post. The post text is provi
 TEXT_PROMPT_HEADER = f"""\
 Return ONLY a JSON object (no code fences, no prose) with these keys:
 - summary: <= 40 words
-- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. Pick "other" if nothing fits.
+- category: MUST be exactly one of [{_CATEGORY_LIST_STR}]. {_HUMOR_INSTRUCTION}
+- content_intent: one of "knowledge", "entertainment", or "humor"
 - {_TAGS_INSTRUCTION}
 - key_takeaways: array of 1-5 short strings
 
@@ -103,6 +114,10 @@ _CATEGORY_ALIASES = {
     "trading": "quant",
     "lifehack": "life-hack",
     "life hack": "life-hack",
+    "meme": "funny",
+    "humor": "funny",
+    "comedy": "funny",
+    "entertainment": "funny",
 }
 
 
@@ -162,7 +177,7 @@ def _generate(contents: list[Any]) -> dict[str, Any]:
     raise last  # type: ignore[misc]
 
 
-def gist_video(mp4: Path) -> dict[str, Any]:
+def _upload_video(mp4: Path) -> Any:
     c = client()
     f = c.files.upload(file=str(mp4))
     deadline = time.time() + 180
@@ -173,7 +188,21 @@ def gist_video(mp4: Path) -> dict[str, Any]:
         f = c.files.get(name=f.name)
     if f.state.name != "ACTIVE":
         raise RuntimeError(f"Gemini Files API state: {f.state.name}")
+    return f
+
+
+def gist_video(mp4: Path) -> dict[str, Any]:
+    f = _upload_video(mp4)
     return _generate([f, VIDEO_PROMPT])
+
+
+def gist_video_with_context(mp4: Path, context: str) -> dict[str, Any]:
+    f = _upload_video(mp4)
+    prompt = (
+        VIDEO_PROMPT.rstrip()
+        + f"\n\nThe video was shared with this post text — consider BOTH the video and the text when classifying:\n---\n{context}\n---"
+    )
+    return _generate([f, prompt])
 
 
 def gist_images(paths: list[Path], context: Optional[str] = None) -> dict[str, Any]:

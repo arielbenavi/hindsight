@@ -1,4 +1,4 @@
-export type Source = "ig_reel" | "tweet" | "web" | "note";
+export type Source = "ig_reel" | "tweet" | "tiktok" | "facebook" | "web" | "note";
 export type Status = "pending" | "done" | "failed";
 
 export type Item = {
@@ -23,7 +23,8 @@ export const CATEGORIES = [
   "music",
   "life-hack",
   "productivity",
+  "funny",
   "other",
 ] as const;
 
-export const SOURCES: Source[] = ["ig_reel", "tweet", "web", "note"];
+export const SOURCES: Source[] = ["ig_reel", "tweet", "tiktok", "facebook", "web", "note"];

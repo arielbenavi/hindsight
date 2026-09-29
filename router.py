@@ -16,7 +16,7 @@ def first_url(text: str) -> Optional[str]:
 
 
 def classify(payload: str) -> tuple[str, Optional[str]]:
-    """Returns (source, url_or_None) — source is one of ig_reel|tweet|web|note."""
+    """Returns (source, url_or_None) — source is one of ig_reel|tweet|tiktok|facebook|web|note."""
     url = first_url(payload)
     if not url:
         return "note", None
@@ -27,4 +27,8 @@ def classify(payload: str) -> tuple[str, Optional[str]]:
         return "ig_reel", url
     if host in {"x.com", "twitter.com"} or host.endswith(".x.com") or host.endswith(".twitter.com"):
         return "tweet", url
+    if "tiktok.com" in host or host == "vm.tiktok.com":
+        return "tiktok", url
+    if "facebook.com" in host or "fb.watch" in host or host == "fb.com":
+        return "facebook", url
     return "web", url
