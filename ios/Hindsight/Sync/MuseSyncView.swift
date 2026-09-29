@@ -33,7 +33,7 @@ struct MuseSyncView: View {
     var body: some View {
         NavigationStack {
             OnboardingPage {
-                Text("Sync with\nMuse ✨")
+                Text("Sync with\nMuse.")
                     .font(OnboardingStyle.display(40))
 
                 Text("Muse is Meta's AI. It can already see your Instagram and Facebook saves, so we just ask it nicely.")
@@ -48,7 +48,7 @@ struct MuseSyncView: View {
 
                 statusBanner
 
-                if launchOutcome == .notInstalled {
+                if launchOutcome == .notInstalled, case .ready = phase {
                     Link("Get Muse on the App Store", destination: MuseLauncher.appStoreURL)
                         .font(OnboardingStyle.caption)
                 }
@@ -82,6 +82,7 @@ struct MuseSyncView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .tint(OnboardingStyle.accent)
         .onChange(of: scenePhase) { _, newPhase in
             // Back from Muse: move straight to the paste step.
             if newPhase == .active, launchOutcome != nil, phase == .ready {

@@ -28,7 +28,10 @@ struct ConnectStep: View {
     private var museCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("\(Platform.instagram.emoji) \(Platform.facebook.emoji)").font(.system(size: 28))
+                HStack(spacing: 10) {
+                    PlatformBadge(platform: .instagram)
+                    PlatformBadge(platform: .facebook)
+                }
                 Spacer()
                 let count = store.count(for: .instagram) + store.count(for: .facebook)
                 if count > 0 {
@@ -43,7 +46,7 @@ struct ConnectStep: View {
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
             }
-            Button("Sync with Muse ✨") { model.isMuseSheetPresented = true }
+            Button("Sync with Muse") { model.isMuseSheetPresented = true }
                 .buttonStyle(.onboardingSecondary)
         }
         .onboardingCard()
@@ -51,9 +54,7 @@ struct ConnectStep: View {
 
     private func comingSoonRow(_ platform: Platform, detail: String) -> some View {
         HStack(spacing: 14) {
-            Text(platform.emoji)
-                .font(.system(size: 24, weight: .bold))
-                .frame(width: 32)
+            PlatformBadge(platform: platform)
             VStack(alignment: .leading, spacing: 2) {
                 Text(platform.displayName).font(OnboardingStyle.title)
                 Text(detail)

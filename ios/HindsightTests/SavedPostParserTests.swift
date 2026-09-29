@@ -19,7 +19,8 @@ struct SavedPostParserTests {
         #expect(post.author == "evolving.ai")
         #expect(post.kind == .post)
         #expect(post.caption?.hasPrefix("Claude Opus 5.5") == true)
-        #expect(post.date == (try Date("2026-09-26T00:00:00Z", strategy: .iso8601)))
+        let day = post.date.map { Calendar.current.dateComponents([.year, .month, .day], from: $0) }
+        #expect(day == DateComponents(year: 2026, month: 9, day: 26))
     }
 
     @Test func markdownWithoutBoldOrCaption() {

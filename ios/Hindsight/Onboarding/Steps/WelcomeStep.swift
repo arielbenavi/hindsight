@@ -14,7 +14,7 @@ struct WelcomeStep: View {
                 .font(OnboardingStyle.display())
                 .minimumScaleFactor(0.7)
 
-            Text("You've saved thousands of reels, posts and threads “for later”.\nThis is later. 👀")
+            Text("You've saved thousands of reels, posts and threads “for later”.\nThis is later.")
                 .font(OnboardingStyle.body)
                 .foregroundStyle(OnboardingStyle.muted)
         } actions: {
@@ -28,10 +28,11 @@ struct WelcomeStep: View {
         ZStack {
             ForEach(Array(Platform.allCases.enumerated()), id: \.element) { index, platform in
                 let offset = CGFloat(index) - 1.5
-                Text(platform.emoji)
-                    .font(.system(size: 44))
+                Image(systemName: platform.symbol)
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundStyle(index == 2 ? OnboardingStyle.onAccent : OnboardingStyle.text)
                     .frame(width: 92, height: 116)
-                    .background(OnboardingStyle.surface, in: .rect(cornerRadius: 20))
+                    .background(index == 2 ? OnboardingStyle.accent : OnboardingStyle.surface, in: .rect(cornerRadius: 20))
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(OnboardingStyle.stroke))
                     .rotationEffect(.degrees(appeared ? offset * 9 : 0))
                     .offset(x: appeared ? offset * 58 : 0, y: appeared ? abs(offset) * 10 : 0)

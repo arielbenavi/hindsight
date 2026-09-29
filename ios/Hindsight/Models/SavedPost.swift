@@ -62,12 +62,13 @@ enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
         }
     }
 
-    var emoji: String {
+    /// SF Symbol stand-in until we add brand assets.
+    var symbol: String {
         switch self {
-        case .instagram: "📸"
-        case .facebook: "👥"
-        case .x: "𝕏"
-        case .tiktok: "🎵"
+        case .instagram: "camera"
+        case .facebook: "person.2.fill"
+        case .x: "xmark"
+        case .tiktok: "music.note"
         }
     }
 

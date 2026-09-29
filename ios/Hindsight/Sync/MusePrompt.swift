@@ -10,7 +10,7 @@ enum MusePrompt {
         limit: Int = 100
     ) -> String {
         let names = platforms.map(\.displayName).formatted(.list(type: .and))
-        let window = since.map { " saved after \($0.formatted(.iso8601.year().month().day()))" } ?? ""
+        let window = since.map { " saved after \($0.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))" } ?? ""
         let values = platforms.map { "\"\($0.rawValue)\"" }.joined(separator: " or ")
         return """
         List my saved posts from \(names)\(window), newest first, up to \(limit).

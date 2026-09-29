@@ -13,10 +13,10 @@ struct OnboardingPreferences: Codable, Equatable, Sendable {
         var id: String { rawValue }
         var title: String {
             switch self {
-            case .topic: "🧠 By topic"
-            case .platform: "📱 By app"
-            case .creator: "🧑‍🎤 By creator"
-            case .time: "🗓️ By when I saved it"
+            case .topic: "By topic"
+            case .platform: "By app"
+            case .creator: "By creator"
+            case .time: "By when I saved it"
             }
         }
     }

@@ -5,8 +5,7 @@ import Testing
 @MainActor
 struct MuseSyncTests {
     @Test func promptPinsTheJSONSchema() throws {
-        let since = try Date("2026-09-27T00:00:00Z", strategy: .iso8601)
-        let prompt = MusePrompt.text(since: since)
+        let prompt = MusePrompt.text(since: SavedPostParser.parseDate("2026-09-27"))
         #expect(prompt.contains("Instagram and Facebook"))
         #expect(prompt.contains("saved after 2026-09-27"))
         for key in ["\"platform\"", "\"author\"", "\"kind\"", "\"date\"", "\"caption\"", "\"url\""] {

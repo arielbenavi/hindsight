@@ -122,7 +122,10 @@ enum SavedPostParser {
         return url
     }
 
-    private static func parseDate(_ raw: String) -> Date? {
-        try? Date(raw.prefix(10) + "T00:00:00Z", strategy: .iso8601)
+    /// `YYYY-MM-DD` as local midnight, so the calendar day shown matches the source.
+    static func parseDate(_ raw: String) -> Date? {
+        let parts = raw.prefix(10).split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return Calendar.current.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
     }
 }

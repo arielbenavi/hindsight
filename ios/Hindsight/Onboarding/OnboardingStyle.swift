@@ -5,6 +5,7 @@ import SwiftUI
 enum OnboardingStyle {
     static let background = Color.black
     static let surface = Color(white: 0.1)
+    static let raised = Color(white: 0.16)
     static let stroke = Color(white: 0.2)
     static let text = Color.white
     static let muted = Color(white: 0.6)
@@ -40,7 +41,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .font(.system(.subheadline, design: .rounded, weight: .bold))
             .foregroundStyle(OnboardingStyle.text)
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(OnboardingStyle.surface, in: .capsule)
+            .background(OnboardingStyle.raised, in: .capsule)
             .overlay(Capsule().stroke(OnboardingStyle.stroke))
             .opacity(configuration.isPressed ? 0.7 : 1)
     }
@@ -114,5 +115,18 @@ struct OnboardingPage<Content: View, Actions: View>: View {
                 .padding(.bottom, 8)
                 .background(OnboardingStyle.background)
         }
+    }
+}
+
+/// Round icon for a platform.
+struct PlatformBadge: View {
+    let platform: Platform
+
+    var body: some View {
+        Image(systemName: platform.symbol)
+            .font(.system(size: 15, weight: .bold))
+            .frame(width: 36, height: 36)
+            .background(OnboardingStyle.stroke, in: .circle)
+            .accessibilityLabel(platform.displayName)
     }
 }

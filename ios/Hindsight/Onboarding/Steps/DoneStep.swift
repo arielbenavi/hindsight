@@ -6,7 +6,7 @@ struct DoneStep: View {
 
     var body: some View {
         OnboardingPage {
-            Text("You're in. 🎉")
+            Text("You're in.")
                 .font(OnboardingStyle.display())
 
             Text("\(Text(store.posts.count.formatted()).foregroundStyle(OnboardingStyle.accent)) saves, ready to resurface.")
@@ -15,7 +15,7 @@ struct DoneStep: View {
             HStack(spacing: 10) {
                 ForEach(Platform.allCases) { platform in
                     VStack(spacing: 4) {
-                        Text(platform.emoji).font(.system(size: 22, weight: .bold))
+                        Image(systemName: platform.symbol).font(.system(size: 18, weight: .bold))
                         Text(store.count(for: platform).formatted())
                             .font(.system(.headline, design: .rounded, weight: .heavy))
                     }
@@ -50,7 +50,9 @@ struct SavedPostPreviewCard: View {
         Link(destination: post.url) {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    Text(post.platform.emoji)
+                    Image(systemName: post.platform.symbol)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(OnboardingStyle.accent)
                     Text("@\(post.author)").font(.system(.subheadline, design: .rounded, weight: .bold))
                     Spacer()
                     Text(post.kind.rawValue)

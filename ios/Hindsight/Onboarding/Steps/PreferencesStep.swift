@@ -75,7 +75,9 @@ struct PreferencesStep: View {
             model.preferences.layout = layout
         } label: {
             VStack(spacing: 8) {
-                Image(systemName: layout.symbol).font(.system(size: 26, weight: .semibold))
+                Image(systemName: layout.symbol)
+                    .font(.system(size: 26, weight: .semibold))
+                    .frame(height: 32)
                 Text(layout.title).font(OnboardingStyle.caption)
             }
             .frame(maxWidth: .infinity, minHeight: 84)
