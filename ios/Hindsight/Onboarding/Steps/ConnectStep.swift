@@ -21,8 +21,7 @@ struct ConnectStep: View {
                 .foregroundStyle(OnboardingStyle.muted)
         }
         .sheet(isPresented: $model.isMuseSheetPresented) {
-            Text("Muse sync goes here")
-                .presentationDetents([.large])
+            MuseSyncView(store: store)
         }
     }
 
