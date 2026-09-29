@@ -1,7 +1,6 @@
-# savefeed
+# hindsight
 
-Continuous-ingest spine for saved content. Forward a link or a note to the
-Telegram bot; it lands in SQLite with a Gemini-generated gist.
+Personal content aggregator for saved posts across Twitter, Instagram, Facebook, and TikTok. Automatically scrapes your saved/bookmarked content, summarizes it with Gemini, and serves a searchable dashboard with RAG-powered chat.
 
 Sources today: Instagram reels (yt-dlp + Gemini video), web articles
 (trafilatura + Gemini text), free-form notes (Gemini text), tweets (stub —

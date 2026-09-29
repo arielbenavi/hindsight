@@ -116,7 +116,7 @@ export default function App() {
       <header className="sticky top-0 z-10" style={{ background: "var(--sf-bg-surface)", borderBottom: "1px solid var(--sf-border)" }}>
         <div className="max-w-3xl mx-auto px-4 py-3">
           <div className="flex items-center gap-3 mb-3">
-            <h1 className="text-base font-bold tracking-tight" style={{ color: "var(--sf-text-primary)" }}>savefeed</h1>
+            <h1 className="text-base font-bold tracking-tight" style={{ color: "var(--sf-text-primary)" }}>hindsight</h1>
             <span className="text-xs font-mono" style={{ color: "var(--sf-text-muted)" }}>{loading ? "…" : `${items.length}`}</span>
             {sweepStatus && <SweepIndicators status={sweepStatus} />}
             <div className="ml-auto flex items-center gap-2">

@@ -23,7 +23,7 @@ async def on_message(update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
         return
     text = (msg.text or msg.caption or "").strip()
     if not text:
-        await msg.reply_text("savefeed: empty message, ignored")
+        await msg.reply_text("hindsight: empty message, ignored")
         return
     try:
         async with httpx.AsyncClient(timeout=10) as cx:
@@ -32,7 +32,7 @@ async def on_message(update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
             data = r.json()
     except Exception as e:
         log.exception("capture call failed")
-        await msg.reply_text(f"savefeed: capture failed ({type(e).__name__}: {e})")
+        await msg.reply_text(f"hindsight: capture failed ({type(e).__name__}: {e})")
         return
     await msg.reply_text(f"saved #{data['id']} as {data['source']} (processing…)")
 
@@ -43,7 +43,7 @@ def main() -> None:
         raise SystemExit("BOT_TOKEN not set in env (.env or shell)")
     app = Application.builder().token(token).build()
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, on_message))
-    log.info("savefeed bot polling, API=%s", API_URL)
+    log.info("hindsight bot polling, API=%s", API_URL)
     app.run_polling()
 
 

@@ -155,7 +155,7 @@ def _check_cookies_file() -> None:
         log.info("IG_COOKIES_FILE=%s (%d bytes) — keychain access disabled", raw, p.stat().st_size)
 
 
-app = FastAPI(title="savefeed", lifespan=lifespan)
+app = FastAPI(title="hindsight", lifespan=lifespan)
 app.include_router(auth.router)
 
 app.add_middleware(
@@ -580,9 +580,9 @@ def items_pretty():
     )
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
-        "<title>savefeed</title>"
+        "<title>hindsight</title>"
         f"<style>{_PRETTY_CSS}</style></head><body>"
-        f"<h1>savefeed — {len(rows)} item(s), newest first</h1>"
+        f"<h1>hindsight — {len(rows)} item(s), newest first</h1>"
         f"{table}"
         f"<script>{_PRETTY_JS}</script>"
         "</body></html>"
@@ -654,7 +654,7 @@ def _render_item_detail(r: dict[str, Any]) -> str:
     tags_seed = json.dumps(r.get("tags") or [])
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
-        f"<title>savefeed · #{r['id']}</title>"
+        f"<title>hindsight · #{r['id']}</title>"
         f"<style>{_PRETTY_CSS}</style></head><body>"
         f"{body}"
         f"<script>window.__TAGS = {tags_seed};{_PRETTY_JS}</script>"

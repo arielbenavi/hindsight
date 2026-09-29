@@ -1,4 +1,4 @@
-# savefeed — Handoff Prompt
+# hindsight — Handoff Prompt
 
 REPO: /Users/arismac/Sync/win_mac_sync/dev/savefeed
 READ README.md FIRST.
@@ -6,7 +6,7 @@ READ README.md FIRST.
 ================================================================
 PROJECT OVERVIEW
 ================================================================
-savefeed is a personal content aggregator. Pipeline: Telegram bot →
+hindsight (formerly savefeed) is a personal content aggregator. Pipeline: Telegram bot →
 FastAPI (POST /capture) → per-source adapters (yt-dlp, gallery-dl,
 trafilatura, syndication) → Gemini gist → SQLite → React feed at
 :5173.
