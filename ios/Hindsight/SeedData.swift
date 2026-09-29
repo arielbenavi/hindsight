@@ -9,11 +9,11 @@ enum SeedData {
         return try? String(contentsOf: url, encoding: .utf8)
     }
 
-    /// Entries look like `12. **@username** · reel · 2026-09-16`.
+    static func posts(in bundle: Bundle = .main) -> [SavedPost] {
+        markdown(in: bundle).map { SavedPostParser.parse($0).posts } ?? []
+    }
+
     static func savedPostCount(in bundle: Bundle = .main) -> Int {
-        guard let text = markdown(in: bundle) else { return 0 }
-        return text.split(separator: "\n").count { line in
-            line.firstMatch(of: /^\d+\. \*\*@/) != nil
-        }
+        posts(in: bundle).count
     }
 }
