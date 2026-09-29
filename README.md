@@ -1,178 +1,211 @@
 # hindsight
 
-Personal content aggregator for saved posts across Twitter, Instagram, Facebook, and TikTok. Automatically scrapes your saved/bookmarked content, summarizes it with Gemini, and serves a searchable dashboard with RAG-powered chat.
+Your saved posts, finally organized. Hindsight pulls everything you've saved across Instagram, Twitter/X, Facebook, and TikTok — summarizes it with AI — and gives you a searchable, personalized dashboard to actually find things again.
 
-Sources today: Instagram reels (yt-dlp + Gemini video), web articles
-(trafilatura + Gemini text), free-form notes (Gemini text), tweets (stub —
-URL + note only, no fetch).
+**GitHub:** [arielbenavi/hindsight](https://github.com/arielbenavi/hindsight)
+
+## Three main components
+
+### 1. Onboarding
+First-run flow that connects your platforms and asks how you want your content organized:
+- Connect Instagram & Facebook via Meta Muse (AI agent with native saved post access)
+- Connect Twitter/X via OAuth (Developer Studio automation TBD for smoother setup)
+- Connect TikTok (approach TBD)
+- "How do you want to see your data?" — user picks preferred clustering, categories, layout
+
+### 2. Data fetching
+Each platform has its own challenges:
+
+| Platform | Method | Status |
+|----------|--------|--------|
+| **Instagram** | Meta Muse MCP connector (planned) / Cookie API (working) | 1,216 posts in seed data |
+| **Facebook** | Meta Muse MCP connector (planned) / Data export (fallback) | Blocked on direct scraping |
+| **Twitter/X** | OAuth API (working) — Developer Studio automation for easier onboarding? | 97 bookmarks done |
+| **TikTok** | Unknown — adapter exists (yt-dlp), no automated fetch yet | Deferred |
+
+### 3. Data organization & display
+After fetching, the real product begins:
+- AI-powered clustering and categorization (Gemini)
+- Multiple views: feed, stats/topics, AI chat, detail panels
+- User preferences from onboarding drive layout and grouping
+- Embeddings-based similarity for "more like this"
+- Spotify-inspired dark UI
+
+## How the pipeline works
+
+1. **Fetch** — sweeps pull new saves every 30 min; backfill grabs full history
+2. **Capture** — each URL routes through per-source adapters (yt-dlp for video, trafilatura for articles, syndication for tweets)
+3. **Summarize** — Gemini 2.5-flash generates a gist, key takeaways, tags, category, and a 768-dim embedding
+4. **Store** — SQLite with FTS5 full-text search
+5. **Browse** — React SPA with filters, search, tag editing, detail panels, stats, and AI chat
+
+You can also forward links to a Telegram bot, paste URLs via curl, or bulk-import from platform data exports.
+
+## Seed data
+
+`data/ig-saved-posts-seed.md` — 1,216 Instagram saved posts (@pudabeats, 2019–2026). Used for development so we're not blocked on live API access. See [data/README.md](data/README.md).
 
 ## Layout
 
 ```
-app.py        # FastAPI: POST /capture, GET /items, GET /items/{id}
-db.py         # SQLite schema + helpers (Postgres-portable types)
-router.py     # classify a payload into (source, url)
-gemini.py     # Files API + text gist, with retry on 5xx/429
-adapters.py   # ig_reel / web / note / tweet processors
-bot.py        # Telegram front door (separate process)
+app.py          (701)  FastAPI: /capture, /items, /health, /sweep/*, /chat, auth routes
+db.py           (396)  SQLite schema + helpers, FTS5 search, category normalization
+router.py        (34)  classify payload → (source, url)
+adapters.py     (395)  ig_reel / tweet / web / note processors
+gemini.py       (221)  Gemini API: gist_video, gist_images, gist_text, embeddings
+bot.py           (51)  Telegram polling → POST /capture
+auth.py         (186)  Twitter OAuth 2.0 PKCE flow
+sweep.py        (647)  Twitter bookmark + IG + FB saved posts sweep logic
+backfill.py     (763)  Resumable full-history backfill for all platforms
+preflight.py    (324)  Dry-run health checks + setup page
+
+scripts/
+  import_whatsapp.py   (213)  WhatsApp chat export importer
+  import_ig_export.py  (199)  IG data download importer
+  import_fb_export.py  (227)  FB data download importer
+
+web/src/
+  App.tsx        (851)  Single-file React frontend (feed, stats, chat views)
+  types.ts        (30)  Source/Status/Item types, CATEGORIES, SOURCES
 ```
 
 ## Setup
 
-```
+```bash
 python3 -m venv venv
 ./venv/bin/pip install -r requirements.txt
-cp .env.example .env    # then fill in the two keys
+cp .env.example .env    # then fill in the keys
+cd web && npm install
 ```
 
-Required env vars:
+### Required env vars
 
-| var              | who needs it | where to get it                         |
-|------------------|--------------|-----------------------------------------|
-| `GEMINI_API_KEY` | API          | https://aistudio.google.com/apikey      |
-| `BOT_TOKEN`      | bot          | @BotFather on Telegram, `/newbot`       |
+| var | who needs it | where to get it |
+|-----|-------------|-----------------|
+| `GEMINI_API_KEY` | API | https://aistudio.google.com/apikey |
+| `BOT_TOKEN` | bot | @BotFather on Telegram, `/newbot` |
 
-Optional:
+### Optional env vars
 
-| var                | default                  | purpose                                  |
-|--------------------|--------------------------|------------------------------------------|
-| `SAVEFEED_API_URL` | `http://localhost:8000`  | where the bot finds the API              |
-| `IG_COOKIES_FILE`  | unset                    | path to a Netscape cookies.txt for IG + X — bypasses the macOS keychain prompts that `--cookies-from-browser` triggers on every capture. See **Getting cookies.txt** below. |
+| var | default | purpose |
+|-----|---------|---------|
+| `SAVEFEED_API_URL` | `http://localhost:8000` | where the bot finds the API |
+| `IG_COOKIES_FILE` | unset | path to Netscape cookies.txt for IG authentication |
+| `X_CLIENT_ID` | unset | Twitter/X OAuth 2.0 client ID |
+| `X_CLIENT_SECRET` | unset | Twitter/X OAuth 2.0 client secret |
 
-`.env` is loaded automatically by both processes via `python-dotenv`.
+`.env` is loaded automatically via `python-dotenv`.
 
-### Getting cookies.txt
+### Cookie setup (Instagram)
 
-`yt-dlp` and `gallery-dl` both accept Netscape-format cookies.txt files via
-`--cookies <file>`. With `IG_COOKIES_FILE` pointing at one, captures stop
-reaching into Chrome's keychain (no more "savefeed wants to access
-keychain" popups) and authenticate via the file instead.
+1. Install [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) in Chrome
+2. Go to instagram.com (logged in), click the extension, export cookies
+3. Save to `~/.savefeed/cookies.txt`
+4. Set `IG_COOKIES_FILE=/Users/you/.savefeed/cookies.txt` in `.env`
 
-1. Install a Netscape cookie-export extension in your browser. **Get
-   cookies.txt LOCALLY** (Chrome / Firefox) is the common pick — it runs
-   entirely client-side, no upload.
-2. Log into **instagram.com** in that browser, click the extension, export
-   cookies for the current site to a file, e.g. `~/.savefeed/cookies.txt`.
-3. Log into **x.com** in the same browser, export again — most extensions
-   append to the same file if you give it the same name, or you can
-   concatenate two exports yourself (the format is one cookie per line and
-   cookies are scoped by domain, so order doesn't matter).
-4. Set `IG_COOKIES_FILE=/abs/path/to/cookies.txt` in `.env`.
+Cookies expire every ~90 days. Re-export when the health check turns red.
 
-Cookies expire (IG/X rotate session cookies on a multi-week cadence). When
-captures start failing with auth errors, log in again in the browser and
-re-export the file. The API logs a clear warning at boot if the path is
-set but the file is missing or empty.
+### Twitter/X setup
+
+1. Sign up at [developer.x.com](https://developer.x.com) (free tier)
+2. Create a project + app with OAuth 2.0 PKCE, callback URL: `http://localhost:8000/auth/twitter/callback`
+3. Add `X_CLIENT_ID` and `X_CLIENT_SECRET` to `.env`
+4. Visit `http://localhost:8000/auth/twitter` to authorize
+5. Tokens auto-refresh; re-auth only needed if revoked
 
 ## Run
 
-Three processes, three terminals:
+Three processes:
 
-```
-make api     # tab 1 — FastAPI on :8000
-make bot     # tab 2 — Telegram polling
-make web     # tab 3 — Vite dev server on :5173 (optional, see Frontend)
-```
-
-(Or call uvicorn / python / npm directly — see the Makefile.)
-
-Then in Telegram, send or forward any message to your bot. The bot replies
-`saved #N as <source> (processing…)` and the worker fills in the gist
-asynchronously.
-
-## Frontend
-
-A Vite + React + TypeScript + Tailwind feed lives in [./web](./web). It
-reads the FastAPI backend over the wire — no SSR, just a SPA hitting
-`/items` with `?category=`, `?source=`, `?q=` filters.
-
-First-time setup:
-
-```
-cd web
-npm install
+```bash
+make api     # FastAPI on :8000
+make bot     # Telegram polling
+make web     # Vite dev server on :5173
 ```
 
-Run the dev server (in a separate terminal from `make api`):
+Open http://localhost:5173 for the dashboard, or http://localhost:8000/setup for health checks.
 
-```
-make web        # or: cd web && npm run dev
-```
+The server auto-starts recurring sweeps for Twitter (30 min) and Instagram (30 min). New saves appear in the feed without manual action.
 
-Open <http://localhost:5173>. The page is mobile-friendly (same `max-w-2xl`
-single-column layout at every width — it's a feed, not a dashboard) and
-polls the API every 15s so newly-forwarded items appear without a manual
-refresh.
+## Backfill (full history import)
 
-The API URL is hard-coded to `http://localhost:8000` but can be overridden
-at build time with `VITE_API_URL=...` in `web/.env.local`. CORS for the
-Vite origin is wired up in [app.py](app.py).
+Once sweeps are connected, pull your entire saved history:
 
-Failed rows get an inline `↻ retry` button (POSTs `/items/{id}/retry`).
-Card actions: `↗ open original` opens the source URL in a new tab,
-`details →` opens the existing `/items/{id}/pretty` page served by the
-API.
+| Platform | Method | Command |
+|----------|--------|---------|
+| Twitter | API pagination | `curl -X POST http://127.0.0.1:8000/sweep/twitter/backfill` |
+| Instagram | Cookie API pagination | `curl -X POST http://127.0.0.1:8000/sweep/ig/backfill` |
+| Facebook | Data export only | `python scripts/import_fb_export.py ~/Downloads/facebook-export.zip` |
 
-## How to test
+Backfills are **resumable** — they save progress to `~/.savefeed/{platform}_backfill_state.json` after every item. If interrupted, re-run the same command to continue.
 
-End-to-end without Telegram, in three steps:
+IG backfill caps at 100 items/session to avoid bans. Run it 2-3 times with breaks between.
 
-1. **Start the API.** In one terminal: `make api`. Wait for
-   `Application startup complete`.
-
-2. **Capture one of each source** with curl:
-
-   ```
-   # IG reel — exercises yt-dlp + Gemini Files API
-   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
-     -d '{"payload":"https://www.instagram.com/reels/<id>/"}'
-
-   # Web article — exercises trafilatura + Gemini text
-   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
-     -d '{"payload":"https://en.wikipedia.org/wiki/Kalman_filter"}'
-
-   # Free-form note — exercises Gemini text only
-   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
-     -d '{"payload":"random idea I want to come back to later"}'
-
-   # Tweet — stub, returns done immediately
-   curl -X POST localhost:8000/capture -H 'Content-Type: application/json' \
-     -d '{"payload":"https://x.com/some/status/123","note":"context"}'
-   ```
-
-   Each call returns `{"id":N,"source":...,"status":"pending"}` fast.
-
-3. **Eyeball the result.** Open <http://localhost:8000/items/pretty> in a
-   browser — newest first, columns for source / status / category /
-   summary / on-screen text. Refresh as the worker fills rows in
-   (IG reels take ~20–40s; text gists are a few seconds).
-
-   For raw JSON: `curl localhost:8000/items | jq`.
-
-**Telegram path:** once the bot is running (`make bot`), forward an IG reel
-post to your bot. You should get a `saved #N as ig_reel (processing…)`
-reply, and the row should appear on `/items/pretty` with a gist shortly
-after.
+Monitor progress: `curl http://127.0.0.1:8000/backfill/status`
 
 ## API endpoints
 
 | method | path | what it does |
-|---|---|---|
-| `POST` | `/capture` | Body `{payload, note?}`. Classifies, enqueues, returns `{id, source, status}`. Re-POSTing a known URL returns the existing row with `deduped: true` instead of duplicating. |
-| `GET`  | `/items` | All items, newest first. Composable query params: `?category=`, `?source=`, `?tag=`, `?q=` (LIKE across summary/transcript/raw_text/on_screen_text). |
-| `GET`  | `/items/{id}` | Raw JSON for one item. |
-| `GET`  | `/items/{id}/pretty` | HTML detail view with chips, full summary, key-takeaways list, on-screen text, collapsible transcript + raw text, and the tag editor. |
-| `GET`  | `/items/pretty` | HTML table view of all items (no filters). |
-| `POST` | `/items/{id}/retry` | Resets a `failed` row to `pending` and re-runs the adapter. No-op on `done`/`pending`. |
-| `POST` | `/items/{id}/tags` | Body `{tags: [...]}` — replaces the tag array. Server lowercases, strips, dedupes, caps at 20. |
-| `GET`  | `/health` | Looks at the last 10 ig_reel/tweet captures and flags `warn: true` if ≥3 of the last 5 failed with an auth-wall signature ("login required", "restricted video", "rate-limit", etc.). The frontend banner reads this. Use it to detect expired cookies. |
+|--------|------|-------------|
+| `POST` | `/capture` | `{payload, note?}` — classify, enqueue, return `{id, source, status}`. Dedupes by URL. |
+| `GET` | `/items` | All items, newest first. Filters: `?category=`, `?source=`, `?tag=`, `?q=` |
+| `GET` | `/items/{id}` | Raw JSON for one item |
+| `POST` | `/items/{id}/retry` | Reset a failed row and re-run the adapter |
+| `POST` | `/items/{id}/tags` | `{tags: [...]}` — replace tags |
+| `GET` | `/health` | Cookie/auth health with failure rate detection |
+| `GET` | `/setup` | Interactive health check + setup guide page |
+| `GET` | `/sweep/status` | All sweep statuses (auth, last run, counts) |
+| `GET` | `/backfill/status` | All backfill progress |
+| `POST` | `/sweep/{platform}` | Trigger one-off sweep (twitter, ig, fb) |
+| `POST` | `/sweep/{platform}/backfill` | Trigger full-history backfill |
+| `POST` | `/chat` | `{message}` — RAG-powered chat over your saved items |
+| `GET` | `/auth/twitter` | Start Twitter OAuth flow |
 
-## Notes
+## Platform status
 
-- yt-dlp uses `--cookies-from-browser chrome`, falling back to firefox.
-  First IG download on macOS will prompt for Keychain access — allow it.
-- The worker is FastAPI `BackgroundTasks`. On restart, pending rows are
-  drained on startup. Fine for low volume; swap for a real queue later.
-- DB is `./savefeed.db` (gitignored). Schema columns and types are
-  Postgres-compatible; only `INTEGER PRIMARY KEY AUTOINCREMENT` needs to
-  become `BIGSERIAL` / `GENERATED ALWAYS AS IDENTITY` on swap.
+| Platform | Sweep | Backfill | Status |
+|----------|-------|----------|--------|
+| **Twitter/X** | OAuth API, 30-min auto | API pagination | **Done** — 97 bookmarks fully backfilled |
+| **Instagram** | Cookie API, 30-min auto | API pagination (100/session cap) | **In progress** — ~193 items, more available |
+| **Facebook** | Blocked (Meta defenses) | Data export only | **Blocked** — see [BACKFILL_STATUS.md](docs/BACKFILL_STATUS.md) |
+| **TikTok** | Not yet | Deferred | Adapter exists (yt-dlp), no sweep |
+
+Facebook cookie scraping was attempted via 5 different approaches (mbasic HTML, www static, GraphQL API, Chrome DOM, network interception) — all blocked by Meta. See [BACKFILL_STATUS.md](docs/BACKFILL_STATUS.md) for full details. **Next approach:** Meta Muse AI agent integration via MCP connector.
+
+## Tech stack
+
+- Python 3.13 + FastAPI + uvicorn
+- SQLite with FTS5 full-text search + 768-dim embeddings
+- Gemini 2.5-flash (summarization, embeddings, chat)
+- yt-dlp (video), trafilatura (articles), syndication (tweets)
+- httpx for HTTP clients
+- python-telegram-bot (Telegram polling)
+- Vite + React 18 + TypeScript + Tailwind CSS (frontend)
+- Spotify-inspired dark UI (see [DESIGN.md](DESIGN.md))
+
+## State files
+
+All token/state files live in `~/.savefeed/`, never in the repo:
+
+| file | purpose |
+|------|---------|
+| `cookies.txt` | IG authentication cookies |
+| `fb_cookies.txt` | FB authentication cookies |
+| `twitter_tokens.json` | OAuth2 access + refresh tokens |
+| `twitter_backfill_state.json` | Twitter backfill progress |
+| `ig_backfill_state.json` | IG backfill progress |
+| `fb_backfill_state.json` | FB backfill progress |
+| `server.log` | Server logs |
+
+## Auto-start on login (macOS)
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.savefeed.server.plist
+```
+
+## Collaboration
+
+Repo shared with [@reyr13](https://github.com/reyr13) (Reut). Workflow:
+- Each person runs Claude Code locally against the repo
+- Slack + Claude Tag for brainstorming and research
+- Branches + PRs for code changes

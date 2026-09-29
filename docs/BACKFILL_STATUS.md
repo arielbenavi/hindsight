@@ -118,20 +118,25 @@ Last updated: 2026-09-29
 
 ### What could still work
 
-1. **Data export** (most reliable, highest friction):
+1. **Meta Muse AI agent integration** (RECOMMENDED — best path forward):
+   - Meta's Muse agent (launched Sep 8, 2026) has native read access to IG/FB saved posts
+   - Muse supports MCP (Model Context Protocol) connectors — same standard Claude uses
+   - Architecture: build a ~50-line Python MCP server wrapping hindsight's `/capture` endpoint
+   - Deep link for one-tap sync: `muse://new?text=<url-encoded-prompt>`
+   - Submit connector at muse.ai/platform
+   - Add "Sync with Muse" button to web UI
+   - This also solves IG saved posts for items the cookie API can't reach
+
+2. **Data export** (most reliable, highest friction):
    - Facebook → Settings → Download Your Information → Saved Items → JSON
    - Takes 24-48 hours for FB to prepare
-   - Endpoint ready: `POST /backfill/fb-export?file_path=~/Downloads/facebook-export.zip`
+   - Script ready: `python scripts/import_fb_export.py ~/Downloads/facebook-export.zip`
    
-2. **Playwright/headless browser** (medium reliability, medium effort):
+3. **Playwright/headless browser** (medium reliability, medium effort):
    - Use Playwright with real browser profile to render the saved page
    - Scroll and collect URLs from rendered DOM
    - Risk: FB's bot detection (device fingerprinting, behavioral analysis)
-   
-3. **Chrome DevTools Protocol** (for doc_id capture):
-   - Connect to Chrome via CDP, intercept network at protocol level
-   - Capture the exact `doc_id` and request format from live traffic
-   - Then replay via httpx (until doc_id rotates again with next FB deploy)
+   - NOT RECOMMENDED — likely to break as quickly as the other approaches
    
 4. **Manual URL collection** (lowest effort, one-time):
    - User scrolls through facebook.com/saved/ manually
@@ -182,18 +187,11 @@ Last updated: 2026-09-29
 | `POST /sweep/{platform}/backfill` | Trigger historical backfill |
 | `POST /sweep/{platform}` | Trigger one-off sweep |
 
-### Files modified this session
-- `backfill.py` — FB UA fix (desktop→mobile), FB backfill functions
-- `sweep.py` — FB UA fix, FB sweep infrastructure
-- `app.py` — FB sweep loop in lifespan, `POST /sweep/fb` endpoint
-
 ---
 
-## Recommendations for next session
+## Next Steps (as of 2026-09-29)
 
 1. **Resume IG backfill**: `curl -X POST http://127.0.0.1:8000/sweep/ig/backfill` (still has more items)
-2. **FB decision needed**: Choose between:
-   - Request FB data export (most reliable, 24-48h wait)
-   - Try Playwright approach (needs testing, bot detection risk)
-   - Try Chrome DevTools Protocol for doc_id capture (technical but could work)
-3. **Commit changes**: FB sweep wiring + UA fixes not yet committed
+2. **Build Muse MCP connector**: ~50-line Python server + "Sync with Muse" button in web UI
+3. **FB data export** (fallback): request export from Facebook settings if Muse integration isn't ready
+4. **TikTok sweep**: build cookie/API-based sweep when ready (adapter already works)
