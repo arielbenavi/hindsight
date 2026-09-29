@@ -13,6 +13,17 @@ docs/    research, platform notes, and handoff docs
 web/     deprecated web prototype (Python backend + React frontend)
 ```
 
+## Running the iOS app
+
+**Requires [XcodeGen](https://github.com/yonaskolb/XcodeGen).** The Xcode project isn't committed; it's generated from `ios/project.yml`.
+
+```bash
+brew install xcodegen
+cd ios && xcodegen && open Hindsight.xcodeproj
+```
+
+Change project settings in `ios/project.yml`, not in Xcode's settings UI. See [ios/README.md](ios/README.md) for why, and for the full rules.
+
 ## How user data gets in
 
 The main path: each user signs up for **Meta Muse** and gets a `.md` file listing all of their saved posts. The app reads that file.

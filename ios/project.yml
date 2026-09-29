@@ -1,0 +1,57 @@
+# Source of truth for the Xcode project. Hindsight.xcodeproj is generated
+# from this file by XcodeGen and is NOT committed. After editing this file,
+# run `xcodegen` in ios/ to regenerate the project.
+name: Hindsight
+options:
+  bundleIdPrefix: com.reutrabin
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: HE6MENN8S6
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  Hindsight:
+    type: application
+    platform: iOS
+    sources:
+      - Hindsight
+      # Seed export shared with the rest of the repo; bundled so the app has
+      # real saved-post data to build against.
+      - path: ../data/ig-saved-posts-seed.md
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.reutrabin.hindsight
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_CFBundleDisplayName: Hindsight
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        GENERATE_INFOPLIST_FILE: YES
+
+  HindsightTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - HindsightTests
+    dependencies:
+      - target: Hindsight
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Hindsight:
+    build:
+      targets:
+        Hindsight: all
+        HindsightTests: [test]
+    test:
+      targets:
+        - HindsightTests
