@@ -408,11 +408,11 @@ function BackfillPanel() {
     return () => clearInterval(iv);
   }, [load]);
 
-  const trigger = async (platform: "twitter" | "ig") => {
+  const trigger = async (platform: "twitter" | "ig" | "facebook") => {
     setActing(platform);
     try {
-      const ep = platform === "twitter" ? "/sweep/twitter/backfill" : "/sweep/ig/backfill";
-      await fetch(`${API}${ep}`, { method: "POST" });
+      const eps: Record<string, string> = { twitter: "/sweep/twitter/backfill", ig: "/sweep/ig/backfill", facebook: "/sweep/fb/backfill" };
+      await fetch(`${API}${eps[platform]}`, { method: "POST" });
       setTimeout(load, 1000);
     } catch { /* ignore */ }
     setActing(null);
@@ -423,7 +423,7 @@ function BackfillPanel() {
   const platforms: { key: keyof BackfillStatus; label: string; color: string; canTrigger: boolean }[] = [
     { key: "twitter", label: "Twitter / X", color: "#38bdf8", canTrigger: true },
     { key: "ig", label: "Instagram", color: "#f472b6", canTrigger: true },
-    { key: "facebook", label: "Facebook", color: "#60a5fa", canTrigger: false },
+    { key: "facebook", label: "Facebook", color: "#60a5fa", canTrigger: true },
     { key: "tiktok", label: "TikTok", color: "#22d3ee", canTrigger: false },
   ];
 
@@ -470,7 +470,7 @@ function BackfillPanel() {
                 </div>
                 {canTrigger && !isRunning && (
                   <button
-                    onClick={() => trigger(key as "twitter" | "ig")}
+                    onClick={() => trigger(key as "twitter" | "ig" | "facebook")}
                     disabled={acting === key}
                     className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
                     style={{ background: color, color: "#000", opacity: acting === key ? 0.5 : 1, letterSpacing: "1px" }}

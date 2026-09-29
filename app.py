@@ -84,6 +84,7 @@ def _drain_pending() -> None:
 
 IG_SWEEP_INTERVAL = 30 * 60
 TWITTER_SWEEP_INTERVAL = int(os.environ.get("TWITTER_SWEEP_INTERVAL", 30 * 60))
+FB_SWEEP_INTERVAL = 30 * 60
 
 
 async def _ig_sweep_loop() -> None:
@@ -100,6 +101,14 @@ async def _twitter_sweep_loop() -> None:
         if os.environ.get("X_CLIENT_ID"):
             log.info("running scheduled Twitter bookmark sweep")
             await asyncio.to_thread(sweep.sweep_twitter_bookmarks)
+
+
+async def _fb_sweep_loop() -> None:
+    while True:
+        await asyncio.sleep(FB_SWEEP_INTERVAL)
+        if sweep._fb_cookies_file():
+            log.info("running scheduled FB saved items sweep")
+            await asyncio.to_thread(sweep.sweep_fb_saved)
 
 
 async def _daily_backup_loop() -> None:
@@ -121,10 +130,12 @@ async def lifespan(_app: FastAPI):
         threading.Thread(target=_drain_pending, daemon=True).start()
     ig_sweep_task = asyncio.create_task(_ig_sweep_loop())
     twitter_sweep_task = asyncio.create_task(_twitter_sweep_loop())
+    fb_sweep_task = asyncio.create_task(_fb_sweep_loop())
     backup_task = asyncio.create_task(_daily_backup_loop())
     yield
     ig_sweep_task.cancel()
     twitter_sweep_task.cancel()
+    fb_sweep_task.cancel()
     backup_task.cancel()
 
 
@@ -384,6 +395,14 @@ def trigger_ig_sweep(bg: BackgroundTasks):
     return {"status": "ig sweep started"}
 
 
+@app.post("/sweep/fb")
+def trigger_fb_sweep(bg: BackgroundTasks):
+    if not sweep._fb_cookies_file():
+        raise HTTPException(400, "FB cookies not found — export cookies.txt to ~/.savefeed/fb_cookies.txt")
+    bg.add_task(sweep.sweep_fb_saved)
+    return {"status": "fb sweep started"}
+
+
 @app.get("/sweep/status")
 def sweep_status():
     return sweep.get_status()
@@ -404,6 +423,15 @@ def ig_backfill_endpoint(bg: BackgroundTasks):
         raise HTTPException(400, "IG_COOKIES_FILE not set in .env")
     bg.add_task(backfill.ig_backfill)
     return {"status": "ig backfill started"}
+
+
+@app.post("/sweep/fb/backfill")
+def fb_backfill_endpoint(bg: BackgroundTasks):
+    cf = backfill._fb_cookies_file()
+    if not cf:
+        raise HTTPException(400, "FB cookies not found — export cookies.txt from facebook.com and save to ~/.savefeed/fb_cookies.txt")
+    bg.add_task(backfill.fb_backfill)
+    return {"status": "fb backfill started"}
 
 
 @app.get("/backfill/status")

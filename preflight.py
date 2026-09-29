@@ -292,15 +292,26 @@ a {{ color: #2563eb; }}
 <li>Run: <code>python scripts/import_ig_export.py ~/Downloads/instagram-export.zip</code></li>
 </ol>
 
-<h3 style="font-size:14px;margin-top:1rem">Facebook — data export</h3>
-<p>No API available for saved items. Use Facebook's data export:</p>
+<h3 style="font-size:14px;margin-top:1rem">Facebook — cookie backfill</h3>
+<p>Scrapes your saved items from mbasic.facebook.com using your browser cookies. Same approach as Instagram.</p>
+<ol>
+<li>Install the <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank">Get cookies.txt LOCALLY</a> extension (same one used for IG)</li>
+<li>Go to <a href="https://www.facebook.com/" target="_blank">facebook.com</a> and make sure you're logged in</li>
+<li>Click the extension icon &rarr; "Export" (for facebook.com only)</li>
+<li>Save or copy the file to: <code>~/.savefeed/fb_cookies.txt</code></li>
+<li>Trigger the backfill:<br>
+<code>curl -X POST http://127.0.0.1:8000/sweep/fb/backfill</code></li>
+</ol>
+<p style="color:#888;font-size:13px">Caps at 100 items per session. Resume with the same command. Falls back to data export if cookies expire.</p>
+
+<h3 style="font-size:14px;margin-top:1rem">Facebook — data export (alternative)</h3>
+<p>If cookie scraping doesn't work, use Facebook's data export:</p>
 <ol>
 <li>Go to Facebook &rarr; Settings &rarr; <a href="https://www.facebook.com/dyi/" target="_blank">Download Your Information</a></li>
 <li>Select <strong>Saved Items and Collections</strong> &rarr; JSON format &rarr; Create File</li>
 <li>Wait for the email (24-48 hours), download the ZIP</li>
-<li>Run: <code>python scripts/import_fb_export.py ~/Downloads/facebook-export.zip</code></li>
+<li>Run: <code>curl -X POST "http://127.0.0.1:8000/backfill/fb-export?file_path=~/Downloads/facebook-export.zip"</code></li>
 </ol>
-<p style="color:#888;font-size:13px">The script unwraps Facebook's redirect links and skips marketplace/events. Caps at 200 items per run.</p>
 </div>
 
 <div class="section">

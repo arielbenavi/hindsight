@@ -6,16 +6,20 @@ item so backfills survive interruptions.
 """
 from __future__ import annotations
 
+import html as html_mod
 import json
 import logging
 import os
+import re
 import tempfile
 import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
+
+import httpx
 
 import auth
 import db
@@ -302,7 +306,198 @@ def ig_backfill() -> dict[str, Any]:
 
 
 FB_INTER_ITEM_DELAY = 5
+FB_INTER_PAGE_DELAY = 5
+FB_CAP_PER_SESSION = 100
 FB_SKIP_PATTERNS = ("/marketplace/", "/events/", "/groups/", "/fundraisers/", "/gaming/")
+FB_MBASIC_URL = "https://mbasic.facebook.com/saved/"
+_FB_UA = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+
+
+def _parse_fb_cookies(path: Path) -> dict[str, str]:
+    cookies: dict[str, str] = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        domain, _, _, _, _, name, value = parts[:7]
+        if "facebook.com" in domain:
+            cookies[name] = value
+    return cookies
+
+
+def _fb_cookies_file() -> Optional[Path]:
+    raw = os.environ.get("FB_COOKIES_FILE")
+    if not raw:
+        default = Path.home() / ".savefeed" / "fb_cookies.txt"
+        return default if default.is_file() and default.stat().st_size > 0 else None
+    p = Path(raw).expanduser()
+    return p if p.is_file() and p.stat().st_size > 0 else None
+
+
+def _fetch_fb_saved_page(cookies: dict[str, str], url: str) -> dict[str, Any]:
+    headers = {"User-Agent": _FB_UA}
+    try:
+        with httpx.Client(timeout=30, follow_redirects=True) as cx:
+            r = cx.get(url, headers=headers, cookies=cookies)
+        if r.status_code in (401, 403) or "/login" in str(r.url):
+            return {"auth_error": True, "status": r.status_code}
+        if r.status_code == 429:
+            return {"rate_limited": True}
+        if r.status_code != 200:
+            return {"error": f"HTTP {r.status_code}"}
+        return {"html": r.text, "final_url": str(r.url)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _extract_fb_saved_urls(html_text: str) -> tuple[list[str], Optional[str]]:
+    urls: list[str] = []
+    # mbasic saved page has links in <a href="..."> tags
+    # External links are wrapped in l.facebook.com/l.php?u=...
+    # Internal FB content links go to /story.php, /photo.php, /video/..., etc.
+    for match in re.finditer(r'href="([^"]+)"', html_text):
+        href = html_mod.unescape(match.group(1))
+        if not href:
+            continue
+
+        # Unwrap l.facebook.com redirects
+        if "l.php?" in href or "lm.facebook.com" in href:
+            parsed = urlparse(href if href.startswith("http") else f"https://mbasic.facebook.com{href}")
+            qs = parse_qs(parsed.query)
+            if "u" in qs:
+                urls.append(qs["u"][0])
+            continue
+
+        # Skip internal FB navigation, ads, etc.
+        if any(skip in href for skip in ("/composer/", "/privacy/", "/settings/", "/help/", "/nfx/", "logout", "/login")):
+            continue
+
+        # Grab external links
+        if href.startswith("http") and "facebook.com" not in href.lower():
+            urls.append(href)
+            continue
+
+        # Grab FB content links (posts, videos, photos)
+        if href.startswith("http") and "facebook.com" in href.lower():
+            path = urlparse(href).path.lower()
+            if any(p in path for p in ("/posts/", "/videos/", "/photo", "/permalink", "/story")):
+                urls.append(href)
+            continue
+
+        # Relative FB content links
+        if href.startswith("/"):
+            path = href.lower()
+            if any(p in path for p in ("/story.php", "/photo.php", "/video/", "/permalink/")):
+                urls.append(f"https://www.facebook.com{href}")
+
+    # Find "See More" / next page link
+    next_page = None
+    for match in re.finditer(r'href="(/saved/[^"]*)"', html_text):
+        href = match.group(1)
+        if "cursor" in href or "bookmark_collection" in href or "see_more" in href.lower():
+            next_page = f"https://mbasic.facebook.com{html_mod.unescape(href)}"
+            break
+    # Also look for generic pagination pattern
+    if not next_page:
+        for match in re.finditer(r'href="(/saved\?[^"]*)"', html_text):
+            href = match.group(1)
+            next_page = f"https://mbasic.facebook.com{html_mod.unescape(href)}"
+            break
+
+    return urls, next_page
+
+
+def fb_backfill() -> dict[str, Any]:
+    state = BackfillState("facebook")
+    if state.is_running():
+        return {"error": "backfill already running", **state.to_dict()}
+
+    cf = _fb_cookies_file()
+    if not cf:
+        return {"error": "FB cookies not found — export cookies.txt from facebook.com and save to ~/.savefeed/fb_cookies.txt (or set FB_COOKIES_FILE in .env)"}
+
+    cookies = _parse_fb_cookies(cf)
+    if "c_user" not in cookies:
+        return {"error": "no c_user in cookies.txt — invalid FB cookie export"}
+
+    state.start()
+    page_url = state.data.get("cursor") or FB_MBASIC_URL
+    session_count = 0
+
+    try:
+        while session_count < FB_CAP_PER_SESSION:
+            result = _fetch_fb_saved_page(cookies, page_url)
+
+            if result.get("auth_error"):
+                state.pause(f"cookies expired or login redirect (HTTP {result.get('status')}) — re-export cookies.txt")
+                break
+            if result.get("rate_limited"):
+                state.pause("rate limited — resume later")
+                break
+            if result.get("error"):
+                state.pause(f"fetch error: {result['error'][:200]}")
+                break
+
+            html_text = result.get("html", "")
+            urls, next_page = _extract_fb_saved_urls(html_text)
+
+            if not urls and not next_page:
+                state.finish()
+                break
+
+            for url in urls:
+                if session_count >= FB_CAP_PER_SESSION:
+                    state.pause(f"session cap reached ({FB_CAP_PER_SESSION} items)")
+                    break
+
+                if _fb_should_skip(url):
+                    continue
+
+                url = _unwrap_fb_redirect(url)
+
+                existing = db.find_active_by_url(url)
+                if existing:
+                    state.record_item("skipped")
+                    session_count += 1
+                    continue
+
+                log.info("backfill: ingesting FB %s", url)
+                res = sweep._ingest(url)
+                if res.get("deduped"):
+                    state.record_item("skipped")
+                    session_count += 1
+                elif res.get("status") == "failed":
+                    state.record_item("failed")
+                    session_count += 1
+                    time.sleep(FB_INTER_ITEM_DELAY)
+                else:
+                    state.record_item("ingested")
+                    session_count += 1
+                    time.sleep(FB_INTER_ITEM_DELAY)
+
+            if next_page and session_count < FB_CAP_PER_SESSION:
+                page_url = next_page
+                state.set_cursor(page_url)
+                time.sleep(FB_INTER_PAGE_DELAY)
+            elif not next_page:
+                state.finish()
+                break
+            else:
+                state.set_cursor(page_url)
+                break
+
+    except Exception as e:
+        log.exception("fb backfill error")
+        state.pause(f"exception: {e}")
+
+    log.info(
+        "fb backfill stopped: ingested=%d skipped=%d failed=%d status=%s",
+        state.data["ingested"], state.data["skipped"], state.data["failed"], state.status,
+    )
+    return state.to_dict()
 
 
 def _find_saved_json_in_dir(root: Path) -> Path | None:

@@ -1,18 +1,21 @@
 """Bookmark sweep: poll platform APIs for new saved content.
 
-Supports Twitter/X bookmarks and Instagram saved posts. The sweep
-runs on a 30-minute loop inside the API server, or can be triggered
-manually via POST /sweep/twitter or POST /sweep/ig.
+Supports Twitter/X bookmarks, Instagram saved posts, and Facebook saved items.
+The sweep runs on a 30-minute loop inside the API server, or can be triggered
+manually via POST /sweep/twitter, POST /sweep/ig, or POST /sweep/fb.
 """
 from __future__ import annotations
 
+import html as html_mod
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 
@@ -420,10 +423,210 @@ def sweep_ig_saved() -> dict[str, int]:
     return _ig_last_sweep_result
 
 
+# ── Facebook saved items sweep (mbasic) ─────────────────────────
+
+FB_STATE_PATH = Path.home() / ".savefeed" / "fb_sweep_state.json"
+FB_CAP_PER_SWEEP = 20
+FB_INTER_ITEM_DELAY = 5
+FB_PAGE_DELAY = 3
+_FB_UA = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+FB_MBASIC_SAVED = "https://mbasic.facebook.com/saved/"
+FB_SKIP_PATTERNS = ("/marketplace/", "/events/", "/groups/", "/fundraisers/", "/gaming/")
+
+_fb_last_sweep_time: Optional[str] = None
+_fb_last_sweep_result: Optional[dict[str, int]] = None
+
+
+def _parse_fb_cookies(path: Path) -> dict[str, str]:
+    cookies: dict[str, str] = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        domain, _, _, _, _, name, value = parts[:7]
+        if "facebook.com" in domain:
+            cookies[name] = value
+    return cookies
+
+
+def _fb_cookies_file() -> Optional[Path]:
+    raw = os.environ.get("FB_COOKIES_FILE")
+    if not raw:
+        default = Path.home() / ".savefeed" / "fb_cookies.txt"
+        return default if default.is_file() and default.stat().st_size > 0 else None
+    p = Path(raw).expanduser()
+    return p if p.is_file() and p.stat().st_size > 0 else None
+
+
+def _load_fb_state() -> dict[str, Any]:
+    if FB_STATE_PATH.is_file():
+        try:
+            return json.loads(FB_STATE_PATH.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def _save_fb_state(state: dict[str, Any]) -> None:
+    FB_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    FB_STATE_PATH.write_text(json.dumps(state, indent=2))
+
+
+def _fetch_fb_saved_page(cookies: dict[str, str], url: str) -> dict[str, Any]:
+    try:
+        with httpx.Client(timeout=30, follow_redirects=True) as cx:
+            r = cx.get(url, headers={"User-Agent": _FB_UA}, cookies=cookies)
+        if r.status_code in (401, 403) or "/login" in str(r.url):
+            return {"auth_error": True, "status": r.status_code}
+        if r.status_code == 429:
+            return {"rate_limited": True}
+        if r.status_code != 200:
+            return {"error": f"HTTP {r.status_code}"}
+        return {"html": r.text, "final_url": str(r.url)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _extract_fb_saved_urls(html_text: str) -> tuple[list[str], Optional[str]]:
+    urls: list[str] = []
+    for match in re.finditer(r'href="([^"]+)"', html_text):
+        href = html_mod.unescape(match.group(1))
+        if not href:
+            continue
+        if "l.php?" in href or "lm.facebook.com" in href:
+            parsed = urlparse(href if href.startswith("http") else f"https://mbasic.facebook.com{href}")
+            qs = parse_qs(parsed.query)
+            if "u" in qs:
+                urls.append(qs["u"][0])
+            continue
+        if any(skip in href for skip in ("/composer/", "/privacy/", "/settings/", "/help/", "/nfx/", "logout", "/login")):
+            continue
+        if href.startswith("http") and "facebook.com" not in href.lower():
+            urls.append(href)
+            continue
+        if href.startswith("http") and "facebook.com" in href.lower():
+            path = urlparse(href).path.lower()
+            if any(p in path for p in ("/posts/", "/videos/", "/photo", "/permalink", "/story")):
+                urls.append(href)
+            continue
+        if href.startswith("/"):
+            path = href.lower()
+            if any(p in path for p in ("/story.php", "/photo.php", "/video/", "/permalink/")):
+                urls.append(f"https://www.facebook.com{href}")
+
+    next_page = None
+    for match in re.finditer(r'href="(/saved/[^"]*)"', html_text):
+        href = match.group(1)
+        if "cursor" in href or "bookmark_collection" in href or "see_more" in href.lower():
+            next_page = f"https://mbasic.facebook.com{html_mod.unescape(href)}"
+            break
+    if not next_page:
+        for match in re.finditer(r'href="(/saved\?[^"]*)"', html_text):
+            next_page = f"https://mbasic.facebook.com{html_mod.unescape(match.group(1))}"
+            break
+
+    return urls, next_page
+
+
+def _fb_should_skip(url: str) -> bool:
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    return any(pat in path for pat in FB_SKIP_PATTERNS)
+
+
+def _fb_unwrap_redirect(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.hostname in ("l.facebook.com", "lm.facebook.com"):
+        qs = parse_qs(parsed.query)
+        if "u" in qs:
+            return qs["u"][0]
+    return url
+
+
+def sweep_fb_saved() -> dict[str, int]:
+    global _fb_last_sweep_time, _fb_last_sweep_result
+
+    cf = _fb_cookies_file()
+    if not cf:
+        log.info("FB cookies not found — skipping FB sweep")
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    cookies = _parse_fb_cookies(cf)
+    if "c_user" not in cookies:
+        log.info("no c_user in FB cookies — skipping FB sweep")
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    state = _load_fb_state()
+    last_seen_urls: set[str] = set(state.get("last_seen_urls", []))
+
+    processed = 0
+    skipped = 0
+    failed = 0
+    new_seen_urls: list[str] = []
+
+    result = _fetch_fb_saved_page(cookies, FB_MBASIC_SAVED)
+    if result.get("auth_error"):
+        log.warning("FB cookies expired — re-export cookies.txt")
+        return {"processed": 0, "skipped": 0, "failed": 0}
+    if result.get("error") or result.get("rate_limited"):
+        log.warning("FB sweep fetch failed: %s", result)
+        return {"processed": 0, "skipped": 0, "failed": 0}
+
+    html_text = result.get("html", "")
+    urls, _ = _extract_fb_saved_urls(html_text)
+
+    for url in urls:
+        if processed + skipped + failed >= FB_CAP_PER_SWEEP:
+            break
+
+        if _fb_should_skip(url):
+            continue
+
+        url = _fb_unwrap_redirect(url)
+
+        if url in last_seen_urls:
+            log.info("FB sweep: hit watermark, stopping")
+            break
+
+        if not new_seen_urls:
+            new_seen_urls.append(url)
+
+        existing = db.find_active_by_url(url)
+        if existing:
+            skipped += 1
+            continue
+
+        log.info("FB sweep: ingesting %s", url)
+        res = _ingest(url)
+        if res.get("deduped"):
+            skipped += 1
+        elif res.get("status") == "failed":
+            failed += 1
+        else:
+            processed += 1
+
+        time.sleep(FB_INTER_ITEM_DELAY)
+
+    if new_seen_urls:
+        _save_fb_state({
+            "last_seen_urls": new_seen_urls[:10],
+            "last_sweep_timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+
+    _fb_last_sweep_time = datetime.now(timezone.utc).isoformat()
+    _fb_last_sweep_result = {"processed": processed, "skipped": skipped, "failed": failed}
+    log.info("FB sweep done: processed=%d skipped=%d failed=%d", processed, skipped, failed)
+    return _fb_last_sweep_result
+
+
 # ── status ───────────────────────────────────────────────────────
 
 def get_status() -> dict[str, Any]:
     tokens = auth.load_tokens()
+    fb_cf = _fb_cookies_file()
     return {
         "twitter": {
             "authenticated": tokens is not None and "access_token" in (tokens or {}),
@@ -435,5 +638,10 @@ def get_status() -> dict[str, Any]:
             "last_sweep": _ig_last_sweep_time,
             "last_sweep_result": _ig_last_sweep_result,
             "session_status": _ig_session_status(),
+        },
+        "fb_saved": {
+            "authenticated": fb_cf is not None and "c_user" in (_parse_fb_cookies(fb_cf) if fb_cf else {}),
+            "last_sweep": _fb_last_sweep_time,
+            "last_sweep_result": _fb_last_sweep_result,
         },
     }
