@@ -13,3 +13,4 @@ web/frontend/node_modules/
 web/frontend/dist/
 web/frontend/.vite/
 x_cookies.txt
+web/node_modules/
