@@ -35,6 +35,14 @@ DATA_FETCHING_RESEARCH.md.)
 - Long `Data` concatenations with `+` time out the type checker. Build them in
   steps. (2026-09-29)
 
+## X
+
+- Use a **separate "Native App"** (public client, PKCE, no secret) for iOS. The web
+  prototype's app (savesFeed) is a confidential Web App; converting it would break
+  the web prototype. Callback `hindsight://oauth/x`. (2026-09-29)
+- Don't trust remembered test vectors. The "RFC 7636" PKCE challenge I recalled
+  was wrong; the test now uses a value computed independently in Python. (2026-09-29)
+
 ## Signing / devices
 
 - **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists

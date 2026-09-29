@@ -11,7 +11,7 @@ struct ConnectStep: View {
 
             museCard
 
-            comingSoonRow(.x, detail: "Sign in with X. No developer account needed.")
+            XConnectRow(store: store)
             comingSoonRow(.tiktok, detail: "Waiting on TikTok's data API approval.")
         } actions: {
             Button("Continue", action: model.next)
