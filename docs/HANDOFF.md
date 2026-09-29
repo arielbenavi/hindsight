@@ -1,4 +1,37 @@
-# hindsight — Handoff Prompt
+# hindsight — Handoff
+
+## Current status (2026-09-29, branch `ariel/onboarding-data`)
+
+**Read [LESSONS.md](LESSONS.md) first**, then [DATA_FETCHING_RESEARCH.md](DATA_FETCHING_RESEARCH.md).
+
+### Built in the iOS app (Ariel: onboarding + data)
+- **Data layer:** `SavedPost` (canonical model), `SavedPostParser` (Muse JSON + seed markdown), `SavedPostStore` (seed + imports, dedup, persisted JSON), `DataExportParser` + `ZipReader` (IG/FB/TikTok data-download exports; no UI yet).
+- **Onboarding (5 screens):** welcome → how it works → connect apps → "how do you want to see it" → done. The look is brrr.now-inspired, and all styling lives in `OnboardingStyle.swift` so it can be reskinned. Preferences (grouping, layout, topics, resurface cadence) are saved via `OnboardingPreferences.save()`/`.load()` for the dashboard to read. Topic chips show real counts from the user's saves (keyword heuristic, a placeholder for real clustering).
+- **Muse sync (IG + FB):** works on device through copy/paste (details in DATA_FETCHING_RESEARCH.md).
+- **Connect X:** works on device (OAuth 2.0 PKCE, 97 bookmarks). Client ID is in `Sync/X/XConfig.swift`.
+- **Device testing:** `ios/scripts/device.sh install|log`, plus a DEBUG event log on the phone.
+- 26 unit tests (Swift Testing), all passing. None of them call real APIs.
+
+### Open decisions
+1. **Ingestion backend hosting:** Fly.io vs Google Cloud Run. Ariel + Reut to decide. Tradeoffs are in DATA_FETCHING_RESEARCH.md → "Ingestion backend".
+2. **Video storage:** proposal is to keep transcript/summary/on-screen text/thumbnail/embedding only, and delete video files after processing.
+3. **TikTok:** no official path for US users. Share extension + export import is the current plan. Research brief: [research/SYNC_RESEARCH_PROMPT.md](research/SYNC_RESEARCH_PROMPT.md).
+4. **Share extension** needs a new target in `project.yml` (coordinate with Reut).
+
+### Next up
+- Ingestion backend: port `web/backend/` adapters + Gemini into a service and run it locally on seed data first.
+- Muse: a "Get older saves" paging button, then the MCP connector on the backend (removes the paste).
+- Share extension ("Share → hindsight") for TikTok and everything else.
+- Try the remaining Muse link-lab candidates on device, looking for a prompt-prefill link.
+
+### Setup notes
+- Ariel's Apple ID is on Reut's team as **App Manager**, which can't sign device builds. Reut needs to grant "Access to Certificates, Identifiers & Profiles" (or the Developer role). Until then, use Personal Team overrides (see ios/README.md).
+- X console: regenerate the unused hindsight-ios secrets that were exposed in screenshots during setup.
+
+---
+
+# Web prototype handoff (historical)
+
 
 REPO: /Users/arismac/Sync/win_mac_sync/dev/savefeed
 GITHUB: https://github.com/arielbenavi/hindsight

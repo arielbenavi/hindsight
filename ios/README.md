@@ -37,11 +37,37 @@ Run `xcodegen` again whenever:
 ```
 project.yml         project definition (source of truth)
 Hindsight/          app source
+  Models/           SavedPost + Platform (the canonical data format)
+  Import/           SavedPostParser (Muse JSON + seed markdown), SavedPostStore,
+                    DataExportParser + ZipReader (IG/FB/TikTok "download your data")
+  Onboarding/       first-run flow; OnboardingStyle.swift holds all its styling
+  Sync/             Muse sync sheet (MusePrompt, MuseLauncher)
+    X/              Connect X: PKCE sign-in, Keychain tokens, bookmarks client
+  DebugLog.swift    DEBUG-only event log for device testing
   Resources/        asset catalog
+scripts/device.sh   install on / pull logs from a connected iPhone
 HindsightTests/     unit tests (Swift Testing)
 ```
 
-The seed export [`../data/ig-saved-posts-seed.md`](../data/ig-saved-posts-seed.md) is bundled into the app via `project.yml`. That gives the app real saved-post data to build against. `SeedData.swift` loads it.
+The seed export [`../data/ig-saved-posts-seed.md`](../data/ig-saved-posts-seed.md) is bundled into the app via `project.yml`. That gives the app real saved-post data to build against. `SeedData.swift` loads it and `SavedPostParser` turns it into `SavedPost`s.
+
+Launch with the `-resetOnboarding` argument (Scheme → Run → Arguments) to replay the first-run flow.
+
+## Testing on a real iPhone
+
+`scripts/device.sh` builds, installs and launches on a connected iPhone, and pulls the app's debug log:
+
+```bash
+scripts/device.sh install
+scripts/device.sh log
+```
+
+- The phone needs Developer Mode on (Settings → Privacy & Security). The first launch of a new signer needs Settings → General → VPN & Device Management → Trust.
+- Signing uses `project.yml`'s team. If your role on that team can't create certificates (for example "App Manager" without "Access to Certificates, Identifiers & Profiles"), use your free Personal Team and your own bundle ID without touching `project.yml`:
+  `HINDSIGHT_TEAM=<your team id> HINDSIGHT_BUNDLE_ID=com.you.hindsight scripts/device.sh install`
+  Personal Team builds expire after 7 days.
+- DEBUG builds append events (Muse link attempts, pastes, X sync) to `Library/Application Support/debug-log.txt`, which is what `log` prints.
+- To replay onboarding: launch with `-resetOnboarding`, e.g. `xcrun devicectl device process launch --device <id> --terminate-existing <bundle id> -- -resetOnboarding`.
 
 ## Build & test from the command line
 
