@@ -4,6 +4,11 @@ Your saved posts, finally usable. People save hundreds of Instagram and Facebook
 
 The product is an **iOS app**. The original web prototype is kept in [`web/`](web) for reference but is deprecated.
 
+> [!IMPORTANT]
+> **Hindsight's AI only works when the iPhone's system language is one Apple Intelligence supports (e.g. English). Hebrew is not supported, even in iOS 27.**
+> Sorting and extraction run on Apple's models (on-device, and Private Cloud Compute), which need Apple Intelligence turned on. Apple Intelligence only turns on when **Settings → General → Language & Region → iPhone Language** and the **Siri language** are the same supported language. A phone set to Hebrew gets **no AI at all**, not even for English posts, and Hebrew captions are rejected by the model (`unsupportedLanguageOrLocale`).
+> It also needs an **iPhone 15 Pro or newer** with Apple Intelligence on. Testers so far (Reut, Ariel, Reut's girlfriend): iPhone 16 or later, English. ✅ Details: [docs/merge-plan.md](docs/merge-plan.md#ai-requirements-read-this).
+
 ## Repo layout
 
 ```

@@ -5,6 +5,17 @@ starting a session; add to it when something surprises you. Newest first.
 (Platform-by-platform fetching history lives in BACKFILL_STATUS.md and
 DATA_FETCHING_RESEARCH.md.)
 
+## Apple Intelligence / on-device AI
+
+- ⚠️ **The iPhone's system language must be an Apple Intelligence language (e.g. English), or the app gets no AI at all.**
+  Apple Intelligence only turns on when the iPhone language and Siri language are the same *supported* language.
+  **Hebrew isn't one, even in iOS 27.** No Apple Intelligence means no on-device model *and* no Private Cloud Compute, even for English posts.
+  Check the phone's language first when AI "doesn't work" on a tester's phone. (2026-09-30)
+- **Hebrew captions are refused by the on-device model** (`unsupportedLanguageOrLocale`), even with English instructions. Hebrew is 7% of Reut's saves and 13% of Ariel's. Hebrew posts need the rules/collections/questions path. (2026-09-30)
+- The on-device model (macOS 26.6 = 26.4 generation, 4K context) scored **62–70%** on bucket sorting vs the fixtures, and got **~41%** of place names. It also fills `places` on posts that have none and translates names. Don't trust it for extraction without checks. (2026-09-30)
+- **Private Cloud Compute:** free only under the App Store Small Business Program with < 2M downloads. Needs the managed entitlement `com.apple.developer.private-cloud-compute` (granted to Reut's account 2026-09-30). The quota is per iCloud account and opaque (only below / approaching / reached + reset date). No paid tier. (2026-09-30)
+- `.permissiveContentTransformations` guardrails only work for plain `String` output, not `@Generable`, so structured sorting always runs with default guardrails. 2–5% of benign English posts got `guardrailViolation` / `refusal`. (2026-09-30)
+
 ## Muse
 
 - **`muse://new?text=` isn't real.** It only appears in a feature request for an
