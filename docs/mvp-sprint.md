@@ -52,7 +52,7 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - [ ] Confirmation cards: saved post on one side, best-guess match on the other. Yes, no, or pick another result. "Couldn't place" goes to a review list
 - [ ] Layout proposal screen: read topics → suggest lego screens → approve, rename, reorder, remove
 - [ ] Hook into Ariel's onboarding: onboarding done → layout proposal → confirmation cards → app
-- [ ] Practice loop (shared, `ios/Hindsight/Practice/`): Today's 3 picker, weekly ring, practice card, "When?" reminders, spaced reviews, notification policy
+- [ ] Practice loop (shared, `ios/Hindsight/Practice/`): Today's 1 picker, weekly ring, practice card, "When?" reminders, spaced reviews, notification policy
 - [ ] Learn lego screen on top of it: setup, home, topic page, tip detail, progress sheet, search
 - [ ] "Everything else" sheet: saves that fit no tab, reachable from every tab's header
 

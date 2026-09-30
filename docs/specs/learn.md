@@ -22,20 +22,20 @@ We looked at how Duolingo, Brilliant, Readwise, Finch and habit research handle 
 | Mechanism | The psychology | How Learn uses it |
 |---|---|---|
 | **Minimum viable action** | Starting has to be nearly free. Doing beats rereading (retrieval practice: 61% vs 40% recall after a week). | Every tip gets a one-line **"Try this (2 min)"** prompt. The daily action is one small try, not "learn guitar". |
-| **Curated resurfacing** (Readwise Daily Review) | A small daily batch with a finish line turns a guilty backlog into something doable. | **Today's 3**: three saves a day, never the whole backlog. Then "Done for today". |
+| **Curated resurfacing** (Readwise Daily Review) | A small daily batch with a finish line turns a guilty backlog into something doable. | **Today's 1**: one save a day, never the whole backlog. Then "Done for today". |
 | **Implementation intentions** ("when X, I'll do Y") | Among the best-evidenced ways to close the intention-behavior gap (d = 0.65 across 94 tests). | **Not today** asks "When?" (Tonight · Tomorrow · Weekend) and schedules a reminder about that exact save. |
 | **Forgiving progress** (Duolingo streak freezes, Weekend Amulet) | Seeing a broken streak makes people quit more than the miss warrants; missing a day doesn't break habit formation. | A **weekly ring** ("2 of 3 tries this week") that resets each Monday. No daily streak, never a "broken" state. |
 | **Endowed progress + first-week commitment** | A card with 2 of 10 stamps pre-filled gets completed far more than a blank 8-stamp card (34% vs 19%). | The first week's ring has a pre-filled segment for setting up ("Picked your saves ✓"). |
 | **Specific, varied, polite notifications** (Duolingo's notification research) | The same message repeated gets ignored; backing off beats nagging. | Max 1 a day, always about a specific save, rotating wording, backs off when ignored, stops politely after a quiet week. |
 | **Spaced review** (Readwise Mastery, Anki) | Coming back to something at growing intervals makes it stick. | A tried tip comes back at 3, 10 and 30 days as **"Still got it?"** |
-| **Fresh starts** | Aspirational behavior spikes after landmarks (a new week, month). | A Monday card: "New week. 3 saves picked for you." After a lapse: "Fresh start", never "You missed 12 days". |
+| **Fresh starts** | Aspirational behavior spikes after landmarks (a new week, month). | A Monday card: "New week. Here's today's pick." After a lapse: "Fresh start", never "You missed 12 days". |
 
 ### Design rules (the pitfalls)
 
 - **No XP, points, leagues or badges.** Expected rewards undermine intrinsic motivation, and leagues need social features we don't have. Informative feedback ("You've tried 5 guitar tips") is fine.
 - **Never show a broken streak or a guilt message.** Tone is warm and playful (DailySpend's voice), never Duolingo's guilt trip.
 - **Opening the reel isn't progress.** Only "Tried it" counts.
-- **Never present the backlog as a to-do list.** Today's 3, then done.
+- **Never present the backlog as a to-do list.** Today's 1, then done.
 - **AI-written prompts are labeled as suggestions** and are easy to dismiss.
 - **At most one notification a day**, and fewer if they're ignored.
 
@@ -46,7 +46,7 @@ From Ariel's 1,216 saves (`data/ig-saved-posts-seed.md`) and Reut's export (`dat
 | Finding | Example | What it means for us |
 |---|---|---|
 | **The caption often isn't the tip** | "It's cool that he shared this! #claude #chatgpt #ai" | We need our own title, gist and try prompt, written from whatever text we have. |
-| **27% of Ariel's captions are almost empty** (under 40 characters without hashtags), and 58 have none | "Tag bro #GymMeme…" | No decent try prompt is possible from text alone. These stay in the library but are never picked for Today's 3 (until we can read the video). |
+| **27% of Ariel's captions are almost empty** (under 40 characters without hashtags), and 58 have none | "Tag bro #GymMeme…" | No decent try prompt is possible from text alone. These stay in the library but are never picked for Today's 1 (until we can read the video). |
 | **Comment-for-the-link posts** (about 50 in Ariel's saves) | "Comment "DESIGN" and I'll send you the 5 Claude Code tools" | The try is literally "comment DESIGN and get the link". Show the keyword and a button to open the post. |
 | **Much of what people save isn't a tip** | Memes, SpongeBob theories, Spotify ads, news | Those go to Everything else, not Learn. |
 | **Topics are narrow and personal** | Ariel: AI tools, quant, music production, guitar. Reut: guitar ("Instruments again soon"), design inspo | Sections are whatever the user has. |
@@ -54,18 +54,18 @@ From Ariel's 1,216 saves (`data/ig-saved-posts-seed.md`) and Reut's export (`dat
 
 ## Scope
 
-**In (MVP):** Today's 3 with try prompts; Tried it / Not today / Not for me; "When?" reminders; the weekly ring; spaced "Still got it?" reviews; the daily practice notification with back-off; a short first-time setup; the library (search, topic sections, tip detail); per-topic progress counts.
+**In (MVP):** Today's 1 with try prompts; Tried it / Not today / Not for me; "When?" reminders; the weekly ring; spaced "Still got it?" reviews; the daily practice notification with back-off; a short first-time setup; the library (search, topic sections, tip detail); per-topic progress counts.
 
-**Out (MVP):** AI-generated check questions after a try (later, behind a flag); XP, streaks, badges, leagues; summaries from the video itself (needs transcripts); an AI chat over the saves; user-made folders; notes; more than one Learn tab.
+**Out (MVP):** AI-generated check questions after a try (later, behind a setting that is off by default); XP, streaks, badges, leagues; summaries from the video itself (needs transcripts); an AI chat over the saves; user-made folders; notes; more than one Learn tab.
 
 ## The core loop
 
 ```
-open Learn → weekly ring + Today's 3
+open Learn → weekly ring + Today's 1
    each card:  Tried it ──→ ring fills, small celebration, review in 3 days
                Not today → "When?" → reminder about this save
                Not for me → archived, never picked again
-   all 3 handled → "Done for today" (+ a one-liner)
+   handled → "Done for today" (+ a one-liner, "One more?" link)
 daily notification (chosen time) → one specific save → opens its card
 Monday → fresh week, ring resets, new picks
 ```
@@ -88,12 +88,12 @@ Top to bottom:
 
 1. **Header:** "Learn" and the Everything else button top right (see *Everything else* in [layout-proposal.md](layout-proposal.md)).
 2. **Weekly ring:** "2 of 3 tries this week" in the DailySpend ring style, lime fill. Tap → L5 (progress).
-3. **Monday card** (Mondays only, or the first open after 7+ days away): "New week. 3 saves picked for you." / "Fresh start. 3 saves picked for you."
-4. **Today's 3:** three practice cards (L2), stacked. Handled cards collapse into a small done row ("✓ Box-shift trick"). When all 3 are handled: **"Done for today."** with a one-liner ("Your future self says thanks.") and a quiet **"One more?"** link.
+3. **Monday card** (Mondays only, or the first open after 7+ days away): "New week. Here's today's pick." / "Fresh start. Here's today's pick."
+4. **Today's 1:** one practice card (L2), big. Once it's handled it collapses into a small done row ("✓ Box-shift trick") and **"Done for today."** appears with a one-liner ("Your future self says thanks.") and a quiet **"One more?"** link.
 5. **Search field** (the library starts here).
 6. **Topic sections**, largest first: "🎸 Guitar · 4 tried of 12", a horizontal row of tip cards, **See all →** to L3.
 
-### L2. Practice card (Today's 3)
+### L2. Practice card (Today's 1)
 
 - Thumbnail (fallback: the topic emoji on a dark tile), title, author, topic.
 - The **try prompt**, big and prominent, with a small "Suggested" label: *"Try this (2 min): play the A minor pentatonic box, then shift it up one fret."*
@@ -101,8 +101,8 @@ Top to bottom:
 - A **Still got it?** variant for spaced reviews: same card, prompt reads "You tried this 10 days ago. Still got it?", buttons **Yep** / **Try again**.
 - Buttons:
   - **Tried it** (primary, lime) → ring fills with a small spring animation + haptic, a quip ("Look at you."), the card collapses. Schedules a review in 3 days.
-  - **Not today** → "When?" chips: **Tonight** · **Tomorrow** · **Weekend** → a local notification about this save at that time ("Tonight" = the user's evening slot). The card is replaced by the next pick.
-  - **Not for me** → archived: stays in the library, never picked again. Undo for 3 seconds.
+  - **Not today** → "When?" chips: **Tonight** · **Tomorrow** · **Weekend** → a local notification about this save at that time ("Tonight" = the user's evening slot). The card shows as handled ("Tonight ⏰"), with a small **Pick another** link.
+  - **Not for me** → archived: stays in the library, never picked again. Undo for 3 seconds. Since today's pick was a miss, a new one replaces it (once a day; after that, "Done for today").
 - **Open the reel ↗** as a small secondary link (doesn't count as a try).
 
 ### L3. Topic page
@@ -136,17 +136,17 @@ Deliberately simple, about identity, not points:
 - Matches the title, gist, key points, try prompt, caption, hashtags, author and topic. Case- and accent-insensitive; works for Hebrew.
 - Empty: "Nothing in Learn for 'x'." + **Search Everything else**.
 
-## Picking Today's 3
+## Picking Today's 1
 
 A pure, testable function. Each day (stable for the whole day):
 
-1. **Due first:** reminders the user scheduled for today ("Not today → Tomorrow"), then spaced reviews that are due.
+1. **Due first:** a reminder the user scheduled for today ("Not today → Tomorrow"), then a spaced review that's due. If several are due, the others become the next "One more?" picks, then roll to following days.
 2. **Fill the rest** by weighted random over tips that are not tried, not archived, not thin:
    - base weight 1;
    - × 2 if the user swiped "want to try" in setup;
    - × (1 + tries in that topic ÷ 5), so topics the user acts on come up more;
    - × 0.2 if it was shown in the last 14 days (so everything gets seen before repeats).
-3. Never two tips from the same topic when another topic is available, if the user has 2+ topics.
+3. Rotate topics: don't pick the same topic two days in a row when another topic is available.
 
 "One more?" draws one extra tip from the same pool.
 
@@ -167,10 +167,10 @@ Local only (`UNUserNotificationCenter`), all rules in one pure `ReminderPolicy` 
 
 | State | What the user sees |
 |---|---|
-| **Setup skipped** | Today's 3 from the biggest topic; goal 3; reminders off, with a small "Get a nudge?" row in L1. |
-| **Notifications denied** | Everything works; the "When?" chips set in-app reminders that show at the top of Today's 3 instead. |
-| **All tips tried or archived** | Today's 3 shows only due reviews; if none: "You've tried everything you saved. Go save more." |
-| **Only thin tips** | Today's 3 is empty with an explanation; the library still works. |
+| **Setup skipped** | Today's 1 from the biggest topic; goal 3; reminders off, with a small "Get a nudge?" row in L1. |
+| **Notifications denied** | Everything works; the "When?" chips set in-app reminders that show at the top of Today's 1 instead. |
+| **All tips tried or archived** | Today's 1 shows only due reviews; if none: "You've tried everything you saved. Go save more." |
+| **Only thin tips** | Today's 1 is empty with an explanation; the library still works. |
 | **Away 7+ days** | "Fresh start" card; no mention of what was missed. |
 | **No search results** | See L6. |
 
@@ -200,7 +200,7 @@ Local only (`UNUserNotificationCenter`), all rules in one pure `ReminderPolicy` 
 | `tip_type`: tool / technique / tutorial / list / idea | Card badge; tunes the prompt (a tool's try is "open it and do X"). |
 | `key_points[]` (0–5) | Only when the caption lists them. Never invented. |
 | `cta_keyword` | "DESIGN" for comment-for-the-link posts. |
-| `is_thin` | Too little text to say what the tip is → library only, never in Today's 3. |
+| `is_thin` | Too little text to say what the tip is → library only, never in Today's 1. |
 
 ### User state (on device)
 
@@ -237,7 +237,7 @@ struct PracticeState: Codable {              // user's, persisted separately so
 
 - **The practice loop is shared with Fitness later.** Build it in `ios/Hindsight/Practice/`, generic over a small protocol (id, title, prompt, topic), and use it from Learn. Don't build Fitness now.
   - `PracticeState.swift`, `PracticeStore.swift` (persists user state; loads/saves JSON in Application Support).
-  - `TodayPicker.swift`: the *Picking Today's 3* rules as a pure function; date and random source injected.
+  - `TodayPicker.swift`: the *Picking Today's 1* rules as a pure function; date and random source injected.
   - `WeeklyProgress.swift`: ring math (week starts Monday, the first-week setup segment).
   - `ReminderPolicy.swift`: the notification rules as pure logic (what to send, when, which template, back-off). `ReminderScheduler.swift`: the thin `UNUserNotificationCenter` wrapper.
   - `PracticeCard.swift`, `WeeklyRing.swift`, `WhenChips.swift`: reusable views.
@@ -245,7 +245,7 @@ struct PracticeState: Codable {              // user's, persisted separately so
 - **Depends on** (built Thursday): `Design/Theme.swift`, `Layout/LayoutConfig.swift`, the extraction fixture JSON (must include `try_prompt`), the confirmation card's swipe component, the shared Everything else button.
 - **Notification taps:** set `UNUserNotificationCenter.current().delegate` from our own `ReminderScheduler`, not from `HindsightApp.swift`, to stay out of Ariel's file (see hotspots).
 - **Tests** (`ios/HindsightTests/PracticeTests.swift`, `LearnTests.swift`):
-  - picker: due items first; never tried/archived/thin; same picks all day; the 14-day repeat penalty; topic spread.
+  - picker: due items first; never tried/archived/thin; same pick all day; the 14-day repeat penalty; topic rotation across days.
   - weekly progress: resets Monday; the first-week setup segment; no "broken" state exists.
   - reminder policy: max 1/day; never the same template twice in a row; back-off after 3 ignored; stops after 7 quiet days; restarts on open.
   - spaced review: 3 → 10 → 30 days; "Try again" resets the step.
@@ -264,10 +264,10 @@ struct PracticeState: Codable {              // user's, persisted separately so
 ## Done when
 
 - [ ] First open of Learn runs setup (5 swipes, goal, reminder time) in under a minute, and the ring starts with the setup segment filled.
-- [ ] Today's 3 never includes thin, archived or tried tips; due reminders and reviews come first; picks don't change during the day.
+- [ ] Today's 1 never includes thin, archived or tried tips; due reminders and reviews come first; the pick doesn't change during the day.
 - [ ] Tried it fills the ring with animation + haptic; the tip comes back as "Still got it?" after 3 days (testable with an injected clock).
 - [ ] Not today → Tonight schedules a local notification that opens that save's card.
-- [ ] After 3 handled cards: "Done for today", and nothing nags until tomorrow.
+- [ ] After today's card is handled: "Done for today", and nothing nags until tomorrow.
 - [ ] No screen ever shows a broken streak, a missed-days count, points or badges.
 - [ ] Notifications: max 1 a day, rotating wording, back-off and stop rules pass their unit tests.
 - [ ] With Ariel's seed: Learn sections for his main topics; comment-for-the-link posts show the keyword prompt.
@@ -276,17 +276,17 @@ struct PracticeState: Codable {              // user's, persisted separately so
 
 ## Decided (was open in v1)
 
-1. **Home layout:** the practice loop (ring + Today's 3) on top, the library (search + topic sections) below.
+1. **Home layout:** the practice loop (ring + Today's 1) on top, the library (search + topic sections) below.
 2. **"Tried it"** is the core action of the loop, not a side toggle.
-3. **Resurfacing** is Today's 3 plus the daily notification (in the MVP).
-4. **Thin posts** stay in the library with a fallback title but are never picked for Today's 3.
+3. **Resurfacing** is Today's 1 plus the daily notification (in the MVP).
+4. **Thin posts** stay in the library with a fallback title but are never picked for Today's 1.
 
-## Open questions
+## Decided (was open in v2)
 
-1. **Weekly goal default:** 3 tries a week (draft). Too low for motivated users, or right for "aspirational"?
-2. **Today's 3 or Today's 1?** Readwise shows a small batch; a single card is even easier to finish. Draft: 3, with "Done for today" after.
-3. **The "Suggested" label on AI-written prompts:** keep it visible (draft, honest), or drop it once prompts are good?
-4. **Check questions after a try** (a one-question quiz from the caption): the research supports them, but AI questions can be wrong. Later, behind a flag (draft)?
+1. **Weekly goal:** 3 tries a week by default, customizable (setup and the progress sheet).
+2. **Today's 1**, not Today's 3. One card a day, then "Done for today", with "One more?" for the motivated.
+3. **The "Suggested" label** on AI-written prompts stays visible.
+4. **Check questions after a try:** built later, behind a setting that's **off by default**. Not in the MVP.
 
 ## Sources
 
