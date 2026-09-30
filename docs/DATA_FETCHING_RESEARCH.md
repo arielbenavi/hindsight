@@ -82,6 +82,8 @@ The parser still accepts the markdown format. The canonical format is the Swift 
 | Data Portability API | likes, favorites (activity scopes) | **EEA/UK accounts only** (DMA compliance); also 3–4 week review, privacy policy URL, business email, 4 UX mockups, data-deletion description |
 | Research API | public likes | academics only |
 
+**Third-party scraper APIs (tested 2026-09-30):** YepAPI's `user-favorites` needs only a numeric user ID, but it returns nothing unless the user's Favorites tab is public (`openFavorite: true`). Both test accounts were private, so both returned 0 videos. Asking users to publish their Favorites is a privacy cost and it's still scraping, so it's ruled out.
+
 Unofficial scraping of the user's logged-in session (like the old IG cookie approach) is possible, but it breaks TikTok's terms, risks the user's account and would likely fail App Store review. Not recommended.
 
 ### What we can do

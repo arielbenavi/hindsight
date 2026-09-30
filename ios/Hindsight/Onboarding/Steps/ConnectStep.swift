@@ -12,7 +12,10 @@ struct ConnectStep: View {
             museCard
 
             XConnectRow(store: store)
-            comingSoonRow(.tiktok, detail: "Waiting on TikTok's data API approval.")
+            comingSoonRow(Platform.tiktok.displayName, symbol: Platform.tiktok.symbol,
+                          detail: "Share any TikTok to hindsight. Coming soon.")
+            comingSoonRow("WhatsApp notes", symbol: "message.fill",
+                          detail: "Links and notes you send yourself on WhatsApp.")
         } actions: {
             Button("Continue", action: model.next)
                 .buttonStyle(.onboardingPrimary)
@@ -52,11 +55,15 @@ struct ConnectStep: View {
         .onboardingCard()
     }
 
-    private func comingSoonRow(_ platform: Platform, detail: String) -> some View {
+    private func comingSoonRow(_ name: String, symbol: String, detail: String) -> some View {
         HStack(spacing: 14) {
-            PlatformBadge(platform: platform)
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .bold))
+                .frame(width: 36, height: 36)
+                .background(OnboardingStyle.stroke, in: .circle)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(platform.displayName).font(OnboardingStyle.title)
+                Text(name).font(OnboardingStyle.title)
                 Text(detail)
                     .font(OnboardingStyle.caption)
                     .foregroundStyle(OnboardingStyle.muted)
