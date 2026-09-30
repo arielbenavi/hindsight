@@ -28,6 +28,18 @@ enum MuseLauncher {
         return opened ? .opened : .notInstalled
     }
 
+    /// WhatsApp route. Muse's WhatsApp chat has no phone number and doesn't show
+    /// up in WhatsApp's "send to…" picker, so a prefilled `wa.me/?text=` link
+    /// can't reach it. Instead: copy the prompt and open WhatsApp; the user
+    /// opens the Muse chat, pastes and sends.
+    static let whatsAppURL = URL(string: "whatsapp://")!
+
+    static func launchWhatsApp(prompt: String) async -> Outcome {
+        UIPasteboard.general.string = prompt
+        let opened = await UIApplication.shared.open(whatsAppURL)
+        return opened ? .opened : .notInstalled
+    }
+
     #if DEBUG
     /// Links to try by hand on a device, to find one that pre-fills a Muse chat.
     static let linkLabCandidates: [(label: String, url: String)] = [

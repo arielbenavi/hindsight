@@ -1,29 +1,58 @@
 import Foundation
 
 /// The message we hand to Muse. It pins Muse to a JSON schema that
-/// `SavedPostParser.parseJSON` reads, so we don't depend on how Muse
-/// feels like formatting a list that day.
+/// `SavedPostParser.parseJSON` reads (the `posts[]` keys of
+/// docs/data-contract.md), so we don't depend on how Muse feels like
+/// formatting a list that day.
 enum MusePrompt {
+    enum Window: Equatable {
+        /// Everything, newest first.
+        case all
+        /// New saves since the newest one we have.
+        case after(Date)
+        /// Backfill: saves older than the oldest one we have.
+        case before(Date)
+    }
+
+    /// Full captions make each item long, so fewer fit in one reply.
+    static let defaultLimit = 50
+
     static func text(
         platforms: [Platform] = [.instagram, .facebook],
-        since: Date? = nil,
-        limit: Int = 100
+        window: Window = .all,
+        limit: Int = defaultLimit
     ) -> String {
         let names = platforms.map(\.displayName).formatted(.list(type: .and))
-        let window = since.map { " saved after \($0.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))" } ?? ""
         let values = platforms.map { "\"\($0.rawValue)\"" }.joined(separator: " or ")
+        let scope = switch window {
+        case .all: ""
+        case .after(let date): " saved after \(day(date))"
+        case .before(let date): " saved before \(day(date))"
+        }
         return """
-        List my saved posts from \(names)\(window), newest first, up to \(limit).
+        List my saved posts from \(names)\(scope), newest first, up to \(limit). \
+        Include the name of the saved collection each one is in, if any.
 
-        Reply with only one ```json code block holding an array. Each item has exactly these keys:
+        Reply with only one ```json code block holding an array. Each item has these keys \
+        (use null or [] when you don't know; never guess):
         - "platform": \(values)
-        - "author": the account's username, without @
-        - "kind": "reel", "post", "carousel" or "video"
-        - "date": YYYY-MM-DD, when I saved it if you know, otherwise when it was posted
-        - "caption": the first 160 characters of the caption, or null
         - "url": the post's permalink
+        - "kind": "reel", "post", "carousel" or "video"
+        - "author": the account's username, without @
+        - "author_display_name": the account's display name
+        - "caption": the full caption, exactly as written (don't shorten or translate it)
+        - "mentions": accounts tagged or @mentioned, as [{"username", "display_name"}]
+        - "collections": names of my saved collections that contain it
+        - "saved_at": when I saved it (YYYY-MM-DD or full timestamp)
+        - "posted_at": when it was posted
+        - "location_tag": the post's location sticker as {"name", "address"}, or null
+        - "thumbnail_url": the post's image URL, or null
 
         No commentary before or after the code block. This is for my hindsight app.
         """
+    }
+
+    static func day(_ date: Date) -> String {
+        date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
     }
 }
