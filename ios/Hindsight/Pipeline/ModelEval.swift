@@ -105,6 +105,9 @@ struct EvalRow: Codable, Sendable {
     var goldPlaces: [String]
     var error: String?
     var seconds: Double
+    /// Tokens this post cost (both requests), from `LanguageModelSession.usage`.
+    var inputTokens = 0
+    var outputTokens = 0
 }
 
 struct EvalSummary: Codable, Sendable {
@@ -133,6 +136,8 @@ struct EvalSummary: Codable, Sendable {
         }
         return (found, total)
     }
+    var tokens: (input: Int, output: Int) { (rows.reduce(0) { $0 + $1.inputTokens }, rows.reduce(0) { $0 + $1.outputTokens }) }
+
     var medianSeconds: Double {
         let s = answered.map(\.seconds).sorted()
         return s.isEmpty ? 0 : s[s.count / 2]
@@ -152,6 +157,9 @@ struct EvalSummary: Codable, Sendable {
         lines.append("  Hebrew: \(h.answered)/\(h.total) answered, \(h.correct) correct")
         let p = placeRecall
         lines.append("  Place names: \(p.found)/\(p.total) · median \(String(format: "%.1f", medianSeconds)) s/post")
+        let t = tokens
+        let perPost = rows.isEmpty ? 0 : (t.input + t.output) / rows.count
+        lines.append("  Tokens: \(t.input.formatted()) in + \(t.output.formatted()) out · ~\(perPost) per post")
         for gold in ["map", "learn", "fitness", "none"] { lines.append("  \(gold) → \(confusion[gold] ?? [:])") }
         if stoppedForQuota { lines.append("  ⚠️ stopped: quota reached") }
         if let quotaAfter { lines.append("  quota after: \(quotaAfter)") }
@@ -179,7 +187,11 @@ final class ModelEvalRunner {
     func runProbe() async {
         var lines: [String] = []
         let local = SystemLanguageModel.default
-        lines.append("On-device: \(local.availability)")
+        if #available(iOS 27, *) {
+            lines.append("On-device: \(local.availability) · model: \(local.variant.displayName)")
+        } else {
+            lines.append("On-device: \(local.availability)")
+        }
         lines.append("  Hebrew: \(local.supportsLocale(Locale(identifier: "he_IL")) ? "yes" : "no") · context \(local.contextSize) tokens")
         lines.append("  languages: \(Self.codes(local.supportedLanguages))")
         if #available(iOS 27, *) {
@@ -231,9 +243,11 @@ final class ModelEvalRunner {
         let start = ContinuousClock.now
         do {
             guard let session = session(engine, instructions: EvalPrompts.bucket) else { throw EvalUnavailable() }
+            defer { count(session, into: &row) }
             let bucket = try await session.respond(to: prompt, generating: EvalBucket.self, options: GenerationOptions(sampling: .greedy))
             row.screen = bucket.content.screen.rawValue
             if bucket.content.screen == .map, let places = self.session(engine, instructions: EvalPrompts.places) {
+                defer { count(places, into: &row) }
                 let found = try await places.respond(to: prompt, generating: EvalPlaces.self, options: GenerationOptions(sampling: .greedy))
                 row.places = found.content.places.map(\.name)
             }
@@ -256,6 +270,13 @@ final class ModelEvalRunner {
     }
 
     private struct EvalUnavailable: Error {}
+
+    /// Token usage is iOS 27+; on iOS 26 the counts stay 0.
+    private static func count(_ session: LanguageModelSession, into row: inout EvalRow) {
+        guard #available(iOS 27, *) else { return }
+        row.inputTokens += session.usage.input.totalTokenCount
+        row.outputTokens += session.usage.output.totalTokenCount
+    }
 
     private static func codes(_ languages: Set<Locale.Language>) -> String {
         Set(languages.compactMap { $0.languageCode?.identifier }).sorted().joined(separator: " ")
