@@ -7,9 +7,13 @@ struct MuseSyncView: View {
     let store: SavedPostStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
-    @State private var phase: Phase = .ready
+    @State fileprivate var phase: Phase = .ready
     @State private var launchOutcome: MuseLauncher.Outcome?
     @State private var request: Request = .newer
+    #if DEBUG
+    /// Muse connector experiment: `<tunnel>/<token>/saves` (see connector/README.md).
+    @AppStorage("connectorSavesURL") private var connectorSavesURL = ""
+    #endif
 
     /// What to ask Muse for.
     enum Request: String, CaseIterable, Identifiable {
@@ -89,6 +93,7 @@ struct MuseSyncView: View {
                 }
 
                 #if DEBUG
+                connectorPull
                 MuseLinkLab()
                 #endif
             } actions: {
@@ -195,7 +200,7 @@ struct MuseSyncView: View {
         }
     }
 
-    private func importReply(_ text: String) {
+    fileprivate func importReply(_ text: String) {
         let result = SavedPostParser.parse(text)
         let byPlatform = Dictionary(grouping: result.posts, by: \.platform).mapValues(\.count)
         let fullCaptions = result.posts.count { ($0.caption?.count ?? 0) > 160 }
@@ -221,6 +226,39 @@ struct MuseSyncView: View {
 }
 
 #if DEBUG
+extension MuseSyncView {
+    /// Dev-only: pull what Muse sent to the local connector (connector/server.py).
+    var connectorPull: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("MUSE CONNECTOR (DEV)")
+                .font(.system(.caption, design: .rounded, weight: .heavy))
+                .tracking(1.4)
+                .foregroundStyle(OnboardingStyle.muted)
+            TextField("https://…trycloudflare.com/<token>/saves", text: $connectorSavesURL)
+                .font(.system(.caption, design: .monospaced))
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .onboardingCard(padding: 12)
+            Button("Pull from connector") { Task { await pullFromConnector() } }
+                .buttonStyle(.onboardingSecondary)
+                .disabled(URL(string: connectorSavesURL)?.scheme?.hasPrefix("http") != true)
+        }
+    }
+
+    func pullFromConnector() async {
+        guard let url = URL(string: connectorSavesURL) else { return }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let text = String(decoding: data, as: UTF8.self)
+            DebugLog.write("connector pull: \(data.count) bytes")
+            importReply(text)
+        } catch {
+            DebugLog.write("connector pull failed: \(error)")
+            phase = .failed("Couldn't reach the connector: \(error.localizedDescription)")
+        }
+    }
+}
+
 /// Dev-only: try candidate Muse links on a real device and log which open.
 private struct MuseLinkLab: View {
     @State private var results: [String: Bool] = [:]
