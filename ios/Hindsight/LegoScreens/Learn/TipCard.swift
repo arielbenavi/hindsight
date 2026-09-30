@@ -63,7 +63,8 @@ struct TipCard: View {
         switch LearnStatus.kind(state) {
         case .tried: Tag(text: "Tried ✓", color: Theme.lime)
         case .archived: Tag(text: "Not for me", color: Theme.muted)
-        case .notTried: Tag(text: tip.type.title, color: Theme.secondary)
+        case .notTried:
+            if tip.isGated { Tag(text: "Behind a DM", color: Theme.violet) } else { Tag(text: tip.type.title, color: Theme.secondary) }
         }
     }
 }

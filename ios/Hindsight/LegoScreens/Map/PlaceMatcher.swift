@@ -23,8 +23,12 @@ struct MatchCache: Codable, Sendable {
     var areas: [String: Triage.Area?] = [:]
     var outcomes: [String: SearchOutcome] = [:]
 
+    /// Bump when the search strategy changes, so old outcomes aren't reused.
+    static let version = "v2"
+
     static func key(for place: ExtractedPlace) -> String {
-        [place.name, place.areaHint ?? "", place.address ?? ""].joined(separator: "|").lowercased()
+        ([version, place.name, place.areaHint ?? "", place.address ?? "", place.type.rawValue] + [place.handle ?? ""])
+            .joined(separator: "|").lowercased()
     }
 
     mutating func merge(_ other: MatchCache) {
@@ -50,6 +54,12 @@ actor MapKitPlaceSearcher: PlaceSearching {
         self.spacing = spacing
     }
 
+    /// Uses the post's context, not just the name (a "FAV DINNER SPOT: Jean's" is a
+    /// restaurant, not a jeans store):
+    /// 1. the name in the area, limited to place categories that fit the type;
+    /// 2. if nothing matches by name: the same without the category limit;
+    /// 3. then the @handle's words ("thegoldenswan_nyc" → "thegoldenswan nyc");
+    /// results whose name matches (the name or the handle) come first.
     func search(_ place: ExtractedPlace) async throws -> SearchOutcome {
         let key = MatchCache.key(for: place)
         if let cached = cache.outcomes[key] { return cached }
@@ -57,8 +67,16 @@ actor MapKitPlaceSearcher: PlaceSearching {
         var query = place.name
         if let address = place.address { query += ", \(address)" }
         else if area == nil, let hint = place.areaHint { query += ", \(hint)" }
-        let items = try await run(query: query, area: area, types: .pointOfInterest)
-        let outcome = SearchOutcome(results: Array(items.prefix(6)), area: area)
+
+        var found = try await run(query: query, area: area, types: .pointOfInterest, categories: place.type.poiCategories)
+        if !Triage.hasNameMatch(found, for: place) {
+            found += try await run(query: query, area: area, types: .pointOfInterest, categories: nil)
+        }
+        if !Triage.hasNameMatch(found, for: place), let handleQuery = Triage.handleQuery(place.handle),
+           handleQuery != TextMatch.fold(place.name) {
+            found += try await run(query: handleQuery, area: area, types: .pointOfInterest, categories: nil)
+        }
+        let outcome = SearchOutcome(results: Array(Triage.rank(found, for: place).prefix(6)), area: area)
         cache.outcomes[key] = outcome
         saveSoon()
         return outcome
@@ -97,10 +115,12 @@ actor MapKitPlaceSearcher: PlaceSearching {
         return area
     }
 
-    private func run(query: String, area: Triage.Area?, types: MKLocalSearch.ResultType) async throws -> [MatchedPlace] {
+    private func run(query: String, area: Triage.Area?, types: MKLocalSearch.ResultType,
+                     categories: [MKPointOfInterestCategory]? = nil) async throws -> [MatchedPlace] {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
         request.resultTypes = types
+        if let categories { request.pointOfInterestFilter = MKPointOfInterestFilter(including: categories) }
         if let area {
             request.region = MKCoordinateRegion(center: area.center.clCoordinate,
                                                 latitudinalMeters: area.radius * 2, longitudinalMeters: area.radius * 2)
@@ -156,5 +176,18 @@ extension MatchedPlace {
             cityWithContext: item.addressRepresentations?.cityWithContext,
             category: item.pointOfInterestCategory?.rawValue.replacingOccurrences(of: "MKPOICategory", with: "")
         )
+    }
+}
+
+extension PlaceType {
+    /// Apple Maps categories a place of this type can be. `other` isn't limited.
+    var poiCategories: [MKPointOfInterestCategory]? {
+        switch self {
+        case .food: [.restaurant, .cafe, .bakery, .nightlife, .brewery, .winery]
+        case .cafe: [.cafe, .bakery, .restaurant]
+        case .bakery: [.bakery, .cafe, .restaurant]
+        case .bar: [.nightlife, .brewery, .winery, .distillery, .restaurant]
+        case .other: nil
+        }
     }
 }

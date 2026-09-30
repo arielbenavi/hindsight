@@ -14,13 +14,27 @@ struct Tip: Identifiable, Hashable, Sendable {
     var ctaKeyword: String?
     var isThin: Bool
 
-    /// Only tips with a concrete prompt go into Today's 1 (thin ones stay in the library).
-    var isPickable: Bool { !isThin && tryPrompt != nil }
+    /// "Comment GUIDE and I'll DM it to you": the real content is behind a DM, so the
+    /// caption's call to action isn't a tip. Gated posts stay in the library (with a
+    /// "Behind a DM" tag) but are never practiced. If the caption itself lists the key
+    /// points, there is a tip after all.
+    var isGated: Bool { ctaKeyword != nil && keyPoints.isEmpty }
 
-    /// The card's prompt: the CTA wording for comment-for-the-link posts.
+    /// Only tips with a concrete prompt go into Today's 1 and setup; thin and gated
+    /// ones stay in the library.
+    var isPickable: Bool { !isThin && !isGated && prompt != nil }
+
+    /// The try prompt, never "comment X to get the link" (that's not practice).
     var prompt: String? {
-        if let ctaKeyword, tryPrompt == nil { return "Comment \(ctaKeyword) on the post to get the link." }
+        guard let tryPrompt, !Self.isCommentInstruction(tryPrompt, keyword: ctaKeyword) else { return nil }
         return tryPrompt
+    }
+
+    static func isCommentInstruction(_ text: String, keyword: String?) -> Bool {
+        let t = TextMatch.fold(text)
+        if t.hasPrefix("comment") || t.contains("comment \"") || t.contains("dm ") { return true }
+        if let keyword, t.contains("comment"), t.contains(TextMatch.fold(keyword)) { return true }
+        return false
     }
 
     init(post: ContractPost, topicID: String, extracted: ExtractedTip?) {
@@ -71,7 +85,9 @@ struct LearnCatalog: Sendable {
                 guard let post = data.post(pid) else { return nil }
                 return Tip(post: post, topicID: id, extracted: data.item(for: pid)?.tip)
             }
-            if !tips.isEmpty { sections.append(LearnSection(topic: topic, tips: tips)) }
+            // gated ("comment X for the guide") posts go to the end of their section
+            let sorted = tips.filter { !$0.isGated } + tips.filter(\.isGated)
+            if !sorted.isEmpty { sections.append(LearnSection(topic: topic, tips: sorted)) }
         }
         self.sections = sections.sorted { $0.tips.count > $1.tips.count }
         tipsByID = Dictionary(uniqueKeysWithValues: self.sections.flatMap(\.tips).map { ($0.id, $0) })

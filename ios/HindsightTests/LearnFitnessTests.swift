@@ -38,10 +38,30 @@ struct LearnTests {
         #expect(guitar.tips.contains { $0.tryPrompt != nil })
     }
 
-    @Test func commentForTheLinkPostsShowTheKeyword() throws {
+    @Test func commentForTheLinkPostsKeepTheirKeyword() throws {
         let tips = try catalog("ariel").tips
         let cta = try #require(tips.first { $0.ctaKeyword == "DESIGN" })
-        #expect(cta.prompt?.contains("DESIGN") == true)
+        #expect(cta.isGated)
+    }
+
+    @Test func commentForTheGuidePostsAreGatedNotPracticed() throws {
+        let post = ContractPost(id: "instagram:g", url: URL(string: "https://www.instagram.com/p/g/")!, author: "g",
+                                caption: "Comment GUIDE and I'll send you my 5 tools")
+        let gated = Tip(post: post, topicID: "ai", extracted: ExtractedTip(
+            title: "5 AI tools", gist: nil, tryPrompt: "Comment GUIDE on the post to get the tools.",
+            tipType: .list, keyPoints: [], ctaKeyword: "GUIDE", isThin: false))
+        #expect(gated.isGated)
+        #expect(!gated.isPickable)
+        #expect(gated.prompt == nil)
+        // with the key points in the caption, it's a real tip, but "comment X" is never the prompt
+        let withPoints = Tip(post: post, topicID: "ai", extracted: ExtractedTip(
+            title: "5 AI tools", gist: nil, tryPrompt: "Open Figma AI and make one screen.", tipType: .list,
+            keyPoints: ["Figma AI", "v0"], ctaKeyword: "GUIDE", isThin: false))
+        #expect(!withPoints.isGated)
+        #expect(withPoints.isPickable)
+        for tip in try catalog("ariel").tips + catalog("reut").tips where tip.isPickable {
+            #expect(!Tip.isCommentInstruction(tip.prompt ?? "", keyword: tip.ctaKeyword))
+        }
     }
 
     @Test func thinTipsAreNeverPickable() throws {

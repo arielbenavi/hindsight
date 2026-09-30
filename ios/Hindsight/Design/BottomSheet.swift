@@ -24,7 +24,9 @@ struct BottomSheet<Content: View>: View {
     var body: some View {
         GeometryReader { geo in
             let total = geo.size.height
-            let height = max(SheetDetent.peek.height(in: total) - 40, detent.height(in: total) - drag)
+            // The card's background runs down behind the tab bar; its content stops above it.
+            let bottomInset = geo.safeAreaInsets.bottom
+            let height = max(SheetDetent.peek.height(in: total) - 40, detent.height(in: total) - drag) + bottomInset
             VStack(spacing: 0) {
                 Capsule().fill(Theme.muted).frame(width: 40, height: 5).padding(.top, 8).padding(.bottom, 6)
                     .frame(maxWidth: .infinity)
@@ -33,12 +35,14 @@ struct BottomSheet<Content: View>: View {
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .clipped()
+                    .padding(.bottom, bottomInset)
             }
             .frame(height: height)
-            .background(Theme.background.opacity(0.97), in: UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26))
+            .background(Theme.background, in: UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26))
             .overlay(UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26).strokeBorder(Theme.stroke))
             .shadow(color: .black.opacity(0.4), radius: 18, y: -4)
             .frame(maxHeight: .infinity, alignment: .bottom)
+            .offset(y: bottomInset)
             .animation(.spring(duration: 0.35, bounce: 0.15), value: detent)
         }
     }

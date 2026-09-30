@@ -59,7 +59,15 @@ final class PlaceStore {
         recordsFile = JSONFile(name: "places", directory: directory)
         statesFile = JSONFile(name: "place-state", directory: directory)
         filtersFile = JSONFile(name: "map-filters", directory: directory)
-        records = recordsFile.load() ?? [:]
+        var loaded = recordsFile.load() ?? [:]
+        // A new search strategy re-matches everything the user hasn't answered.
+        let meta = JSONFile<[String: String]>(name: "places-meta", directory: directory)
+        if meta.load()?["matcher"] != MatchCache.version {
+            loaded = loaded.filter { $0.value.confirmedAt != nil || $0.value.status == .skipped }
+            recordsFile.save(loaded)
+            meta.save(["matcher": MatchCache.version])
+        }
+        records = loaded
         userStates = statesFile.load() ?? [:]
         filters = filtersFile.load() ?? MapFilters()
         self.searcher = searcher ?? MapKitPlaceSearcher(directory: directory, bundled: bundledCache)

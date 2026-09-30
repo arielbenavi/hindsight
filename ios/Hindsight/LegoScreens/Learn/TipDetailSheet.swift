@@ -108,7 +108,7 @@ struct TipDetailSheet: View {
 
     private func ctaNotice(_ keyword: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Comment \(keyword) on the post to get the link.", systemImage: "text.bubble")
+            Label("The creator sends this by DM. Comment \(keyword) on the post to get it.", systemImage: "text.bubble")
                 .font(Theme.body(15, weight: .semibold))
             Button { PostOpener.open(tip.post, openURL: openURL) } label: {
                 Label("Open post to comment", systemImage: "arrow.up.right")

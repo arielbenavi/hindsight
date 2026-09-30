@@ -1,4 +1,5 @@
 import Foundation
+import MapKit
 import Testing
 @testable import Hindsight
 
@@ -49,6 +50,31 @@ struct MapTests {
     @Test func outsideTheAreaOrWrongNameIsAsked() {
         #expect(Triage.status(for: place("Semma"), results: [match("Semma", 34.05, -118.24)], area: westVillage) == .ask)
         #expect(Triage.status(for: place("Semma"), results: [match("Joe's Pizza")], area: westVillage) == .ask)
+    }
+
+    @Test func namesAreNotStrippedToScraps() {
+        // "New York AC" (the Athletic Club) must not match an air-conditioning company.
+        #expect(!Triage.namesMatch("New York AC", "Friedrich AC"))
+        #expect(Triage.namesMatch("The Golden Swan", "Golden Swan"))
+    }
+
+    @Test func nameMatchesAreRankedFirstAndHandlesCount() {
+        var jeans = place("Jean's")
+        jeans.handle = "jeanslafayette"
+        let ranked = Triage.rank([match("Target"), match("Coach"), match("Jean's")], for: jeans)
+        #expect(ranked.first?.name == "Jean's")
+        var swan = place("Golden Swan")
+        swan.handle = "thegoldenswan_nyc"
+        #expect(Triage.matches(match("The Golden Swan"), swan))
+        #expect(!Triage.hasNameMatch([match("Target")], for: jeans))
+        #expect(Triage.handleQuery("thegoldenswan_nyc") == "thegoldenswan nyc")
+    }
+
+    @Test func placeTypesLimitAppleMapsCategories() {
+        #expect(PlaceType.food.poiCategories?.contains(.restaurant) == true)
+        #expect(PlaceType.food.poiCategories?.contains(.store) == false)
+        #expect(PlaceType.food.poiCategories?.contains(.foodMarket) == false)
+        #expect(PlaceType.other.poiCategories == nil)
     }
 
     @Test func noResultsIsCantTell() {

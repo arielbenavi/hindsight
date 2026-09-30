@@ -64,7 +64,37 @@ enum Triage {
         let words = folded.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
         let stop: Set<String> = ["the", "nyc", "new", "york", "cafe", "restaurant", "bar", "and"]
         let kept = words.filter { !stop.contains($0) }
-        return kept.isEmpty ? words : kept
+        // Don't strip a name down to a scrap ("New York AC" must not become just "ac").
+        return kept.joined().count < 4 ? words : kept
+    }
+
+    /// Does any result's name match the place (by name or by its @handle)?
+    static func hasNameMatch(_ results: [MatchedPlace], for place: ExtractedPlace) -> Bool {
+        results.contains { matches($0, place) }
+    }
+
+    /// Name matches first (keeping MapKit's order otherwise), duplicates removed.
+    static func rank(_ results: [MatchedPlace], for place: ExtractedPlace) -> [MatchedPlace] {
+        var seen = Set<String>()
+        let unique = results.filter { seen.insert($0.id).inserted }
+        return unique.filter { matches($0, place) } + unique.filter { !matches($0, place) }
+    }
+
+    static func matches(_ result: MatchedPlace, _ place: ExtractedPlace) -> Bool {
+        if namesMatch(place.name, result.name) { return true }
+        guard let handle = place.handle else { return false }
+        // "thegoldenswan_nyc" contains "goldenswan"
+        let h = TextMatch.fold(handle).filter { $0.isLetter || $0.isNumber }
+        let n = normalize(result.name).joined()
+        return n.count >= 4 && h.contains(n)
+    }
+
+    /// A search query from an @handle: separators become spaces.
+    static func handleQuery(_ handle: String?) -> String? {
+        guard let handle, !handle.isEmpty else { return nil }
+        let words = handle.replacingOccurrences(of: "_", with: " ").replacingOccurrences(of: ".", with: " ")
+            .split(separator: " ").map(String.init).filter { !$0.isEmpty }
+        return words.isEmpty ? nil : TextMatch.fold(words.joined(separator: " "))
     }
 
     /// The onboarding pass: posts with Ask places, strongest first, one card per
