@@ -154,7 +154,7 @@ A pure, testable function. Each day (stable for the whole day):
 
 Local only (`UNUserNotificationCenter`), all rules in one pure `ReminderPolicy` type:
 
-- **At most 1 practice notification a day**, at the chosen time. "When?" reminders are extra but never more than one at the same time.
+- **At most 1 practice notification a day**, at the chosen time. With Fitness in the app too, it's one app-chosen nudge a day **across both tabs** (see *Notifications across Learn and Fitness* in [fitness.md](fitness.md)). "When?" reminders are extra but never more than one at the same time.
 - **Always about a specific save.** Rotating templates, never the same one twice in a row, e.g.:
   - "2 min tonight? The box-shift trick you saved in March."
   - "You saved this for a reason: 'Diminished scale tricks'."
