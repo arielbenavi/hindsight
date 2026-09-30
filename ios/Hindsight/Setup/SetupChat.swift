@@ -208,7 +208,12 @@ final class SetupChatModel {
 
     // B1
     private func found() async {
+        let total = data.posts.count
         switch proposal.situation {
+        case .nothingFits where total < LayoutRules.fewSaves, .fewSaves:
+            await say("That's only \(total) \(total == 1 ? "save" : "saves") so far, not enough to build much yet. Here's what's there:")
+            await say("", kind: .topics, delay: .milliseconds(300))
+            await say("Bring in more from Instagram, Facebook or X and I'll build more tabs.")
         case .nothingFits:
             await say("", kind: .topics, delay: .milliseconds(300))
             await say("Your saves are mostly memes and news, which I can't organize yet. Here's the closest I've got:")
@@ -217,7 +222,6 @@ final class SetupChatModel {
             await say("", kind: .topics, delay: .milliseconds(400))
             let none = data.topics.filter { $0.legoScreen == nil }.reduce(0) { $0 + $1.postIds.count }
             if none > 0 { await say("The random stuff (\(none) memes, news and ads) I'll leave out for now. It's all still in Everything else.") }
-            if proposal.situation == .fewSaves { await say("That's not a lot yet. The more you save, the smarter this gets.") }
         }
         stage = .found
         await askNextQuestionOrPropose()
