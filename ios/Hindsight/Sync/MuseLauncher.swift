@@ -28,18 +28,15 @@ enum MuseLauncher {
         return opened ? .opened : .notInstalled
     }
 
-    /// WhatsApp route. Muse's WhatsApp chat has no phone number (it's linked
-    /// through the Muse app), so we open WhatsApp's "send to…" picker with the
-    /// prompt already typed; the user picks the Muse chat and taps Send.
-    static func whatsAppURL(prompt: String) -> URL {
-        var components = URLComponents(string: "https://wa.me/")!
-        components.queryItems = [URLQueryItem(name: "text", value: prompt)]
-        return components.url!
-    }
+    /// WhatsApp route. Muse's WhatsApp chat has no phone number and doesn't show
+    /// up in WhatsApp's "send to…" picker, so a prefilled `wa.me/?text=` link
+    /// can't reach it. Instead: copy the prompt and open WhatsApp; the user
+    /// opens the Muse chat, pastes and sends.
+    static let whatsAppURL = URL(string: "whatsapp://")!
 
     static func launchWhatsApp(prompt: String) async -> Outcome {
         UIPasteboard.general.string = prompt
-        let opened = await UIApplication.shared.open(whatsAppURL(prompt: prompt), options: [.universalLinksOnly: true])
+        let opened = await UIApplication.shared.open(whatsAppURL)
         return opened ? .opened : .notInstalled
     }
 

@@ -13,18 +13,11 @@ struct MuseSyncView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var phase: Phase = .ready
     @State private var launchOutcome: MuseLauncher.Outcome?
-    @State private var request: Request = .newer
+    @State private var launchedViaWhatsApp = false
     @State private var method: Method = MuseConnector.baseURL == nil ? .paste : .connector
     @State private var pollID: UUID?
     @AppStorage(MuseConnector.baseURLKey) private var connectorBaseURL = ""
     @AppStorage(MuseConnector.connectedKey) private var connectorConnected = false
-
-    /// What to ask Muse for.
-    enum Request: String, CaseIterable, Identifiable {
-        case newer = "New saves"
-        case older = "Older saves"
-        var id: Self { self }
-    }
 
     enum Method: String, CaseIterable, Identifiable {
         case connector = "Automatic"
@@ -56,16 +49,17 @@ struct MuseSyncView: View {
         }
     }
 
-    /// New saves: only what's newer than what we have. Older saves (backfill):
-    /// what's older than our oldest, a page at a time.
+    /// Decided from what we already have, so the user never has to choose:
+    /// first connector sync → everything (duplicates are dropped on both
+    /// sides, so a full re-send is harmless); after that → only what's newer
+    /// than the newest Instagram/Facebook save we have.
     private var window: MusePrompt.Window {
-        let dates = store.posts.lazy
+        if method == .connector && !connectorConnected { return .all }
+        let newest = store.posts.lazy
             .filter { $0.platform == .instagram || $0.platform == .facebook }
             .compactMap(\.savedAt)
-        switch request {
-        case .newer: return dates.max().map(MusePrompt.Window.after) ?? .all
-        case .older: return dates.min().map(MusePrompt.Window.before) ?? .all
-        }
+            .max()
+        return newest.map(MusePrompt.Window.after) ?? .all
     }
 
     var body: some View {
@@ -77,17 +71,6 @@ struct MuseSyncView: View {
                 Text("Muse is Meta's AI. It can already see your Instagram and Facebook saves, so we just ask it nicely.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
-
-                if base != nil {
-                    Picker("How", selection: $method) {
-                        ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                }
-                Picker("What to sync", selection: $request) {
-                    ForEach(Request.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
 
                 VStack(spacing: 10) {
                     switch method {
@@ -103,6 +86,13 @@ struct MuseSyncView: View {
                 }
 
                 statusBanner
+
+                if base != nil, case .ready = phase {
+                    Button(method == .connector ? "Muse won't connect? Paste its reply instead" : "Use the automatic way instead") {
+                        method = method == .connector ? .paste : .connector
+                    }
+                    .font(OnboardingStyle.caption)
+                }
 
                 if launchOutcome == .notInstalled, case .ready = phase {
                     Link("Get Muse on the App Store", destination: MuseLauncher.appStoreURL)
@@ -231,7 +221,10 @@ struct MuseSyncView: View {
 
     private var openDetail: String {
         switch launchOutcome {
-        case .opened: "Our message is on your clipboard. If it isn't typed in already, paste it and send."
+        case .opened:
+            launchedViaWhatsApp
+                ? "Message copied. Open your Muse chat in WhatsApp, paste it and send."
+                : "Our message is on your clipboard. If it isn't typed in already, paste it and send."
         case .notInstalled: "Couldn't open Muse. The message is copied, so paste it into Muse yourself."
         case nil:
             method == .connector && !connectorConnected
@@ -262,7 +255,8 @@ struct MuseSyncView: View {
         let outcome = viaWhatsApp
             ? await MuseLauncher.launchWhatsApp(prompt: prompt)
             : await MuseLauncher.launch(prompt: prompt)
-        DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(method.rawValue), \(request.rawValue), connected=\(connectorConnected)): \(outcome)")
+        DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(method.rawValue), connected=\(connectorConnected)): \(outcome)")
+        launchedViaWhatsApp = viaWhatsApp
         launchOutcome = outcome
         phase = outcome == .notInstalled ? .ready : .waiting
     }

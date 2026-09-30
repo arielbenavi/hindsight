@@ -175,7 +175,40 @@ app = mcp.streamable_http_app(
     transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
 )
 
+
+class RequestLog:
+    """Logs every HTTP request (method, path, client, status) to calls.log, and
+    answers GET on the MCP endpoint with 405: we don't offer a standalone SSE
+    stream (the spec allows this), and holding it open made clients time out."""
+
+    def __init__(self, inner: Any) -> None:
+        self.inner = inner
+
+    async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
+        if scope["type"] != "http":
+            await self.inner(scope, receive, send)
+            return
+        headers = {k.decode(): v.decode() for k, v in scope.get("headers", [])}
+        path = scope["path"].replace(TOKEN, "<token>")
+        status: dict[str, int] = {}
+
+        async def send_logged(message: dict[str, Any]) -> None:
+            if message["type"] == "http.response.start":
+                status["code"] = message["status"]
+            await send(message)
+
+        if scope["method"] == "GET" and scope["path"].endswith("/mcp"):
+            await send({"type": "http.response.start", "status": 405,
+                        "headers": [(b"allow", b"POST"), (b"content-length", b"0")]})
+            await send({"type": "http.response.body", "body": b""})
+            status["code"] = 405
+        else:
+            await self.inner(scope, receive, send_logged)
+        log_call("http", method=scope["method"], path=path, status=status.get("code"),
+                 user_agent=headers.get("user-agent", "")[:80], accept=headers.get("accept", "")[:60])
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8765"))
     print(f"MCP endpoint path: /{TOKEN}/mcp   app pull path: /{TOKEN}/saves", flush=True)
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+    uvicorn.run(RequestLog(app), host="127.0.0.1", port=port, log_level="warning")

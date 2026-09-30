@@ -19,13 +19,6 @@ struct MuseSyncTests {
         #expect(!MusePrompt.text().contains("saved after"))
     }
 
-    @Test func whatsAppLinkCarriesThePrompt() throws {
-        let url = MuseLauncher.whatsAppURL(prompt: "list my saves & more")
-        #expect(url.host() == "wa.me")
-        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
-        #expect(items?.first { $0.name == "text" }?.value == "list my saves & more")
-    }
-
     @Test func deepLinkCarriesThePrompt() throws {
         let url = MuseLauncher.chatURL(prompt: "list my saves & more")
         #expect(url.host() == "muse.ai")
