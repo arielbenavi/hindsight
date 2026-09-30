@@ -4,9 +4,10 @@ import SwiftUI
 /// proposal → place check → "You're in"), then the tabs. `HindsightApp` shows
 /// this once onboarding is done. Spec: docs/specs/onboarding-chat.md.
 struct RootView: View {
-    @State private var app = AppModel()
+    @State private var app: AppModel
 
-    init() {
+    init(store: SavedPostStore? = nil, useMySaves: Bool = false) {
+        _app = State(initialValue: AppModel(store: store, useMySaves: useMySaves))
         ReminderScheduler.shared.install()
     }
 
@@ -14,10 +15,11 @@ struct RootView: View {
         Group {
             if let error = app.loadError {
                 ContentUnavailableView("Couldn't load your saves", systemImage: "exclamationmark.triangle", description: Text(error))
+            } else if !app.setupDone && (app.data != nil || app.isMySaves) {
+                // My saves: the chat starts before the file exists (it's written at the end of reading).
+                SetupChatView(app: app)
             } else if app.data == nil {
                 ContentUnavailableView("No saves yet", systemImage: "tray", description: Text("No data file is bundled."))
-            } else if !app.setupDone {
-                SetupChatView(app: app)
             } else {
                 MainTabView(app: app)
             }

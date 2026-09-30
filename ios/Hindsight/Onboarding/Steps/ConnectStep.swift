@@ -6,8 +6,8 @@ import UniformTypeIdentifiers
 struct ConnectStep: View {
     @Bindable var model: OnboardingModel
     let store: SavedPostStore
-    /// Done connecting → the setup chat.
-    let onFinish: () -> Void
+    /// Done connecting → the setup chat, on the user's saves or the sample.
+    let onFinish: (OnboardingChoice) -> Void
 
     @State private var isImporting = false
     @State private var importMessage: String?
@@ -31,11 +31,11 @@ struct ConnectStep: View {
             comingSoonRow("WhatsApp notes", symbol: "message.fill",
                           detail: "Links and notes you send yourself on WhatsApp.")
         } actions: {
-            Button(finishTitle, action: onFinish)
+            Button(finishTitle) { onFinish(.mySaves) }
                 .buttonStyle(.onboardingPrimary)
                 .disabled(importedCount == 0)
                 .opacity(importedCount == 0 ? 0.5 : 1)
-            Button("Just looking? Try it with sample saves", action: onFinish)
+            Button("Just looking? Try it with sample saves") { onFinish(.sample) }
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.accent)
         }

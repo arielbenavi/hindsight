@@ -3,6 +3,8 @@ import SwiftUI
 @main
 struct HindsightApp: App {
     @AppStorage(OnboardingModel.completedKey) private var hasCompletedOnboarding = false
+    /// "mine" once the user starts with their own saves; empty = the sample.
+    @AppStorage("setupSource") private var setupSource = ""
     @State private var store = SavedPostStore()
 
     init() {
@@ -15,9 +17,12 @@ struct HindsightApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                RootView()
+                RootView(store: store, useMySaves: setupSource == OnboardingChoice.mySaves.rawValue)
             } else {
-                OnboardingFlow(store: store) { hasCompletedOnboarding = true }
+                OnboardingFlow(store: store) { choice in
+                    setupSource = choice.rawValue
+                    hasCompletedOnboarding = true
+                }
             }
         }
     }

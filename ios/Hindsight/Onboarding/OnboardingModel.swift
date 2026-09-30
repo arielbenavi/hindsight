@@ -1,6 +1,12 @@
 import Foundation
 import Observation
 
+/// How the user left Connect: with their own saves, or to look around with the sample.
+enum OnboardingChoice: String, Sendable {
+    case mySaves = "mine"
+    case sample
+}
+
 @Observable
 @MainActor
 final class OnboardingModel {

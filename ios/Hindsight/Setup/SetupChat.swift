@@ -11,8 +11,8 @@ struct SetupChatView: View {
 
     var body: some View {
         Group {
-            if let model, let data = app.data {
-                ChatContent(model: model, data: data, isSample: app.isSampleData)
+            if let model {
+                ChatContent(model: model, data: model.data, isSample: app.isSampleData)
                     .onChange(of: model.approvedConfig) { _, config in
                         if let config { app.approve(config) }
                     }
@@ -27,9 +27,17 @@ struct SetupChatView: View {
             }
         }
         .onAppear {
-            if model == nil, let data = app.data {
-                model = SetupChatModel(data: data, datasetID: app.dataset?.id ?? "default", places: app.places,
-                                       progress: { SimulatedSort.progress(for: data) })
+            guard model == nil else { return }
+            if app.isMySaves {
+                // The user's own saves: sorted on the phone, then the file is written at hand-off.
+                app.startSorting()
+                model = SetupChatModel(data: app.data, receipt: app.myPosts, datasetID: Dataset.mineID,
+                                       places: { app.places }, progress: { app.sortProgress() },
+                                       load: { await app.buildMySaves() })
+            } else if let data = app.data {
+                model = SetupChatModel(data: data, receipt: data.posts, datasetID: app.dataset?.id ?? "default",
+                                       places: { app.places }, progress: { SimulatedSort.progress(for: data) },
+                                       load: { data })
             }
         }
     }
@@ -69,9 +77,14 @@ final class SetupChatModel {
     /// "Open my app" tapped.
     private(set) var isFinished = false
 
-    let data: HindsightData
-    private let places: PlaceStore
+    /// The sorted saves. Empty until the end of reading for the user's own saves.
+    private(set) var data: HindsightData
+    /// What arrived (R1, R2): the user's imports, or the sample's posts.
+    let receiptPosts: [ContractPost]
+    private let placesStore: () -> PlaceStore
+    private var places: PlaceStore { placesStore() }
     private let progressStream: () -> AsyncStream<SortProgress>
+    private let loadData: () async -> HindsightData?
     private(set) var proposal: LayoutRules.Proposal
     private var assignment: LayoutRules.Assignment
     private let file: JSONFile<Saved>
@@ -87,16 +100,21 @@ final class SetupChatModel {
 
     private var answers: [String: String] = [:]
 
-    init(data: HindsightData, datasetID: String, places: PlaceStore, progress: @escaping () -> AsyncStream<SortProgress>) {
+    init(data: HindsightData?, receipt: [ContractPost], datasetID: String, places: @escaping () -> PlaceStore,
+         progress: @escaping () -> AsyncStream<SortProgress>, load: @escaping () async -> HindsightData?) {
+        let data = data ?? .empty
         self.data = data
-        self.places = places
+        receiptPosts = receipt
+        placesStore = places
         progressStream = progress
+        loadData = load
         let proposal = LayoutRules.propose(data)
         self.proposal = proposal
         draft = proposal.draft
         assignment = LayoutRules.naturalAssignment(data)
         file = JSONFile(name: "setup-chat", directory: JSONFile<Saved>.directory(for: datasetID))
-        guard let saved = file.load(), !saved.messages.isEmpty, saved.stage != .receipt, saved.stage != .reading else {
+        guard let saved = file.load(), !saved.messages.isEmpty, saved.stage != .receipt, saved.stage != .reading,
+              !data.posts.isEmpty else {
             Task { await start() }
             return
         }
@@ -136,12 +154,25 @@ final class SetupChatModel {
     // R1–R3
     private func start() async {
         stage = .receipt
-        await say(Self.receiptLine(data.posts), delay: .milliseconds(500))
+        await say(Self.receiptLine(receiptPosts), delay: .milliseconds(500))
         await say("", kind: .receipt, delay: .milliseconds(250))
         await say("Here's a taste of what's in there:", delay: .milliseconds(700))
         await say("", kind: .samples, delay: .milliseconds(300))
         await read()
+        guard let loaded = await loadData(), !loaded.posts.isEmpty else {
+            await say("Hmm, I couldn't finish reading your saves. Close the app and open it again, and I'll pick up where I stopped.")
+            return
+        }
+        use(loaded)
         await found()
+    }
+
+    /// The sorted saves arrived (end of reading): build the proposal from them.
+    private func use(_ loaded: HindsightData) {
+        data = loaded
+        proposal = LayoutRules.propose(loaded)
+        draft = proposal.draft
+        assignment = LayoutRules.naturalAssignment(loaded)
     }
 
     /// "Got them. 412 saves: 324 from Instagram and 88 from X."
@@ -166,7 +197,7 @@ final class SetupChatModel {
             progress = snapshot
             if snapshot.fraction >= SortProgress.handOffFraction || clock.now - started >= SortProgress.handOffAfter { break }
         }
-        let total = data.posts.count.formatted()
+        let total = receiptPosts.count.formatted()
         messages[index].text = (progress?.isComplete ?? true)
             ? "Done. That's all \(total)."
             : "Done with most of them. I'll finish the rest in the background."
@@ -427,9 +458,9 @@ private struct ChatContent: View {
                     .background(Theme.lime, in: .rect(cornerRadius: 18))
             }
         case .receipt:
-            ReceiptCard(posts: data.posts)
+            ReceiptCard(posts: model.receiptPosts)
         case .samples:
-            TasteCards(posts: SetupChatModel.tastePosts(data.posts), data: data)
+            TasteCards(posts: SetupChatModel.tastePosts(model.receiptPosts), data: data)
         case .progress:
             if let progress = model.progress {
                 ReadingBubble(progress: progress)
@@ -834,4 +865,10 @@ private struct SamplesRow: View {
         }
         .padding(.top, 4)
     }
+}
+
+extension HindsightData {
+    /// No saves yet (the setup chat before its data arrives).
+    static let empty = HindsightData(file: ContractFile(contractVersion: ContractFile.supportedVersion, generatedAt: nil,
+                                                        user: ContractUser(handle: "", platforms: []), posts: [], topics: [], items: []))
 }

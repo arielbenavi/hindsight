@@ -55,7 +55,17 @@ struct Dataset: Identifiable, Hashable, Sendable {
     let id: String
     let url: URL
 
-    var displayName: String { id.prefix(1).uppercased() + id.dropFirst() }
+    var displayName: String { isMine ? "My saves" : id.prefix(1).uppercased() + id.dropFirst() }
+
+    /// The user's own saves, sorted on the phone (Pipeline/SortEngine).
+    static let mineID = "me"
+    var isMine: Bool { id == Self.mineID }
+
+    /// `Application Support/Hindsight/me/hindsight.json`; may not exist yet.
+    static func mine() -> Dataset {
+        let directory = URL.applicationSupportDirectory.appending(path: "Hindsight/\(mineID)", directoryHint: .isDirectory)
+        return Dataset(id: mineID, url: directory.appending(path: "hindsight.json"))
+    }
 
     static let suffix = ".hindsight.json"
 

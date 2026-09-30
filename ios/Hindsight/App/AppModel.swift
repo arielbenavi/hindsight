@@ -24,6 +24,10 @@ final class AppModel {
     private(set) var learn: LearnCatalog?
     private(set) var fitness: FitnessCatalog?
 
+    /// The user's own imports (Ariel's store), sorted by `engine` into the "me" dataset.
+    private let store: SavedPostStore?
+    private(set) var engine: SortEngine?
+
     private let persist: Bool
     private var layoutFile: JSONFile<LayoutConfig>
     private var flagsFile: JSONFile<Flags>
@@ -36,16 +40,22 @@ final class AppModel {
     }
 
     /// `persist: false` keeps everything in memory (previews, tests).
+    /// `useMySaves`: the user started with their own saves, so open the "me"
+    /// dataset (sorted on the phone) instead of a bundled sample.
     init(datasets: [Dataset] = Dataset.bundled(), selected: String? = UserDefaults.standard.string(forKey: AppModel.datasetKey),
-         persist: Bool = true) {
-        self.datasets = datasets
+         persist: Bool = true, store: SavedPostStore? = nil, useMySaves: Bool = false) {
+        let mine = Dataset.mine()
+        let hasMine = useMySaves || FileManager.default.fileExists(atPath: mine.url.path())
+        self.datasets = hasMine ? [mine] + datasets : datasets
+        self.store = store
         self.persist = persist
         let empty = JSONFile<LayoutConfig>(name: "layout", directory: nil)
         layoutFile = empty
         flagsFile = JSONFile(name: "flags", directory: nil)
         places = PlaceStore(directory: nil, data: nil)
         practice = PracticeStore(directory: nil)
-        let initial = datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first
+        let initial = useMySaves ? mine
+            : (datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first)
         if let initial { select(initial) }
     }
 
@@ -54,7 +64,12 @@ final class AppModel {
         self.dataset = dataset
         if persist { UserDefaults.standard.set(dataset.id, forKey: Self.datasetKey) }
         do {
-            data = try HindsightData.load(from: dataset.url)
+            // "me" has no file until the sort engine writes one (end of reading).
+            if dataset.isMine && !FileManager.default.fileExists(atPath: dataset.url.path()) {
+                data = nil
+            } else {
+                data = try HindsightData.load(from: dataset.url)
+            }
             loadError = nil
         } catch {
             data = nil
@@ -98,7 +113,72 @@ final class AppModel {
         self.layout = layout
         layoutFile.save(layout)
         applyLayout()
+        if isMySaves {
+            // Tips and routines get their details in the background (places are done).
+            let posts = myPosts
+            Task { [weak self] in
+                guard let engine = self?.engine, await engine.enrich(posts) > 0 else { return }
+                await self?.rewriteMySaves()
+            }
+        }
         if !layout.hasMap { finishConfirmation() }
+    }
+
+    // MARK: - My saves (the sort engine)
+
+    var isMySaves: Bool { dataset?.isMine ?? false }
+
+    /// The user's own imports, newest first, without the bundled seed.
+    var myPosts: [ContractPost] { ContractPost.userPosts(from: store?.posts ?? []) }
+
+    private func sortEngine() -> SortEngine {
+        if let engine { return engine }
+        let engine = SortEngine(backend: AppleSortBackend(), directory: persist ? JSONFile<LayoutConfig>.directory(for: Dataset.mineID) : nil)
+        self.engine = engine
+        return engine
+    }
+
+    /// Start (or resume) sorting the user's saves. Safe to call again.
+    func startSorting() {
+        sortEngine().start(myPosts) { [weak self] in
+            Task { await self?.rewriteMySaves() }
+        }
+    }
+
+    func sortProgress() -> AsyncStream<SortProgress> { sortEngine().progressStream() }
+
+    /// End of reading: write the user's contract file from what's sorted so far
+    /// and load it. The rest joins later (`rewriteMySaves`).
+    func buildMySaves() async -> HindsightData? {
+        await writeMySaves()
+        guard let mine = datasets.first(where: \.isMine) else { return nil }
+        select(mine)
+        places.startMatching()
+        return data
+    }
+
+    /// Late posts or new details: rewrite the file; reload only once the user is
+    /// in the app, so nothing shifts under the setup chat.
+    private func rewriteMySaves() async {
+        guard isMySaves, data != nil else { return }
+        await writeMySaves()
+        if setupDone, let mine = datasets.first(where: \.isMine) {
+            select(mine)
+            places.startMatching()
+        }
+    }
+
+    private func writeMySaves() async {
+        let posts = myPosts
+        let platforms = Array(Set(posts.map(\.platform.rawValue))).sorted()
+        let file = await sortEngine().assemble(posts, user: ContractUser(handle: "me", platforms: platforms))
+        let url = Dataset.mine().url
+        do {
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try file.encoded().write(to: url, options: .atomic)
+        } catch {
+            DebugLog.write("couldn't write my saves: \(error)")
+        }
     }
 
     func finishConfirmation() {
@@ -106,11 +186,12 @@ final class AppModel {
         saveFlags()
     }
 
-    /// End of the setup chat: show the tabs.
+    /// End of the setup chat: show the tabs (with anything sorted since the proposal).
     func finishSetup() {
         finishConfirmation()
         setupDone = true
         saveFlags()
+        if isMySaves { Task { await rewriteMySaves() } }
     }
 
     private func saveFlags() {
@@ -118,8 +199,7 @@ final class AppModel {
     }
 
     /// Bundled data (the sample saves) rather than the user's own sorted saves.
-    /// Always true until the sort engine writes a live dataset (ADR-001, A3).
-    var isSampleData: Bool { dataset != nil }
+    var isSampleData: Bool { dataset.map { !$0.isMine } ?? false }
 
     /// Dev: forget the layout and all user state for this dataset.
     func resetCurrentDataset() {

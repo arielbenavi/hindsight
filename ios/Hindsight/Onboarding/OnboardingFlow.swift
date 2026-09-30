@@ -3,10 +3,10 @@ import SwiftUI
 /// First-run experience. Shown by `HindsightApp` until `onFinish` is called.
 struct OnboardingFlow: View {
     let store: SavedPostStore
-    let onFinish: () -> Void
+    let onFinish: (OnboardingChoice) -> Void
     @State private var model: OnboardingModel
 
-    init(store: SavedPostStore, onFinish: @escaping () -> Void) {
+    init(store: SavedPostStore, onFinish: @escaping (OnboardingChoice) -> Void) {
         self.store = store
         self.onFinish = onFinish
         _model = State(initialValue: OnboardingModel())
@@ -43,7 +43,7 @@ struct OnboardingFlow: View {
         HStack {
             Spacer()
             #if DEBUG
-            Button("Skip", action: onFinish)
+            Button("Skip") { onFinish(.sample) }
                 .font(.system(.caption, design: .rounded, weight: .heavy))
                 .foregroundStyle(OnboardingStyle.muted)
                 .frame(minWidth: 36, minHeight: 36)
@@ -79,7 +79,7 @@ struct OnboardingFlow: View {
 
             #if DEBUG
             // Dev shortcut: straight to the app with the bundled seed data.
-            Button("Skip", action: onFinish)
+            Button("Skip") { onFinish(.sample) }
                 .font(.system(.caption, design: .rounded, weight: .heavy))
                 .foregroundStyle(OnboardingStyle.muted)
                 .frame(minWidth: 36, minHeight: 36)
@@ -94,5 +94,5 @@ struct OnboardingFlow: View {
 }
 
 #Preview {
-    OnboardingFlow(store: SavedPostStore(fileURL: nil)) {}
+    OnboardingFlow(store: SavedPostStore(fileURL: nil)) { _ in }
 }
