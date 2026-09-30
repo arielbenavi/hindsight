@@ -123,6 +123,7 @@ struct EverythingElseSheet: View {
 /// we're on TestFlight with bundled data.
 struct DevMenu: View {
     let app: AppModel
+    @State private var showsModelTest = false
 
     var body: some View {
         Menu {
@@ -133,6 +134,7 @@ struct DevMenu: View {
                     }
                 }
             }
+            Button("Model test", systemImage: "cpu") { showsModelTest = true }
             Button("Redo layout & reset \(app.dataset?.displayName ?? "")", role: .destructive) { app.resetCurrentDataset() }
         } label: {
             Image(systemName: "ladybug").font(.system(size: 15, weight: .semibold))
@@ -140,5 +142,6 @@ struct DevMenu: View {
                 .frame(width: 36, height: 36)
         }
         .accessibilityLabel("Beta menu")
+        .sheet(isPresented: $showsModelTest) { ModelEvalView() }
     }
 }
