@@ -13,7 +13,7 @@ struct DoneStep: View {
                 .font(.system(.title2, design: .rounded, weight: .heavy))
 
             HStack(spacing: 10) {
-                ForEach(Platform.allCases) { platform in
+                ForEach(Platform.social) { platform in
                     VStack(spacing: 4) {
                         Image(systemName: platform.symbol).font(.system(size: 18, weight: .bold))
                         Text(store.count(for: platform).formatted())

@@ -14,8 +14,7 @@ struct ConnectStep: View {
             XConnectRow(store: store)
             comingSoonRow(Platform.tiktok.displayName, symbol: Platform.tiktok.symbol,
                           detail: "Share any TikTok to hindsight. Coming soon.")
-            comingSoonRow("WhatsApp notes", symbol: "message.fill",
-                          detail: "Links and notes you send yourself on WhatsApp.")
+            whatsAppRow
         } actions: {
             Button("Continue", action: model.next)
                 .buttonStyle(.onboardingPrimary)
@@ -25,6 +24,9 @@ struct ConnectStep: View {
         }
         .sheet(isPresented: $model.isMuseSheetPresented) {
             MuseSyncView(store: store)
+        }
+        .sheet(isPresented: $model.isWhatsAppSheetPresented) {
+            WhatsAppImportView(store: store)
         }
     }
 
@@ -53,6 +55,27 @@ struct ConnectStep: View {
                 .buttonStyle(.onboardingSecondary)
         }
         .onboardingCard()
+    }
+
+    private var whatsAppRow: some View {
+        HStack(spacing: 14) {
+            PlatformBadge(platform: .whatsapp)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("WhatsApp notes").font(OnboardingStyle.title)
+                let count = store.count(for: .whatsapp)
+                Text(count > 0 ? "\(count.formatted()) notes imported." : "Links and notes you send yourself.")
+                    .font(OnboardingStyle.caption)
+                    .foregroundStyle(OnboardingStyle.muted)
+            }
+            Spacer()
+            Button("Import") { model.isWhatsAppSheetPresented = true }
+                .font(.system(.subheadline, design: .rounded, weight: .heavy))
+                .foregroundStyle(OnboardingStyle.onAccent)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(OnboardingStyle.accent, in: .capsule)
+        }
+        .onboardingCard(padding: 16)
     }
 
     private func comingSoonRow(_ name: String, symbol: String, detail: String) -> some View {
