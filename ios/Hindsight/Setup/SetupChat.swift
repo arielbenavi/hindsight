@@ -85,6 +85,8 @@ final class SetupChatModel {
     private var places: PlaceStore { placesStore() }
     private let progressStream: () -> AsyncStream<SortProgress>
     private let loadData: () async -> HindsightData?
+    /// Answers what the user types (Private Cloud Compute → on-device → rules).
+    private let replier: ChatReplying
     private(set) var proposal: LayoutRules.Proposal
     private var assignment: LayoutRules.Assignment
     private let file: JSONFile<Saved>
@@ -101,7 +103,9 @@ final class SetupChatModel {
     private var answers: [String: String] = [:]
 
     init(data: HindsightData?, receipt: [ContractPost], datasetID: String, places: @escaping () -> PlaceStore,
-         progress: @escaping () -> AsyncStream<SortProgress>, load: @escaping () async -> HindsightData?) {
+         progress: @escaping () -> AsyncStream<SortProgress>, load: @escaping () async -> HindsightData?,
+         replier: ChatReplying = AppleChatReplier()) {
+        self.replier = replier
         let data = data ?? .empty
         self.data = data
         receiptPosts = receipt
@@ -280,7 +284,7 @@ final class SetupChatModel {
         Task { await say("Tap a tab to change it, or just tell me.", delay: .milliseconds(400)) }
     }
 
-    func apply(_ edit: LayoutEdit, echo: String? = nil) {
+    func apply(_ edit: LayoutEdit, echo: String? = nil, announce: Bool = true) {
         if let echo { userSays(echo) }
         let before = draft
         draft = edit.apply(to: draft, data: data)
@@ -293,6 +297,7 @@ final class SetupChatModel {
             Task { await say("Hmm, nothing changed there.", delay: .milliseconds(300)) }
             return
         }
+        guard announce else { return }
         let line = edit.confirmation(draft, data)
         Task { await say(line, delay: .milliseconds(350)) }
     }
@@ -306,13 +311,82 @@ final class SetupChatModel {
             approveNow()
             return
         }
-        if stage != .editing { stage = .editing }
-        if let edit = TypedEditParser.parse(trimmed, draft: draft, data: data, lastTouched: lastTouched) {
-            apply(edit, echo: trimmed)
-        } else {
-            userSays(trimmed)
-            Task { await say("I didn't catch that. Try \"rename Map to Eats\", \"drop cooking\" or \"put Learn first\", or tap a tab.", delay: .milliseconds(400)) }
+        userSays(trimmed)
+        Task {
+            isTyping = true
+            let reply = await replier.reply(to: trimmed, about: summary)
+            isTyping = false
+            if let reply {
+                await handle(reply, typed: trimmed)
+            } else {
+                await parseWithoutModel(trimmed)
+            }
         }
+    }
+
+    /// The model understood the message: answer it, and make the edit if it asked for one.
+    private func handle(_ reply: ChatReply, typed: String) async {
+        switch reply.intent {
+        case .approve:
+            approveNow()
+        case .edit:
+            if stage != .editing { stage = .editing }
+            // The app confirms the edit in its own words, so the line always matches what happened.
+            if let edit = reply.layoutEdit(draft: draft, data: data, message: typed)
+                ?? TypedEditParser.parse(typed, draft: draft, data: data, lastTouched: lastTouched) {
+                apply(edit)
+            } else {
+                await say("I'm not sure what to change. Try \"rename Map to Eats\", \"leave out cooking\" or \"put Learn first\", or tap a tab.", delay: .milliseconds(200))
+            }
+        case .question, .other:
+            // Never show an answer that claims a change that didn't happen.
+            await say(reply.claimsAChange ? plainAnswer : reply.text, delay: .milliseconds(200))
+        }
+    }
+
+    /// A factual fallback answer from the data itself.
+    private var plainAnswer: String {
+        let counts = Platform.allCases.map { p in (p, receiptPosts.count { $0.platform == p }) }.filter { $0.1 > 0 }
+        let breakdown = counts.map { "\($0.1) from \($0.0.displayName)" }.formatted(.list(type: .and))
+        let tabs = draft.tabs.map(\.title).formatted(.list(type: .and))
+        return "You have \(receiptPosts.count) saves so far\(breakdown.isEmpty ? "" : ": \(breakdown)")"
+            + (tabs.isEmpty ? "." : ", in \(tabs).")
+            + " To bring in more, use Muse, Connect X or Import a file on the Connect screen."
+    }
+
+    /// No model: the fixed phrasings.
+    private func parseWithoutModel(_ text: String) async {
+        if let edit = TypedEditParser.parse(text, draft: draft, data: data, lastTouched: lastTouched) {
+            if stage != .editing { stage = .editing }
+            apply(edit)
+        } else {
+            await say("I didn't catch that. Try \"rename Map to Eats\", \"drop cooking\" or \"put Learn first\", or tap a tab.", delay: .milliseconds(400))
+        }
+    }
+
+    /// What the model knows when it answers: the saves, the proposed tabs, what's left out.
+    var summary: String {
+        Self.summary(posts: receiptPosts, sorted: data, draft: draft, offers: proposal.offers)
+    }
+
+    static func summary(posts: [ContractPost], sorted data: HindsightData, draft: LayoutRules.Draft, offers: [LegoScreen]) -> String {
+        var lines: [String] = []
+        let byPlatform = Platform.allCases.map { p in (p, posts.count { $0.platform == p }) }.filter { $0.1 > 0 }
+        lines.append("Saves: \(posts.count) (\(byPlatform.map { "\($0.1) \($0.0.displayName)" }.joined(separator: ", ")))."
+                     + (data.posts.count < posts.count ? " Sorted so far: \(data.posts.count)." : ""))
+        if posts.count < LayoutRules.fewSaves { lines.append("That's very few; a tab needs at least \(LayoutRules.threshold) posts.") }
+        lines.append("Proposed tabs, in order:")
+        if draft.tabs.isEmpty { lines.append("(none yet)") }
+        for (i, tab) in draft.tabs.enumerated() {
+            let topics = tab.topicIDs.compactMap { data.topic($0) }.map { "\($0.label) (\($0.postIds.count))" }
+            lines.append("\(i + 1). \(tab.legoScreen.rawValue) tab named \"\(tab.title)\": \(topics.joined(separator: ", "))")
+        }
+        let left = draft.excludedTopicIDs.compactMap { data.topic($0) }.filter { $0.legoScreen != nil }
+        if !left.isEmpty { lines.append("Left out for now: \(left.map { "\($0.label) (\($0.postIds.count))" }.joined(separator: ", "))") }
+        let random = data.topics.filter { $0.legoScreen == nil }.reduce(0) { $0 + $1.postIds.count }
+        if random > 0 { lines.append("In Everything else: \(random) posts (memes, news, ads and other things that fit no tab).") }
+        if !offers.isEmpty { lines.append("Could also add: \(offers.map(\.rawValue).joined(separator: ", ")).") }
+        return lines.joined(separator: "\n")
     }
 
     // B5
