@@ -1,6 +1,6 @@
 # Flow spec: Onboarding as one conversation
 
-Status: **proposal** (2026-09-30), for Reut's review. Owners: Reut (the chat), Ariel (the Connect screen and the data behind it). Part of [ADR-001](../merge-plan.md), where it replaces workstream O1.
+Status: **accepted** (2026-09-30). Decisions 1–4 below were made by Reut, all as recommended. Owners: Reut (the chat), Ariel (the Connect screen and the data behind it). Part of [ADR-001](../merge-plan.md), where it replaces workstream O1.
 
 ## The problem
 
@@ -153,12 +153,12 @@ SavedPostStore ──"Start"────►    SetupChatModel (was ProposalChatM
 - [ ] Quitting anywhere resumes in the same place in the transcript.
 - [ ] It works end to end with no Apple Intelligence (rules only) and on the demo.
 
-## Decisions for Reut
+## Decided (2026-09-30)
 
-1. **Welcome and How it works:** fold a one-line welcome into the Connect header and delete both screens (recommended), or keep a single welcome screen before Connect?
-2. **Place check:** opened from the chat as a full-screen deck that returns to the chat (recommended), or embedded card by card inside the transcript? Embedding is prettier, but it means rebuilding the swipe deck.
-3. **When to stop "reading":** at ≥ 90% decided or ~20 s (recommended), or always wait until every post is sorted?
-4. **Bot voice:** fixed templates with real numbers in v1 (recommended; no quota, testable), or Private Cloud Compute writing the lines now?
+1. **Welcome and How it works** fold into a one-line header on Connect; both screens are deleted. Connect is the first screen.
+2. **Place check** opens from a chat message as the existing full-screen swipe deck, and returns to the chat.
+3. **Reading ends** at ≥ 90% of posts decided or ~20 s, whichever is first. The rest finish in the background.
+4. **Bot voice (v1):** fixed lines with real numbers. Apple's models do the sorting, not the talking.
 
 ## Later
 
