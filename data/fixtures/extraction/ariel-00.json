@@ -1,0 +1,1355 @@
+[
+ {
+  "post_id": "instagram:DdyvEu1OVoH",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "AI calculator that solves from the camera",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DdwJgsNABze",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Motion graphics from prompts with Claude",
+   "gist": "Creators are making 15-second motion graphics in Claude Opus 5.5 from simple prompts.",
+   "try_prompt": "Prompt Claude for a 15-second motion graphic.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdshHpFpqdi",
+  "lego_screen": "learn",
+  "topic_hint": "web-design",
+  "topic_label": "Web design with AI",
+  "tip": {
+   "title": "5 Claude Code tools for a better design workflow",
+   "gist": "Your Claude Code app needs a better design workflow, not more code; 5 tools for it.",
+   "try_prompt": "Comment DESIGN on the post to get the 5 Claude Code tools.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "DESIGN",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdsDsWUMGCp",
+  "lego_screen": "none",
+  "topic_hint": "career",
+  "topic_label": "Career"
+ },
+ {
+  "post_id": "instagram:DdjplE0olTS",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Wavefolding plugin for beats",
+   "gist": "Wavefolding as a sound-design trick; plugin link on request.",
+   "try_prompt": "Comment MOD on the post to get the plugin link.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": "MOD",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdjDp4eDa2G",
+  "lego_screen": "none",
+  "topic_hint": "ai-news",
+  "topic_label": "AI news"
+ },
+ {
+  "post_id": "instagram:DdiCSwPxGJS",
+  "lego_screen": "none",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools"
+ },
+ {
+  "post_id": "instagram:DdhrccLtiA_",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Backtested quant strategy",
+   "gist": "The creator's best quant strategy so far, with a backtest link on request.",
+   "try_prompt": "Comment backtest on the post to get the link.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": "backtest",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdfBe-QJhrJ",
+  "lego_screen": "none",
+  "topic_hint": "side-hustles",
+  "topic_label": "Side hustles"
+ },
+ {
+  "post_id": "instagram:Dde2z38HJFp",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DdcyQE3OhLC",
+  "lego_screen": "none",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools"
+ },
+ {
+  "post_id": "instagram:DdXT4EIgfhi",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DdWtJm_T07C",
+  "lego_screen": "learn",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code",
+  "tip": {
+   "title": "4 Claude Code plugins for coding",
+   "gist": "Four plugins that take a Claude Code coding workflow to another level.",
+   "try_prompt": "Pick one of the 4 plugins in the post and add it to Claude Code.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdUwNB2nBeA",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DdMyq4DtnaC",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "HFT resource link",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": "HFT",
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DdJ5ynbDxqS",
+  "lego_screen": "none",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools"
+ },
+ {
+  "post_id": "instagram:DdH8i8WttH6",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Building an HFT system step by step",
+   "gist": "Every step to build an HFT system from the ground up; preorder link on request.",
+   "try_prompt": "Comment PentPort on the post to get the preorder link.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "PentPort",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdD485Gu8-0",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "בוסט 10k וקומפרסיה עדינה",
+   "gist": "בוסט של 10k וקומפרסיה עדינה - לפעמים זה כל מה שצריך. מתוך מאסטרקלאס.",
+   "try_prompt": "נסו בוסט של 10k וקומפרסיה עדינה על ערוץ במיקס.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Dc78WZhS_xY",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:Dc06_9fMc5o",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "100+ year profitable quant strategy",
+   "gist": "A simple long-running quant strategy; overcomplication = problems in trading.",
+   "try_prompt": "Comment TF on the post to get the strategy video.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": "TF",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Dcz0rX9Okxu",
+  "lego_screen": "none",
+  "topic_hint": "side-hustles",
+  "topic_label": "Side hustles"
+ },
+ {
+  "post_id": "instagram:Dcubb-FtIRb",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:Dcouools6cK",
+  "lego_screen": "none",
+  "topic_hint": "ai-news",
+  "topic_label": "AI news"
+ },
+ {
+  "post_id": "instagram:Dcl2ephILJM",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Strawberry: a self-driving AI browser",
+   "gist": "Strawberry is building a browser where AI companions click, type, search and complete tasks.",
+   "try_prompt": "Look up Strawberry, the self-driving AI browser.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DcdmzOoCMKW",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DcZDHq7pUse",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Free guide to build your first AI app",
+   "gist": "Free guide on building your first AI app or automation.",
+   "try_prompt": "Comment build on the post to get the free guide.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "build",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DcWXCppxii0",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DcWQCQdN28T",
+  "lego_screen": "learn",
+  "topic_hint": "web-design",
+  "topic_label": "Web design with AI",
+  "tip": {
+   "title": "5 Claude Code plugins for better websites",
+   "gist": "Five plugins so Claude Code websites stop looking like generic AI templates.",
+   "try_prompt": "Pick one of the 5 plugins in the post and try it on your site.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DcVWSaXN8-O",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Recipes",
+  "tip": {
+   "title": "ארוחת בוקר מהירה",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DcRfqamSPEi",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Micron example of a market phenomenon",
+   "gist": "An on-paper Micron calculation illustrating a phenomenon found across markets.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DcEJDHBTyPY",
+  "lego_screen": "learn",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code",
+  "tip": {
+   "title": "Checklist for vibecoded sites",
+   "gist": "Things your vibecoded site should have, explained quickly in the video.",
+   "try_prompt": "Check your vibecoded site against the list in the video.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DcB49VzhjLv",
+  "lego_screen": "none",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code"
+ },
+ {
+  "post_id": "instagram:Db-8mHTgAqs",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes & random"
+ },
+ {
+  "post_id": "instagram:Db-JKwIvuc6",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "How HFTs exploit speed on big orders",
+   "gist": "Brad Katsuyama on how HFTs use tiny speed differences to get ahead of large stock orders.",
+   "try_prompt": "Watch the clip on how HFTs front-run large orders.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Db6JD54yFIa",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Learning to make beats in FL Studio",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:Db6E1vFgBiI",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:Db4uucDyfPA",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "5-day crash course for your first AI app",
+   "gist": "Free crash course to launch your first AI automation or web app in 5 days.",
+   "try_prompt": "Comment Build on the post to get the crash course.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "Build",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Dbt1YX5sd4A",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DbnP_NhgoNS",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "פרלל קומפרסור דחוס בקיצוניות על ווקאל",
+   "gist": "פרלל קומפרסור דחוס ברמות קיצוניות שומר על הווקאל בפנים ומנצנץ מעל הטראק.",
+   "try_prompt": "נסו פרלל קומפרסור דחוס מאוד על ערוץ הווקאל.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DbkpVBcsZkg",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "The AI iceberg, with a hardware focus",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DbkmqksAMC9",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "איזה EQ להשתמש ומה לחתוך בווקאל",
+   "gist": "באיזה EQ להשתמש, מה לחתוך ולמה - מתוך הווקאל צ׳יין של נאדי באדי.",
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:Dbbp5qSywnp",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DbbTvYNgECc",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DbPynD_uLFU",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Run TradingView PineScript off-platform",
+   "gist": "Run PineScript off TradingView to build with AI, iterate fast and tune parameters.",
+   "try_prompt": "Watch part 1 on running PineScript off-platform.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DbJzWBfxPvD",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Humanize Claude Code writing with one doc",
+   "gist": "Level up Claude Code writing with blader/humanizer plus Wikipedia's \"Signs of AI writing\".",
+   "try_prompt": "Fetch blader/humanizer on GitHub.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DbF46e6Mz3o",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "GDELT: real-time global events data",
+   "gist": "GDELT is an open data project that continuously monitors global events and emotion.",
+   "try_prompt": "Look up the GDELT Project dataset.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DbEbyBMgL-R",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DbBwGWxuUSt",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Donchian channel for trend following",
+   "gist": "Tracks the highest high and lowest low of the last 20 days; a close above signals a trend.",
+   "try_prompt": "Plot a 20-day Donchian channel on a chart you follow.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Da6AHzxNtNZ",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes & random"
+ },
+ {
+  "post_id": "instagram:Da4TB_RsQK5",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:Da3bY4CsfmZ",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:Da1Mdd-qQW8",
+  "lego_screen": "none",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code"
+ },
+ {
+  "post_id": "instagram:Da0WC0FN1lF",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:Dayaxw4OvrR",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:Daxso2ygCBO",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Stanford lecture on AI",
+   "gist": "A Stanford lecture worth watching instead of Netflix; link on request.",
+   "try_prompt": "Comment Link on the post to get the Stanford lecture.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "Link",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DalKeQqOguu",
+  "lego_screen": "none",
+  "topic_hint": "ai-news",
+  "topic_label": "AI news"
+ },
+ {
+  "post_id": "instagram:DahxtT0ul1j",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "מולטי-בנד סטורציה לבאס שמן",
+   "gist": "שימוש במולטי-בנד סטורציה כדי להפוך באס רזה לסאונד שמן ומלא נוכחות.",
+   "try_prompt": "נסו מולטי-בנד סטורציה על באס רזה.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Daeh9cIuDpB",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DacoJIeuCjA",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "לא לחתוך אוטומטית ב-20 הרץ",
+   "gist": "חיתוך אוטומטי ב-20 הרץ הוא טעות נפוצה; חיתוך לא נכון מייצר רזונס מציק.",
+   "try_prompt": "בדקו אם חתכתם אוטומטית ב-20 הרץ במיקס האחרון.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaTEjTDtuEP",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DaQdExlII2r",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Delta hedging an option",
+   "gist": "Option P&L moves with the stock every tick; delta measures how much it moves.",
+   "try_prompt": "Look up the delta of an option you follow.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaNu3R8NpaY",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DaMh7SapLiB",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Tape + widening for a 70s/80s melody",
+   "gist": "Widening the melody and adding tape makes it sound like the 70s/80s.",
+   "try_prompt": "Add tape and widening to a melody.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaJKwbFmXoi",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "5 Ivy League lectures on hedge funds",
+   "gist": "5 Ivy League lectures on the hedge fund playbook: long/short, macro, event-driven.",
+   "try_prompt": "Look up Harvard's MGMT S-2784.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaF-8qhkQLA",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "5 GitHub repos to learn quant finance",
+   "gist": "5 GitHub repos that teach quantitative finance for free.",
+   "try_prompt": "Comment Repo on the post to get all the links.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "Repo",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaECST_OaPn",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Cleaning the covariance matrix",
+   "gist": "Min-variance weights come from the inverse covariance matrix, so quants clean it first.",
+   "try_prompt": "Watch how quants clean a covariance matrix bottom up.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaDiqmQOM_h",
+  "lego_screen": "learn",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code",
+  "tip": {
+   "title": "CuPy: GPU-speed NumPy/SciPy",
+   "gist": "CuPy speeds NumPy/SciPy code up to 100x on GPU with almost no changes.",
+   "try_prompt": "Swap import numpy as np for import cupy as cp in a script.",
+   "tip_type": "tool",
+   "key_points": [
+    "Just change `import numpy as np` → `import cupy as cp`"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DaBublAh9wT",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "QuantPad: AI agent to code discretion",
+   "gist": "You can code discretion if it isn't pure randomness; QuantPad is an AI coding agent for it.",
+   "try_prompt": "Look up QuantPad.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZ95vy5Rpv-",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Order flow imbalance (Cont et al. 2011)",
+   "gist": "Cont, Kukanov and Stoikov found order flow imbalance at best bid/ask explains price moves.",
+   "try_prompt": "Look up the 2011 Cont, Kukanov and Stoikov order flow paper.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZ783KHyYnv",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes & random"
+ },
+ {
+  "post_id": "instagram:DZ5pQ2oMY1s",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DZ4ERTIoD7N",
+  "lego_screen": "learn",
+  "topic_hint": "web-design",
+  "topic_label": "Web design with AI",
+  "tip": {
+   "title": "העתקת מערכת עיצוב מכל אתר בקליק",
+   "gist": "הדרך המהירה להעתיק מערכת עיצוב של כל אתר בקליק אחד.",
+   "try_prompt": "בחרו אתר שאתם אוהבים והעתיקו את מערכת העיצוב שלו.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZvRJZTOdr5",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "When to sell a stock still going up",
+   "gist": "Beyond price targets and trailing stops: a 2010 approach to selling winners.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DZsv1Fzhcol",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DZqkOF4IDcJ",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Selling 1M shares without crashing price",
+   "gist": "Trade too fast and market impact hurts you; too slow and you take other risk.",
+   "try_prompt": "Watch how to balance speed vs market impact.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZgCOXMx1PB",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "5 quants who teach how to do the work",
+   "gist": "Five quants who teach the real work instead of selling signals.",
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DZf03iIh0On",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DZfyWMkxzlm",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Free Finance ML bootcamp video",
+   "gist": "Bootcamp 2.0 video on Don Marcos (López de Prado), author of \"Advances in Financial…\".",
+   "try_prompt": "Comment DON on the post to get the bootcamp video.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "DON",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZfhxLiOOdy",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:DZc_XrDo7VZ",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Square-root law of market impact",
+   "gist": "Big trades move prices by roughly the square root of size; a paper by Julius Bonart explains why.",
+   "try_prompt": "Look up Julius Bonart's paper on square-root impact.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZc6e5MByuj",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Algo trading without coding",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DZcdGxvTLno",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Canary resource doc",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": "canary",
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DZaftt1RxzG",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DZX-pp7RM1i",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "3 free prop-trading documents",
+   "gist": "Average execution beats perfection; 3 free documents to get going.",
+   "try_prompt": "Comment PROP on the post to get the 3 documents.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "PROP",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZXpDSWTDXN",
+  "lego_screen": "learn",
+  "topic_hint": "health",
+  "topic_label": "Health",
+  "tip": {
+   "title": "Why Huberman avoids melatonin",
+   "gist": "The issue is not melatonin itself but the dose, per Huberman.",
+   "try_prompt": "Check the melatonin dose on any supplement you use.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZVaH9ogixZ",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "HyperFrames: HTML to video",
+   "gist": "HeyGen open-sourced HyperFrames: write HTML, get video; now with code and CLI components.",
+   "try_prompt": "חפשו את HyperFrames של HeyGen.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZLG7kNtjQQ",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "Miso One text-to-speech model",
+   "gist": "8B-parameter TTS model that emotes like a human with 110 ms latency.",
+   "try_prompt": "Look up Miso One by Miso Labs.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZKqPE8oiXU",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DZImunWDEbz",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DZD6TrJjDNM",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DZDMkgFI9sO",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "How quants find signals",
+   "gist": "Signals start with a score assigned to every stock to predict what comes next.",
+   "try_prompt": "Watch how a stock score becomes a signal.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZBHvBIxb3s",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Lithe settings in FL Studio",
+   "gist": "Settings to try yourself; full project on request.",
+   "try_prompt": "Comment lithe on the post to get the full project.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": "lithe",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DY11bizzonB",
+  "lego_screen": "learn",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code",
+  "tip": {
+   "title": "Official Claude Code best practices",
+   "gist": "The official best practices for Claude Code, sent on request.",
+   "try_prompt": "Comment Correct on the post to get the Claude Code best practices.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "Correct",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYs2buco5g7",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "FPGA edge in HFT",
+   "gist": "Processing market data in hardware, not software, gives FPGA firms an edge at the matching engine.",
+   "try_prompt": "Look up how FPGAs process market data.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYQwnDSDF0S",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DX96rhPAAri",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DXpW8iuADtM",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DWJb6ENkfgr",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DWER2wEiCIt",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Quant finance papers list",
+   "gist": "Quant finance is more than statistics and coding; a list of key papers.",
+   "try_prompt": "Comment PAPERS on the post to get the full list.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "PAPERS",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DO-72RXghR-",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes & random"
+ },
+ {
+  "post_id": "instagram:DZDHjLAMTsS",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Cross-validation that fits markets",
+   "gist": "One backtest can lie; standard CV shuffles data, but markets aren't a deck of cards.",
+   "try_prompt": "Check if your backtest CV shuffles time-ordered data.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DY_zNsklZpG",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DY8fjIHOxnn",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Leaked production plugin trick",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DY76Db6SV6O",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DYwBT3xP6BI",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DYg9rwFgA26",
+  "lego_screen": "learn",
+  "topic_hint": "coding",
+  "topic_label": "Coding & Claude Code",
+  "tip": {
+   "title": "38-minute breakdown of Atlassian systems",
+   "gist": "An ex-Atlassian engineer's 38-minute breakdown of every system he built.",
+   "try_prompt": "Watch the first minutes of the 38-minute systems breakdown.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYfAkyWAPAY",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DYcdMocMW5E",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Is Jim Simons' 66% return verifiable?",
+   "gist": "The famous track record has no SEC filings, audited returns or public statements.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DYPyLbgSkV5",
+  "lego_screen": "learn",
+  "topic_hint": "ai-tools",
+  "topic_label": "AI tools",
+  "tip": {
+   "title": "How to pick an AI model",
+   "gist": "Go-to resources for choosing a model, like Artificialanalysis.ai.",
+   "try_prompt": "Compare models on Artificialanalysis.ai.",
+   "tip_type": "list",
+   "key_points": [
+    "Artificialanalysis.ai: third-party analysis including price comparisons"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYNL-unIBuX",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DYLKSkpovcg",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "NLP model to detect bubbles (HLPPL)",
+   "gist": "Johns Hopkins HLPPL combines Sornette's LPPL crash theory with FinBERT-style NLP.",
+   "try_prompt": "Look up the HLPPL bubble detection paper.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYC-x8DogOI",
+  "lego_screen": "learn",
+  "topic_hint": "web-design",
+  "topic_label": "Web design with AI",
+  "tip": {
+   "title": "Premium website with Claude",
+   "gist": "Claude replaces much of the workflow for building a premium website.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DYCNmcYNruv",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DYCKnT2NRZr",
+  "lego_screen": "none",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading"
+ },
+ {
+  "post_id": "instagram:DX7f_JWGJ4L",
+  "lego_screen": "none",
+  "topic_hint": "music-culture",
+  "topic_label": "Music releases & stories"
+ },
+ {
+  "post_id": "instagram:DXuH57RlbIt",
+  "lego_screen": "none",
+  "topic_hint": "ai-news",
+  "topic_label": "AI news"
+ },
+ {
+  "post_id": "instagram:DXtf3ZzAPUh",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DXrEeQFgHRE",
+  "lego_screen": "learn",
+  "topic_hint": "health",
+  "topic_label": "Health",
+  "tip": {
+   "title": "ניקוי תרופות מהדם",
+   "gist": "תרופות אמפטמיניות נחשבות בסיס מבחינת pH; ויטמין סי הוא חומצה.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DXquNgjjnrm",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Grid search for indicator combos",
+   "gist": "Grid search tests indicator combinations systematically instead of guessing.",
+   "try_prompt": "Grid-search two parameters of one indicator you use.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DXpRg6SDPUH",
+  "lego_screen": "learn",
+  "topic_hint": "quant-finance",
+  "topic_label": "Quant finance & trading",
+  "tip": {
+   "title": "Why diversification has limits",
+   "gist": "Portfolio variance splits in two: one term shrinks with more assets, the other doesn't.",
+   "try_prompt": "Watch the variance formula breakdown in the video.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DXpJQ5cEyP9",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Dark angelic vocal stacks with AutoTune",
+   "gist": "Stack vocals with AutoTune plugins for a dark, angelic sound.",
+   "try_prompt": "Stack a vocal with an AutoTune harmony plugin.",
+   "tip_type": "technique",
+   "key_points": [
+    "EFX+",
+    "choir",
+    "duo",
+    "harmony engine"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DXmoZNzkVnh",
+  "lego_screen": "none",
+  "topic_hint": "career",
+  "topic_label": "Career"
+ },
+ {
+  "post_id": "instagram:DXj904-iMUf",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "איך משתפרים במיקס",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DXhjyYeCCCe",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:DXdVUiOjKUv",
+  "lego_screen": "none",
+  "topic_hint": "web-design",
+  "topic_label": "Web design with AI"
+ }
+]
