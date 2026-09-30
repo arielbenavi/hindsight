@@ -102,5 +102,8 @@ Design/Theme.swift          DailySpend Theme + OnboardingStyle merged (Onboardin
 - [x] PR into `master`
 - [ ] Send Ariel the contract + needed pipeline changes
 
+## Deferred
+- **Extraction quality pass** (expand names from caption/handle context, use labels like "dinner spot", alternative search names): wait for real data from the live onboarding (Ariel's pipeline) and fix what actually breaks there, not the seed fixtures. Decided 2026-09-30.
+
 ## Cut order if we slip (from the sprint doc)
 1. Fitness practice loop (keep browse + search) · 2. L5 progress + back-off rules · 3. Thumbnails · 4. Proposal editing (approve only) · 5. Map list view
