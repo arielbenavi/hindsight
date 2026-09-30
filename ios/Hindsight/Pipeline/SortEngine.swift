@@ -61,7 +61,10 @@ final class SortEngine {
     /// Starts sorting whatever isn't sorted yet. Runs on its own: observers can
     /// stop listening (the chat moves on at 90%) without stopping the sort.
     func start(_ posts: [ContractPost], concurrency: Int = 4, onFinish: (@MainActor () -> Void)? = nil) {
+        // A stable shuffle, not newest-first: whatever is sorted by the hand-off
+        // is a fair sample of the whole history, so the proposal's topics are too.
         let todo = posts.filter { cache.records[$0.id]?.captionHash != Self.hash($0.caption) }
+            .sorted { Self.hash($0.id) < Self.hash($1.id) }
         publish(posts)
         guard !todo.isEmpty, task == nil else {
             if todo.isEmpty { finishStreams(); onFinish?() }

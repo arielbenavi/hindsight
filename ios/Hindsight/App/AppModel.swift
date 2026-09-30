@@ -45,7 +45,7 @@ final class AppModel {
     init(datasets: [Dataset] = Dataset.bundled(), selected: String? = UserDefaults.standard.string(forKey: AppModel.datasetKey),
          persist: Bool = true, store: SavedPostStore? = nil, useMySaves: Bool = false) {
         let mine = Dataset.mine()
-        let hasMine = useMySaves || FileManager.default.fileExists(atPath: mine.url.path())
+        let hasMine = useMySaves || FileManager.default.fileExists(atPath: mine.url.path(percentEncoded: false))
         self.datasets = hasMine ? [mine] + datasets : datasets
         self.store = store
         self.persist = persist
@@ -65,7 +65,7 @@ final class AppModel {
         if persist { UserDefaults.standard.set(dataset.id, forKey: Self.datasetKey) }
         do {
             // "me" has no file until the sort engine writes one (end of reading).
-            if dataset.isMine && !FileManager.default.fileExists(atPath: dataset.url.path()) {
+            if dataset.isMine && !FileManager.default.fileExists(atPath: dataset.url.path(percentEncoded: false)) {
                 data = nil
             } else {
                 data = try HindsightData.load(from: dataset.url)

@@ -55,6 +55,10 @@ struct SortUsage: Codable, Sendable, Equatable {
 actor AppleSortBackend: SortBackend {
     private var tally = SortUsage()
     private var cloudExhausted = false
+    /// Cloud failures in a row. After a few (no network, service down, or a
+    /// simulator that can't reach it) stop trying it for this run.
+    private var cloudFailuresInARow = 0
+    private static let cloudFailureLimit = 3
 
     func bucket(_ post: ContractPost) async -> SortDecision? {
         guard let answer = await ask(SortPrompts.bucket, SortPrompts.post(post), SortBucket.self) else { return nil }
@@ -109,17 +113,22 @@ actor AppleSortBackend: SortBackend {
     // MARK: - Requests
 
     private func ask<T: Generable>(_ instructions: String, _ prompt: String, _ type: T.Type, cloudOnly: Bool = false) async -> T? {
-        if #available(iOS 27, *), !cloudExhausted {
+        if #available(iOS 27, *), !cloudExhausted, cloudFailuresInARow < Self.cloudFailureLimit {
             let cloud = PrivateCloudComputeLanguageModel()
             if cloud.isAvailable {
                 let session = LanguageModelSession(model: cloud, instructions: Instructions(instructions))
                 do {
                     let response = try await session.respond(to: prompt, generating: T.self, options: GenerationOptions(sampling: .greedy))
                     record(session, cloud: true)
+                    cloudFailuresInARow = 0
                     return response.content
                 } catch {
                     tally.failedRequests += 1
-                    if case PrivateCloudComputeLanguageModel.Error.quotaLimitReached = error { cloudExhausted = true }
+                    if let cloudError = error as? PrivateCloudComputeLanguageModel.Error, case .quotaLimitReached = cloudError {
+                        cloudExhausted = true
+                    } else if !Self.isAboutThisPost(error) {
+                        cloudFailuresInARow += 1
+                    }
                     DebugLog.write("sort: cloud failed (\(String(describing: error).prefix(80)))")
                 }
                 tally.quota = Self.describe(cloud.quotaUsage)
@@ -135,6 +144,12 @@ actor AppleSortBackend: SortBackend {
             tally.failedRequests += 1
             return nil
         }
+    }
+
+    /// Guardrails and refusals are about one post, not about the cloud being down.
+    private static func isAboutThisPost(_ error: Error) -> Bool {
+        let name = String(describing: error)
+        return ["guardrail", "refusal", "unsupportedLanguage", "Safety", "sensitive", "unsafe"].contains { name.localizedCaseInsensitiveContains($0) }
     }
 
     private func record(_ session: LanguageModelSession, cloud: Bool) {

@@ -195,12 +195,13 @@ final class SetupChatModel {
         let started = clock.now
         for await snapshot in progressStream() {
             progress = snapshot
-            if snapshot.fraction >= SortProgress.handOffFraction || clock.now - started >= SortProgress.handOffAfter { break }
+            if snapshot.shouldHandOff(after: clock.now - started) { break }
         }
         let total = receiptPosts.count.formatted()
+        let decided = (progress?.decided ?? 0).formatted()
         messages[index].text = (progress?.isComplete ?? true)
             ? "Done. That's all \(total)."
-            : "Done with most of them. I'll finish the rest in the background."
+            : "I've read \(decided) of \(total), enough to see the shape of it. I'll finish the rest in the background."
         progress = nil
         save()
     }
