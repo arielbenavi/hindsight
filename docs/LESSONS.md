@@ -20,6 +20,13 @@ DATA_FETCHING_RESEARCH.md.)
 - The Muse paste flow works end to end on device. Asking only for saves after our
   newest date made the first real reply tiny (2 posts). That's expected, not a
   bug. (2026-09-29)
+- ✅ **First real send (2026-09-30 21:04): Muse called `submit_saved_posts`** through
+  the ngrok connector. Handshake: initialize (200), initialized (202), tools/list,
+  then tools/call, all from `Python-urllib/3.12` on Meta's side. **Muse ignores our
+  field names**: `author` = display name + `author_username`, `post_creation_time`,
+  `tagged_users`, `media_type`, and the default "Saved"/"All posts" folders as
+  collections. The server normalizes to the contract (`normalized()` in
+  connector/server.py). Never trust an LLM to follow a schema; normalize at the edge.
 - **Muse accepts a custom MCP connector from a chat message.** It asks "Allow the
   agent to share information with <host>?" (Allow once / Always allow / Deny). So
   Meta does allow sending saves to a third-party connector. (2026-09-30)

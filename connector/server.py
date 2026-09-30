@@ -79,6 +79,48 @@ def post_id(url: str, platform: str | None) -> str:
     return f"{platform}:{parts[-1] if known and parts else url}"
 
 
+# Instagram's built-in folders, not collections the user made.
+DEFAULT_COLLECTIONS = {"saved", "all posts", "all saved", "all", "all saved posts"}
+
+
+def normalized(post: dict[str, Any]) -> dict[str, Any]:
+    """Map whatever keys Muse used onto the contract's posts[] keys.
+
+    Muse doesn't stick to the schema it's given: first real send (2026-09-30)
+    used author=<display name> + author_username, post_creation_time,
+    tagged_users, media_type, and the default "Saved"/"All posts" folders.
+    Unknown keys are kept (the app ignores them)."""
+    out = dict(post)
+
+    def first(*keys: str) -> Any:
+        return next((post[k] for k in keys if post.get(k) not in (None, "", [])), None)
+
+    username = first("author_username", "username", "owner_username")
+    if username:
+        if post.get("author") and post.get("author") != username and not post.get("author_display_name"):
+            out["author_display_name"] = post["author"]
+        out["author"] = username
+    if isinstance(out.get("author"), str):
+        out["author"] = out["author"].lstrip("@")
+    out["url"] = first("url", "media_permalink", "permalink") or post.get("url")
+    out["posted_at"] = first("posted_at", "post_creation_time", "created_at", "timestamp")
+    out["saved_at"] = first("saved_at", "saved_time", "date")
+    if not post.get("mentions") and isinstance(post.get("tagged_users"), list):
+        out["mentions"] = [
+            {"username": str(u).lstrip("@"), "display_name": None} if not isinstance(u, dict)
+            else {"username": str(u.get("username", "")).lstrip("@"), "display_name": u.get("display_name") or u.get("name")}
+            for u in post["tagged_users"]
+        ]
+    if isinstance(post.get("collections"), list):
+        out["collections"] = [c for c in post["collections"] if str(c).strip().lower() not in DEFAULT_COLLECTIONS]
+    if not post.get("kind") or post.get("kind") == "post":
+        media = str(post.get("media_type") or post.get("post_type") or "").lower()
+        path = str(out.get("url") or "")
+        out["kind"] = ("reel" if "/reel" in path else "carousel" if "carousel" in media or "album" in media
+                       else "video" if media == "video" else post.get("kind") or "post")
+    return out
+
+
 mcp = MCPServer(
     name="hindsight",
     title="hindsight",
@@ -121,7 +163,7 @@ def submit_saved_posts(
     accepted = duplicates = rejected = 0
     with _lock:
         saves = load_saves()
-        for post in posts:
+        for post in map(normalized, posts):
             url = str(post.get("url") or "").strip()
             if not url.startswith("http"):
                 rejected += 1
@@ -155,7 +197,7 @@ def submit_saved_posts(
 async def saves_for_app(request: Request) -> JSONResponse:
     """The app pulls what Muse sent, as a contract-shaped JSON array (newest received first)."""
     since = request.query_params.get("since")
-    posts = sorted(load_saves().values(), key=lambda p: p.get("received_at", ""), reverse=True)
+    posts = sorted((normalized(p) for p in load_saves().values()), key=lambda p: p.get("received_at", ""), reverse=True)
     if since:
         posts = [p for p in posts if p.get("received_at", "") > since]
     log_call("app_pull", returned=len(posts), since=since)
