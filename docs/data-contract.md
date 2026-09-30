@@ -319,6 +319,16 @@ What's different from the code on `master` today:
 5. **Extraction:** output `items[]` in the shapes above: places, tips, routines. Never invent content; write in the caption's language.
 6. **Delivery:** for the MVP, a file in this format (the one we generate this week is the reference). Later, the backend returns the same JSON.
 
+## Proposed additions (Ariel, 2026-09-30; not yet agreed)
+
+Additive only, so v1 readers keep working (Reut's decoder falls back to `instagram` / `unknown`):
+- `platform`: `web` (any other site: articles, YouTube…) and `whatsapp` (notes with no post behind them).
+- `kind`: `link` (a web page) and `note` (text the user wrote to themselves).
+- `source`: `whatsapp_export` (a WhatsApp "Export chat" import).
+- A `note` has no permalink, so its `url` is a stable made-up `hindsight-note:whatsapp/<time>-<hash>`. Don't open it; show the caption.
+
+If agreed, bump `contract_version` to 2 and decide where notes and links appear in the screens.
+
 ## Changelog
 
 - **v1** (2026-09-30): first version, merged from the Map, confirmation, layout proposal, Learn and Fitness specs.
