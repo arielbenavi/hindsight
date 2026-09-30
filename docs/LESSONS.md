@@ -20,6 +20,17 @@ DATA_FETCHING_RESEARCH.md.)
 - The Muse paste flow works end to end on device. Asking only for saves after our
   newest date made the first real reply tiny (2 posts). That's expected, not a
   bug. (2026-09-29)
+- **Muse accepts a custom MCP connector from a chat message.** It asks "Allow the
+  agent to share information with <host>?" (Allow once / Always allow / Deny). So
+  Meta does allow sending saves to a third-party connector. (2026-09-30)
+- **Muse's WhatsApp chat has no number and isn't in WhatsApp's "send to…" picker**,
+  so `wa.me/?text=` can't reach it. The WhatsApp route = copy + open WhatsApp +
+  user pastes into the Muse chat. (2026-09-30)
+- MCP server: answer `GET /mcp` with 405 unless you really serve an SSE stream.
+  Holding it open made Muse's requests hang and get cancelled (cloudflared: "stream
+  canceled by remote"). Muse then blamed "Cloudflare 403" and fell back to its
+  browser tool. Log every HTTP request (method, path, UA, status) from the start.
+  (2026-09-30)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
 
