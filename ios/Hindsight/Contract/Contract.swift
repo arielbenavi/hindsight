@@ -17,6 +17,14 @@ struct ContractFile: Codable, Sendable {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(ContractFile.self, from: data)
     }
+
+    /// The file as the pipeline writes it: snake_case keys (the sort engine's output).
+    func encoded() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(self)
+    }
 }
 
 struct ContractUser: Codable, Sendable, Hashable {

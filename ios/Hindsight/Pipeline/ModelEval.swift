@@ -47,51 +47,7 @@ struct EvalCase: Sendable {
     }
 }
 
-// MARK: - What the models are asked (the Mac test's second, Apple-guided version)
-
-@Generable enum EvalScreen: String { case map, learn, fitness, none }
-
-@Generable struct EvalBucket {
-    @Guide(description: "One short sentence: what is this post, and would the person act on it (go somewhere, try something, do an exercise) or just enjoy it?")
-    var reason: String
-    var screen: EvalScreen
-    @Guide(description: "A short broad kebab-case topic slug, like nyc-food, guitar, ai-tools, back-mobility, memes")
-    var topic: String
-}
-
-@Generable struct EvalPlace {
-    @Guide(description: "The place's name exactly as written in the text")
-    var name: String
-}
-
-@Generable struct EvalPlaces {
-    @Guide(description: "Every specific venue named in the text (restaurant, cafe, bar, shop, beach, sight). Copy names exactly as written. Not cities, countries or neighborhoods on their own. Empty if none are named.", .maximumCount(12))
-    var places: [EvalPlace]
-}
-
-enum EvalPrompts {
-    static let bucket = """
-    You sort a person's saved social media posts for an app. Read the post and decide which screen it belongs to and a topic slug. Use only the given text.
-
-    Examples:
-    - "Best smash burger in the East Village 🍔 📍 @7thstreetburger" → map, nyc-food
-    - "3 stretches for lower back pain, hold each 30s" → fitness, back-mobility
-    - "This AI tool writes your emails for you. Comment AI for the link" → learn, ai-tools
-    - "Easy protein pancakes: oats, eggs, banana" → learn, recipes
-    - "POV: you said one more set 😂 #gymmemes" → none, memes
-    - "Breaking: new iPhone announced today" → none, news
-    - "Grateful for this weekend with my people ❤️" → none, personal
-    A post only goes to learn if there is a concrete tip, technique, tool or recipe someone could try. Jokes, vibes, quotes and personal moments are none.
-    """
-    static let places = "You list the specific places named in a saved social media post, exactly as written. Never invent names. A city or neighborhood alone is not a place."
-
-    static func post(_ post: ContractPost) -> String {
-        var text = "Author: @\(post.author.username)\n"
-        if !post.collections.isEmpty { text += "Saved in the user's collection(s): \(post.collections.joined(separator: ", "))\n" }
-        if !post.mentions.isEmpty { text += "Mentions: \(post.mentions.map { "@" + $0.username }.joined(separator: ", "))\n" }
-        return text + "Caption:\n\((post.caption ?? "").prefix(1800))"
-    }
-}
+// The prompts and schemas live in SortPrompts.swift, shared with the sort engine.
 
 // MARK: - Results
 
@@ -239,16 +195,16 @@ final class ModelEvalRunner {
     private static func sort(_ c: EvalCase, engine: EvalEngine) async -> EvalRow {
         var row = EvalRow(id: c.post.id, dataset: c.dataset, gold: c.gold?.rawValue ?? "none", hebrew: c.isHebrew,
                           goldPlaces: c.goldPlaces, seconds: 0)
-        let prompt = EvalPrompts.post(c.post)
+        let prompt = SortPrompts.post(c.post)
         let start = ContinuousClock.now
         do {
-            guard let session = session(engine, instructions: EvalPrompts.bucket) else { throw EvalUnavailable() }
+            guard let session = session(engine, instructions: SortPrompts.bucket) else { throw EvalUnavailable() }
             defer { count(session, into: &row) }
-            let bucket = try await session.respond(to: prompt, generating: EvalBucket.self, options: GenerationOptions(sampling: .greedy))
+            let bucket = try await session.respond(to: prompt, generating: SortBucket.self, options: GenerationOptions(sampling: .greedy))
             row.screen = bucket.content.screen.rawValue
-            if bucket.content.screen == .map, let places = self.session(engine, instructions: EvalPrompts.places) {
+            if bucket.content.screen == .map, let places = self.session(engine, instructions: SortPrompts.places) {
                 defer { count(places, into: &row) }
-                let found = try await places.respond(to: prompt, generating: EvalPlaces.self, options: GenerationOptions(sampling: .greedy))
+                let found = try await places.respond(to: prompt, generating: SortPlaces.self, options: GenerationOptions(sampling: .greedy))
                 row.places = found.content.places.map(\.name)
             }
         } catch {
