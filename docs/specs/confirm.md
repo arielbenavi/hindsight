@@ -159,6 +159,11 @@ Playful one-liners in DailySpend's voice, shown briefly between cards or on C5. 
 - On C5: "Map's ready. Go eat something."
 - When nothing needs asking: "Nailed all of them. Didn't even need you."
 
+## Later
+
+- **LLM confidence scoring.** A lightweight LLM goes through every matched place and scores how confident we are that the pin is right (caption evidence vs. the MapKit result's name, address, type and area). The score replaces the rule-based triage above and decides what's placed, asked or parked. Not in the MVP.
+- **Browse automatic matches:** a view listing what we placed without asking, for spot-checking.
+
 ## Decided (was open)
 
 1. **Swipes plus buttons.**

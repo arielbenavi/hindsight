@@ -24,7 +24,7 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - [x] Confirmation flow spec ("is this right?" cards) ([specs/confirm.md](specs/confirm.md))
 - [ ] Fitness lego screen spec: search by problem area or muscle group, reminders
 - [ ] Education lego screen spec
-- [ ] Layout proposal screen spec (onboarding handoff: "here's your app", approve or edit)
+- [x] Layout proposal screen spec (onboarding handoff: "here's your app", approve or edit) ([specs/layout-proposal.md](specs/layout-proposal.md))
 - [ ] Data contract: the fields each lego screen needs and why → becomes the list for Ariel
 - [x] Design references reviewed (DailySpend theme + Ariel's onboarding style)
 
