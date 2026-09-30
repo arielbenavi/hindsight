@@ -58,6 +58,10 @@ DATA_FETCHING_RESEARCH.md.)
   have `openFavorite: false`, and both returned `ok: true` with 0 videos. That's an
   empty "success", not an error. They scrape the public profile tab, so they'd need
   every user to make Favorites public. Not a product path. (2026-09-30)
+- Even after @pudabeats made Favorites visible, logged-out tiktok.com showed only
+  a **public Collection** ("For later 1"), not the flat Favorites list, and YepAPI
+  still returned 0 (`openFavorite` stayed false; it has no collections endpoint).
+  TikTok now exposes Collections, not Favorites. (2026-09-30)
 
 ## Process
 
