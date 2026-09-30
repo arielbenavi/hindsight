@@ -65,7 +65,7 @@ scripts/device.sh log
 - The phone needs Developer Mode on (Settings → Privacy & Security). The first launch of a new signer needs Settings → General → VPN & Device Management → Trust.
 - Signing uses `project.yml`'s team. If your role on that team can't create certificates (for example "App Manager" without "Access to Certificates, Identifiers & Profiles"), use your free Personal Team and your own bundle ID without touching `project.yml`:
   `HINDSIGHT_TEAM=<your team id> HINDSIGHT_BUNDLE_ID=com.you.hindsight scripts/device.sh install`
-  Personal Team builds expire after 7 days.
+  Personal Team builds expire after 7 days, and they leave out the Private Cloud Compute entitlement (a Personal Team can't sign it), so Apple's cloud model is unavailable in them. Building from Xcode's UI with a Personal Team instead: clear **Code Signing Entitlements** in the target's build settings for that build.
 - DEBUG builds append events (Muse link attempts, pastes, X sync) to `Library/Application Support/debug-log.txt`, which is what `log` prints.
 - To replay onboarding: launch with `-resetOnboarding`, e.g. `xcrun devicectl device process launch --device <id> --terminate-existing <bundle id> -- -resetOnboarding`.
 

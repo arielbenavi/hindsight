@@ -11,7 +11,9 @@ DEVICE=$(xcrun devicectl list devices 2>/dev/null | awk '/iPhone/ && /(available
 [[ -z "$DEVICE" ]] && { echo "No iPhone connected (plug it in, unlock it)."; exit 1; }
 BUNDLE_ID=${HINDSIGHT_BUNDLE_ID:-com.reutrabin.hindsight}
 OVERRIDES=()
-[[ -n "${HINDSIGHT_TEAM:-}" ]] && OVERRIDES+=(DEVELOPMENT_TEAM=$HINDSIGHT_TEAM)
+# A Personal Team can't sign managed entitlements (Private Cloud Compute), so
+# builds under your own team drop them: the app runs, minus the cloud model.
+[[ -n "${HINDSIGHT_TEAM:-}" ]] && OVERRIDES+=(DEVELOPMENT_TEAM=$HINDSIGHT_TEAM CODE_SIGN_ENTITLEMENTS=)
 [[ -n "${HINDSIGHT_BUNDLE_ID:-}" ]] && OVERRIDES+=(PRODUCT_BUNDLE_IDENTIFIER=$HINDSIGHT_BUNDLE_ID)
 DERIVED=${TMPDIR:-/tmp}/hindsight-device-build
 

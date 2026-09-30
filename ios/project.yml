@@ -31,6 +31,13 @@ targets:
         includes:
           - "*.hindsight.json"
           - "*.matches.json"
+    entitlements:
+      # Apple's server-side models (docs/merge-plan.md → AI requirements).
+      # Managed entitlement, granted to Reut's team. Personal Team builds drop it:
+      # scripts/device.sh does that when HINDSIGHT_TEAM is set.
+      path: Hindsight/Hindsight.entitlements
+      properties:
+        com.apple.developer.private-cloud-compute: true
     info:
       # Merged with the generated Info.plist keys below. Dark launch screen,
       # so the app doesn't flash white before the first frame.
