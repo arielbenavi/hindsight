@@ -1,0 +1,113 @@
+# MVP sprint: Wed 9/30 → Mon 10/5
+
+Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in parallel and isn't tracked here.
+
+**Monday goal:** a TestFlight build that Reut, Ariel and Reut's girlfriend can install. It goes: seed or imported saves → proposed layout → approve → a working **Map** tab (with "is this right?" confirmation cards), a **Fitness** tab and an **Education** tab.
+
+**How we avoid waiting on Ariel:** each lego screen spec defines the data it needs (the data contract). A Claude agent then reads both seed files once and writes that data into a committed fixture file, so the app runs on real saves. When Ariel's pipeline outputs the same shape, it replaces the fixture.
+
+## Decisions
+
+- **Lego screens in the MVP:** Map, Fitness, Education. The tab bar is one tab per lego screen, never per category.
+- **Map:** any place, built for deciding in the moment (what's near me now). One Map tab; cities and collections are filters.
+- **Confirmation flow:** after onboarding, cards show the saved post next to the best-guess match: "is this right?"
+- **Saving is aspirational.** People save tips and stretches as promises to their future self. Learn and Fitness don't just help find saves again; they nudge the user to practice and build a routine (see the practice loop in [specs/learn.md](specs/learn.md)).
+- **Fitness:** reuses Learn's practice loop ("Did it" instead of "Tried it"), plus search by problem area or muscle group. Not live workout tracking.
+- **Place matching:** Apple Maps (MapKit search) for now. Every place also gets an "Open in Google Maps" link. A full Google Maps option comes later.
+- **Video:** thumbnail + tap-through to the original app. ⚠️ **Known gap:** we want in-app playback (Instagram/TikTok/X embeds), which needs API access. Tracked for after the MVP.
+- **Users:** Reut, Ariel, Reut's girlfriend → then a friends beta on TestFlight. Everyone has their own data; no sharing.
+- **LLM:** for this sprint, sorting and extraction on the seed data is done once by a Claude agent, with the output committed as a fixture. The app's real LLM (Apple's on-device models, cheap local models on a VPS, a hosted provider) gets evaluated after the MVP.
+- **Design:** DailySpend's look ([reyr13/daily-spend](https://github.com/reyr13/daily-spend), `Shared/Design/Theme.swift`), brrr.now, and Ariel's onboarding (`ios/Hindsight/Onboarding/OnboardingStyle.swift`). Both already share the same language: near-black background, heavy rounded type, a lime accent, pill buttons, rounded dark cards. We merge them into one theme file instead of keeping two.
+
+## Wed 9/30: Specs
+
+- [x] Map lego screen spec: screens, flows, states, data needs ([specs/map.md](specs/map.md))
+- [x] Confirmation flow spec ("is this right?" cards) ([specs/confirm.md](specs/confirm.md))
+- [x] Fitness lego screen spec ([specs/fitness.md](specs/fitness.md))
+- [x] Education (Learn) lego screen spec ([specs/learn.md](specs/learn.md))
+- [x] Layout proposal screen spec (onboarding handoff: "here's your app", approve or edit) ([specs/layout-proposal.md](specs/layout-proposal.md))
+- [x] Data contract ([data-contract.md](data-contract.md))
+- [x] Design references reviewed (DailySpend theme + Ariel's onboarding style)
+
+## Thu 10/1: Foundations
+
+- [ ] Parser for Reut's Instagram export (collections, full captions, encoding fix) → `SavedPost` with a new `collection` field
+- [ ] Data models for extracted items: `Place`, `Exercise`, `Tip`, plus `LayoutConfig` (which lego screens, in what order)
+- [ ] Extraction agent: goes over both seed files → assigns each post to a lego screen and pulls out the contract fields → commits the fixture JSON
+- [ ] Place matching: place name + city → MapKit search → coordinates, address, Apple Maps and Google Maps links; cached
+- [ ] App shell: tab bar built from `LayoutConfig`, not hardcoded
+- [ ] Shared theme: merge `OnboardingStyle` and the DailySpend theme into one design system
+
+## Fri 10/2: Map lego screen
+
+- [ ] Map opens centered on you, pins for nearby saved places, locate-me button
+- [ ] Filters: type (food / café / bar / other), collection or city, want-to-go / been there
+- [ ] Place card: name, type, neighborhood, thumbnail → Instagram, Open in Apple Maps / Google Maps, been-there toggle
+- [ ] List view of the same places, sorted by distance
+- [ ] Posts with several places: one pin per place, all linking to the same post
+- [ ] Empty, loading and location-permission-denied states
+
+## Sat 10/3: Confirmation flow + onboarding handoff + Education
+
+- [ ] Confirmation cards: saved post on one side, best-guess match on the other. Yes, no, or pick another result. "Couldn't place" goes to a review list
+- [ ] Layout proposal screen: read topics → suggest lego screens → approve, rename, reorder, remove
+- [ ] Hook into Ariel's onboarding: onboarding done → layout proposal → confirmation cards → app
+- [ ] Practice loop (shared, `ios/Hindsight/Practice/`): Today's 1 picker, weekly ring, practice card, "When?" reminders, spaced reviews, notification policy
+- [ ] Learn lego screen on top of it: setup, home, topic page, tip detail, progress sheet, search
+- [ ] "Everything else" sheet: saves that fit no tab, reachable from every tab's header
+
+## Sun 10/4: Fitness + polish
+
+- [ ] Fitness: browse by body area or problem, exercise cards (name, target area, form tips, link to the reel)
+- [ ] Fitness on the shared practice loop ("Did it"), reusing its reminders
+- [ ] Thumbnails, if we find a way to fetch them (otherwise a styled placeholder)
+- [ ] Look-and-feel pass across all tabs
+- [ ] Unit tests: export parser, contract decoding, layout config
+
+## Mon 10/5: Ship
+
+- [ ] Walk through it on Reut's phone with Reut's data and Ariel's data
+- [ ] Fix blocking bugs only
+- [ ] Archive, upload to TestFlight, invite Ariel and Reut's girlfriend
+- [ ] Send Ariel the data contract and the changes his Muse pull needs
+
+## ⚠️ Merge-conflict hotspots with Ariel
+
+Each spec has its own table with details. The files where our work overlaps his:
+
+| File | Why we touch it | Spec | Risk |
+|---|---|---|---|
+| `ios/Hindsight/HindsightApp.swift` | Routing: onboarding → proposal → confirmation → tab shell | layout-proposal, confirm | **High** |
+| `ios/Hindsight/Onboarding/OnboardingModel.swift`, `OnboardingFlow.swift`, `Steps/PreferencesStep.swift` | The proposal replaces the preferences step | layout-proposal | **High** |
+| `ios/Hindsight/Models/SavedPost.swift` | New fields (collections, mentions, thumbnail…) | map | **High** |
+| `ios/Hindsight/Onboarding/OnboardingPreferences.swift` | Replaced by `LayoutConfig` | layout-proposal | Medium |
+| `ios/Hindsight/Import/DataExportParser.swift`, `SavedPostStore.swift` | Reut's export format; new fields in the store | map | Medium |
+| `ios/Hindsight/Onboarding/OnboardingStyle.swift` | The shared theme. Leave it alone: build `ios/Hindsight/Design/Theme.swift` next to it and unify later, together | all | Medium |
+| `ios/project.yml` | Seed files, location permission (Ariel: share extension) | map | Medium |
+| `ios/HindsightTests/*` | Tests affected by the above | all | Low |
+
+**Rules:** new code goes in new folders we own (`Design/`, `Layout/`, `LegoScreens/`). Tell Ariel before touching one of his files, change it in a small separate commit, and pull `master` before starting each day.
+
+## Cut order if we slip
+
+1. Fitness practice loop (keep browse and search)
+2. Learn progress sheet (L5) and notification back-off rules (keep one daily reminder)
+3. Thumbnails (styled placeholders)
+4. Editing on the layout proposal screen (approve only)
+5. Map list view
+
+## After the MVP
+
+- **Apple's Foundation Models framework for all LLM work (v1).** On-device models: no cost per call, and nothing leaves the phone. Checked on developer.apple.com:
+  - **Already on iOS 26** (our deployment target): the on-device model, guided generation (`@Generable`, which returns Swift structs directly) and tool calling. Our small tasks fit it: typed layout edits, place extraction from a caption, the B2 questions.
+  - **New in iOS 27:** Private Cloud Compute models (`PrivateCloudComputeLanguageModel`) for jobs too big for the device, image input (`ImageAttachmentContent`, e.g. reading thumbnails), and plugging in other models through the same API (`LanguageModel`).
+  - **Catch:** it needs an Apple Intelligence device; older iPhones need a fallback.
+
+- In-app video playback via platform embeds / API access
+- Evaluating the app's LLM: Apple's on-device SDKs, cheap local models on a VPS, hosted providers
+- Google Maps as a full place-matching option
+- Sharing lists (e.g. with a partner)
+- More lego screens (e.g. guitar or other instructional content), including a **Recipes** lego screen (food and nutrition saves live in Learn until then)
+- **Widgets:** home-screen / lock-screen widgets showing a practice ring; the user picks which tab it tracks (Learn or Fitness). DailySpend already has ring widgets to borrow from.
+- **Body map** for Fitness: a tappable front/back body outline instead of the area grid
+- **Optional tabs under the threshold:** offer e.g. Fitness as an extra tab when there are fewer than 5 matching saves
