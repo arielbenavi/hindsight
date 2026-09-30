@@ -153,10 +153,13 @@ struct ConfirmationFlow: View {
     private var intro: some View {
         let found = store.totalFound
         let placed = store.placedCount
-        let asks = store.isMatching ? 0 : store.onboardingCards().count
+        let ready = store.onboardingCards().count
+        // Cards can start once a full hand is ready; matching carries on behind them.
+        let canStart = !store.isMatching || ready >= Triage.onboardingLimit
+        let asks = ready
         return VStack(alignment: .leading, spacing: 18) {
             Spacer()
-            if store.isMatching {
+            if store.isMatching && !canStart {
                 Text("Finding your spots… \(found - store.pendingCount)")
                     .font(Theme.number(40))
                     .contentTransition(.numericText(value: Double(found - store.pendingCount)))
@@ -166,7 +169,8 @@ struct ConfirmationFlow: View {
                 Text("We'll finish finding your spots when you're back online.").font(Theme.title(30))
             } else {
                 Text("We found \(found) spots in your saves.").font(Theme.number(44)).fixedSize(horizontal: false, vertical: true)
-                Text(asks == 0 ? "\(placed) are on your map already." :
+                Text(asks == 0 ? "\(placed) are on your map already." : store.isMatching ?
+                        "\(placed) are on your map already, more on the way. Help us check \(asks)? Takes 30 seconds." :
                         "\(placed) are on your map already. Help us check \(asks) more? Takes 30 seconds.")
                     .font(Theme.body(19)).foregroundStyle(Theme.secondary)
             }
@@ -176,8 +180,8 @@ struct ConfirmationFlow: View {
             } else {
                 Button(asks == 0 && !store.isMatching ? "See my map" : "Let's go") { beginCards() }
                     .buttonStyle(.pill)
-                    .disabled(store.isMatching)
-                    .opacity(store.isMatching ? 0.5 : 1)
+                    .disabled(!canStart)
+                    .opacity(canStart ? 1 : 0.5)
                 Button("Later") { onFinish() }
                     .buttonStyle(.pillSecondary)
             }
