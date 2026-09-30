@@ -167,9 +167,32 @@ The app's tab bar is built only from `LayoutConfig`. It replaces `OnboardingPref
 - [ ] Works without the LLM (rules + fixed wording).
 - [ ] The tab bar after onboarding matches the approved card exactly.
 
-## Open questions
+## Decided (was open)
 
-1. **More than one Learn tab?** Reut's original example had "guitar" as its own tab. The draft keeps one tab per lego screen (guitar is a section in Learn). Should "Move to its own tab" be allowed, even if it breaks the one-tab rule?
-2. **Name: Learn or Education?** "Learn" is shorter and friendlier in a tab bar.
-3. **Changing it later:** a "Rebuild my app" entry in settings that reopens this chat? Out of the MVP in the draft.
-4. **The left-out saves:** out of sight entirely in the MVP, or a plain "Everything else" list somewhere (e.g. in settings) so nothing feels lost?
+1. **One Learn tab in the MVP.** Letting the user split a topic into its own tab is an idea for later.
+2. **"Learn"** is the working name. Loose; we'll workshop it.
+3. **No "Rebuild my app" in the MVP.** Definitely later.
+4. **Keep an "Everything else" list** (see below). Later, it gets a "try to place these" action that sorts them into existing tabs, which ties into rebuilding the app and creating new pages.
+
+## Everything else
+
+Saves that didn't fit any tab (and topics the user left out) stay reachable, so nothing feels lost.
+
+- **Where:** a button in the top-right of every tab's header opens a sheet: "Everything else · 44".
+- **What:** a plain list, newest first: thumbnail, author, first line of caption. Tap → opens the post.
+- **Later:** "Try to place these" re-runs sorting on the list and suggests moving posts into existing tabs; with "Rebuild my app", it can also propose new tabs.
+
+## ⚠️ Merge-conflict hotspots with Ariel
+
+This spec replaces part of Ariel's onboarding, so it touches his files more than any other spec. Talk to him **before** changing any of these, and land each change as its own small commit.
+
+| File | What we'd change | Risk |
+|---|---|---|
+| `ios/Hindsight/Onboarding/OnboardingModel.swift` | The `Step` enum (`welcome, howItWorks, connect, preferences, done`): `.preferences` is replaced by the chat + proposal. `topicSuggestions` is replaced by Ariel's clustering output. | **High.** Ariel is turning onboarding into a chat, so he's rewriting this file too. |
+| `ios/Hindsight/Onboarding/OnboardingFlow.swift` | The `switch model.step` that picks each screen. | **High**, same reason. |
+| `ios/Hindsight/Onboarding/Steps/PreferencesStep.swift` | Deleted, replaced by the proposal. | **High** if he edits it meanwhile. |
+| `ios/Hindsight/Onboarding/OnboardingPreferences.swift` | `grouping`, `layout` and `topics` are replaced by `LayoutConfig`; `resurface` moves to Fitness. The saved UserDefaults key must still load or be migrated. | Medium. |
+| `ios/Hindsight/HindsightApp.swift` | After onboarding: proposal → confirmation → tab shell, instead of `ContentView`. | **High.** Ariel changed it in PR #1. |
+| `ios/HindsightTests/OnboardingTests.swift` | Tests for the preferences step and topic suggestions will need updating. | Medium. |
+
+**How we avoid them:** put our code in new files we own (`ios/Hindsight/Layout/`: `LayoutConfig`, the proposal card, the edit operations). Agree with Ariel on one integration point: his chat calls our proposal view with the clustering output and gets a `LayoutConfig` back. Then only one line of `OnboardingFlow` changes, and he makes it.

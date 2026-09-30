@@ -200,6 +200,19 @@ struct PlaceSource: Codable {      // the link back to a saved post
 - [ ] Location denied still gives a usable map.
 - [ ] Apple Maps and Google Maps buttons open the right place.
 
+## ⚠️ Merge-conflict hotspots with Ariel
+
+| File | What we'd change | Risk |
+|---|---|---|
+| `ios/Hindsight/Models/SavedPost.swift` | Add `collections`, `mentions`, `hashtags`, `savedAt`, `thumbnailURL`, `locationTag`. The `init` is called by all of Ariel's parsers and tests. | **High.** Add them as optional fields with default values, and decode them with `decodeIfPresent`, so his call sites and the saved store keep working unchanged. |
+| `ios/Hindsight/Import/DataExportParser.swift` | Ariel's Instagram parser expects the older export format (a top-level object with `saved_saved_media` / `string_map_data`). Reut's export is a top-level array with `label_values`, plus `saved_collections.json`, so it currently parses to nothing. | Medium. Put the new format in a new file (`InstagramExportParser.swift`) and add one call to it from `parse(json:)`. |
+| `ios/Hindsight/Import/SavedPostStore.swift` | Seed loading (add Reut's seed) and the persisted JSON (new fields). | Medium. |
+| `ios/Hindsight/SeedData.swift` | Load Reut's seed next to Ariel's. | Low. |
+| `ios/project.yml` | Bundle Reut's seed files; add `INFOPLIST_KEY_NSLocationWhenInUseUsageDescription`. Ariel also plans to add a share-extension target here. | Medium. Small separate commits; rerun `xcodegen` after pulling. |
+| `ios/HindsightTests/SavedPostParserTests.swift`, `DataExportParserTests.swift` | May need updates after the model change. | Low if the fields are optional. |
+
+Everything else lives in new files we own: `ios/Hindsight/LegoScreens/Map/`.
+
 ## Decided (was open)
 
 1. **Been-there places** stay visible with a ✓ badge on their emoji; they aren't hidden or dimmed. The default status filter is All.

@@ -159,6 +159,14 @@ Playful one-liners in DailySpend's voice, shown briefly between cards or on C5. 
 - On C5: "Map's ready. Go eat something."
 - When nothing needs asking: "Nailed all of them. Didn't even need you."
 
+## ⚠️ Merge-conflict hotspots with Ariel
+
+| File | What we'd change | Risk |
+|---|---|---|
+| `ios/Hindsight/HindsightApp.swift` | Show the confirmation flow after the layout is approved, before the tab shell. | **High.** Same file as the layout proposal's routing change; do both in one commit. |
+
+The flow itself lives in new files we own: `ios/Hindsight/LegoScreens/Map/Confirmation/`.
+
 ## Later
 
 - **LLM confidence scoring.** A lightweight LLM goes through every matched place and scores how confident we are that the pin is right (caption evidence vs. the MapKit result's name, address, type and area). The score replaces the rule-based triage above and decides what's placed, asked or parked. Not in the MVP.

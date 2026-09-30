@@ -52,6 +52,7 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - [ ] Layout proposal screen: read topics → suggest lego screens → approve, rename, reorder, remove
 - [ ] Hook into Ariel's onboarding: onboarding done → layout proposal → confirmation cards → app
 - [ ] Education lego screen: grouped by topic, search, tip cards linking to the post
+- [ ] "Everything else" sheet: saves that fit no tab, reachable from every tab's header
 
 ## Sun 10/4: Fitness + polish
 
@@ -68,6 +69,23 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - [ ] Archive, upload to TestFlight, invite Ariel and Reut's girlfriend
 - [ ] Send Ariel the data contract and the changes his Muse pull needs
 
+## ⚠️ Merge-conflict hotspots with Ariel
+
+Each spec has its own table with details. The files where our work overlaps his:
+
+| File | Why we touch it | Spec | Risk |
+|---|---|---|---|
+| `ios/Hindsight/HindsightApp.swift` | Routing: onboarding → proposal → confirmation → tab shell | layout-proposal, confirm | **High** |
+| `ios/Hindsight/Onboarding/OnboardingModel.swift`, `OnboardingFlow.swift`, `Steps/PreferencesStep.swift` | The proposal replaces the preferences step | layout-proposal | **High** |
+| `ios/Hindsight/Models/SavedPost.swift` | New fields (collections, mentions, thumbnail…) | map | **High** |
+| `ios/Hindsight/Onboarding/OnboardingPreferences.swift` | Replaced by `LayoutConfig` | layout-proposal | Medium |
+| `ios/Hindsight/Import/DataExportParser.swift`, `SavedPostStore.swift` | Reut's export format; new fields in the store | map | Medium |
+| `ios/Hindsight/Onboarding/OnboardingStyle.swift` | The shared theme. Leave it alone: build `ios/Hindsight/Design/Theme.swift` next to it and unify later, together | all | Medium |
+| `ios/project.yml` | Seed files, location permission (Ariel: share extension) | map | Medium |
+| `ios/HindsightTests/*` | Tests affected by the above | all | Low |
+
+**Rules:** new code goes in new folders we own (`Design/`, `Layout/`, `LegoScreens/`). Tell Ariel before touching one of his files, change it in a small separate commit, and pull `master` before starting each day.
+
 ## Cut order if we slip
 
 1. Fitness reminders (keep browse and search)
@@ -76,6 +94,11 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 4. Map list view
 
 ## After the MVP
+
+- **Apple's Foundation Models framework for all LLM work (v1).** On-device models: no cost per call, and nothing leaves the phone. Checked on developer.apple.com:
+  - **Already on iOS 26** (our deployment target): the on-device model, guided generation (`@Generable`, which returns Swift structs directly) and tool calling. Our small tasks fit it: typed layout edits, place extraction from a caption, the B2 questions.
+  - **New in iOS 27:** Private Cloud Compute models (`PrivateCloudComputeLanguageModel`) for jobs too big for the device, image input (`ImageAttachmentContent`, e.g. reading thumbnails), and plugging in other models through the same API (`LanguageModel`).
+  - **Catch:** it needs an Apple Intelligence device; older iPhones need a fallback.
 
 - In-app video playback via platform embeds / API access
 - Evaluating the app's LLM: Apple's on-device SDKs, cheap local models on a VPS, hosted providers
