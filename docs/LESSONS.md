@@ -31,6 +31,12 @@ DATA_FETCHING_RESEARCH.md.)
   canceled by remote"). Muse then blamed "Cloudflare 403" and fell back to its
   browser tool. Log every HTTP request (method, path, UA, status) from the start.
   (2026-09-30)
+- **Cloudflare quick tunnels (trycloudflare.com) block AI agents with 403**: a
+  GPTBot user agent gets 403 at the edge, and Muse's server-side calls never reached
+  our server. Muse's *browser* got through, which is why it kept falling back to the
+  browser. localhost.run's free domains rotate every few minutes. For an MCP
+  connector Muse can call, use a fixed-address tunnel without AI-bot blocking
+  (ngrok static domain) or real hosting. (2026-09-30)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
 
