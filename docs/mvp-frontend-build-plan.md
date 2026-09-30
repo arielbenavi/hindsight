@@ -95,11 +95,12 @@ Design/Theme.swift          DailySpend Theme + OnboardingStyle merged (Onboardin
 - [x] Picker config for Fitness (thin allowed, done ×1.5 capped, 3-day window, area rotation)
 
 ### 7. Polish + ship
-- [ ] Look-and-feel pass; every view has previews with seed data
-- [ ] Full test run; walk every spec's "Done when" list and tick what passes
+- [x] Look-and-feel pass; every view has previews with seed data
+- [x] Full test run (80 passing); simulator walkthrough with both datasets: proposal chat, confirmation, Map, Learn, Fitness setup
 - [ ] Real-device pass on Reut's phone (emoji pins, location, notifications), Reut's and Ariel's data
 - [ ] Bump build number, archive; **Reut uploads to TestFlight** (her Individual account signs); invite Ariel + girlfriend
-- [ ] PR into `master`; send Ariel the contract + needed pipeline changes
+- [x] PR into `master`
+- [ ] Send Ariel the contract + needed pipeline changes
 
 ## Cut order if we slip (from the sprint doc)
 1. Fitness practice loop (keep browse + search) · 2. L5 progress + back-off rules · 3. Thumbnails · 4. Proposal editing (approve only) · 5. Map list view
