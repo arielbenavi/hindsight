@@ -495,8 +495,16 @@ struct ChecklistCard: View {
         }
         .card(padding: 18)
         .onAppear {
-            unticked = Set(refs.filter { store.record($0).match == nil })
+            // ✓ on by default only for good matches (confirm.md → C4).
+            unticked = Set(refs.filter { !isGoodMatch($0) })
         }
+    }
+
+    private func isGoodMatch(_ ref: PlaceRef) -> Bool {
+        let rec = store.record(ref)
+        guard let match = rec.match, let extracted = store.extracted(ref) else { return false }
+        let inArea = rec.area?.contains(match.coordinate) ?? false
+        return Triage.namesMatch(extracted.name, match.name) && inArea
     }
 }
 

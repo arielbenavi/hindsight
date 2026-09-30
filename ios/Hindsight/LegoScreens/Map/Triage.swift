@@ -12,7 +12,11 @@ enum Triage {
         var center: Coordinate
         var radius: Double   // meters
 
-        func contains(_ c: Coordinate) -> Bool { center.distance(to: c) <= radius }
+        /// Area lookups often return a near-point region ("Paros, Greece"), so the
+        /// check allows at least 15 km: it's there to catch wrong-city matches.
+        static let minimumRadius: Double = 15_000
+
+        func contains(_ c: Coordinate) -> Bool { center.distance(to: c) <= max(radius, Self.minimumRadius) }
     }
 
     /// Placed / ask / can't tell for one extracted place.

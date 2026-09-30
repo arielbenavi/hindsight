@@ -23,4 +23,6 @@ python3 tools/validate.py *.hindsight.json
 3. **`merge.py`**: consolidates topic hints into named topics (`topics-<user>.json`, hand-written), applies the "< 5 fitness posts → Learn" rule, picks samples, writes the file.
 4. **`validate.py`**: checks the contract rules (enums, no `""`, each post in one topic, one item per non-`none` post, lengths). Warnings are fine; errors aren't.
 
+`<user>.matches.json` is a warm Apple Maps cache (same shape as the app's `match-cache.json`), copied from a simulator run so testers' first launch doesn't need hundreds of live MapKit searches. Refresh it by running the app on that dataset and copying `Library/Application Support/Hindsight/<user>/match-cache.json`.
+
 `work/` is scratch and not committed. Adding a tester: build their posts, run extraction on the batches, write `topics-<name>.json`, merge, validate.
