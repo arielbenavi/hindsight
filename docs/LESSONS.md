@@ -53,6 +53,12 @@ DATA_FETCHING_RESEARCH.md.)
   compliance API; US accounts get nothing back. Check a platform API's regional
   scope before recommending it. (2026-09-29)
 
+- **Third-party "TikTok favorites" APIs (YepAPI `/v1/tiktok/user-favorites`) only see
+  public Favorites.** Tested on two real accounts (tikvaqqfl75, pudabeats): both
+  have `openFavorite: false`, and both returned `ok: true` with 0 videos. That's an
+  empty "success", not an error. They scrape the public profile tab, so they'd need
+  every user to make Favorites public. Not a product path. (2026-09-30)
+
 ## Process
 
 - Screenshots of developer consoles leak secrets (X showed consumer secret,
