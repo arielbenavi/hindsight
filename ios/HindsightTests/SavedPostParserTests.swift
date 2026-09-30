@@ -66,6 +66,7 @@ struct SavedPostParserTests {
         #expect(result.posts[0].author == "chef")
         #expect(result.posts[0].id == "facebook:123456")
         #expect(result.posts[1].date == nil)
+        #expect(result.posts.allSatisfy { $0.source == .muse })
     }
 
     @Test func junkDoesNotCrash() {
@@ -78,8 +79,8 @@ struct SavedPostParserTests {
 @MainActor
 struct SavedPostStoreTests {
     private func post(_ code: String) -> SavedPost {
-        SavedPost(author: "a", kind: .reel, date: nil, caption: nil,
-                  url: URL(string: "https://www.instagram.com/reel/\(code)/")!)
+        SavedPost(url: URL(string: "https://www.instagram.com/reel/\(code)/")!, kind: .reel,
+                  author: "a", caption: nil, source: .seedMD)
     }
 
     @Test func mergeSkipsDuplicates() {

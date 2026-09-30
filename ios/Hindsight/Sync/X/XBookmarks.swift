@@ -54,12 +54,13 @@ enum XBookmarks {
             guard let url = URL(string: "https://x.com/\(username)/status/\(tweet.id)") else { return nil }
             return SavedPost(
                 platform: .x,
-                author: username == "i" ? "" : username,
+                url: url,
                 kind: .tweet,
-                // Tweet time; X doesn't expose when it was bookmarked.
-                date: tweet.created_at.flatMap { try? Date($0, strategy: .iso8601.year().month().day().time(includingFractionalSeconds: true)) },
+                author: username == "i" ? "" : username,
                 caption: tweet.text,
-                url: url
+                // X doesn't expose when it was bookmarked, only when it was posted.
+                postedAt: tweet.created_at.flatMap { try? Date($0, strategy: .iso8601.year().month().day().time(includingFractionalSeconds: true)) },
+                source: .xAPI
             )
         }
     }

@@ -47,7 +47,9 @@ struct XTests {
         #expect(posts[0].author == "karpathy")
         #expect(posts[0].url.absoluteString == "https://x.com/karpathy/status/1830000000000000001")
         #expect(posts[0].kind == .tweet)
-        #expect(posts[0].date != nil)
+        #expect(posts[0].postedAt != nil)
+        #expect(posts[0].savedAt == nil)
+        #expect(posts[0].source == .xAPI)
         #expect(posts[1].author == "")
         #expect(posts[1].url.absoluteString == "https://x.com/i/status/1830000000000000002")
     }

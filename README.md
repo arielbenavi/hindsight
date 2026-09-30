@@ -41,7 +41,8 @@ Next (planned): a hosted **ingestion backend**, ported from `web/backend/`, that
 - [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md): how the iOS app gets saves from each platform, what's verified, what's open
 - [docs/mvp-sprint.md](docs/mvp-sprint.md) and [docs/mvp-frontend-build-plan.md](docs/mvp-frontend-build-plan.md): the MVP sprint and the frontend (iOS screens) build checklist
 - [docs/LESSONS.md](docs/LESSONS.md): gotchas and dead ends. **Read before starting a session; add to it when something surprises you.**
-- [docs/research/SYNC_RESEARCH_PROMPT.md](docs/research/SYNC_RESEARCH_PROMPT.md): open research brief on the smoothest sync per platform
+- [docs/SYNC_PLAN.md](docs/SYNC_PLAN.md): the sync plan (backfill once + Share → hindsight + X auto-sync; Muse connector experiment) and phases
+- [docs/research/](docs/research): the research brief and the answer it's based on
 - [docs/BACKFILL_STATUS.md](docs/BACKFILL_STATUS.md): what worked and what failed when pulling saved posts from each platform
 - [docs/cookie-refresh-workflow.md](docs/cookie-refresh-workflow.md): notes on the Instagram cookie flow and its UX pain points
 - [web/README.md](web/README.md): how to run the deprecated prototype
