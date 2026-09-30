@@ -64,8 +64,16 @@ DATA_FETCHING_RESEARCH.md.)
 ## Signing / devices
 
 - **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists
-  the team, but builds fail with `No Account for Team`. The role needs "Access to
-  Certificates, Identifiers & Profiles", or use the Developer role. (2026-09-29)
+  the team, but builds fail with `No Account for Team`. (2026-09-29)
+- **Reut's Apple Developer account is an Individual membership, and only Organization
+  accounts can give members certificate access.** So Ariel can never sign under
+  Reut's team. Paths: Personal Team overrides for local builds, TestFlight builds
+  uploaded by Reut, or Xcode Cloud (Apple signs server-side, triggered by a git
+  push). Xcode Cloud needs a `ci_scripts/ci_post_clone.sh` that runs `xcodegen`,
+  because the .xcodeproj isn't committed. (2026-09-30)
+- Free Personal Teams probably can't use App Groups (unverified), which a share
+  extension needs to share storage with the app. Plan share-extension testing
+  around Reut's signing (TestFlight / Xcode Cloud). (2026-09-30)
 - Workaround without touching `project.yml`: build with your free Personal Team and
   a different bundle ID via command-line overrides:
   `HINDSIGHT_TEAM=<id> HINDSIGHT_BUNDLE_ID=com.you.hindsight ios/scripts/device.sh install`.

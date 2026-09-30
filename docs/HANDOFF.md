@@ -25,7 +25,7 @@
 - Try the remaining Muse link-lab candidates on device, looking for a prompt-prefill link.
 
 ### Setup notes
-- Ariel's Apple ID is on Reut's team as **App Manager**, which can't sign device builds. Reut needs to grant "Access to Certificates, Identifiers & Profiles" (or the Developer role). Until then, use Personal Team overrides (see ios/README.md).
+- Reut's Apple Developer account is an **Individual** membership, so it can't give Ariel signing rights (that needs an Organization account). Ariel builds locally with Personal Team overrides (see ios/README.md). Shared builds go through TestFlight (Reut uploads). Next step: Xcode Cloud (builds on push, Apple signs), which needs a `ci_scripts/ci_post_clone.sh` running `xcodegen`.
 - X console: regenerate the unused hindsight-ios secrets that were exposed in screenshots during setup.
 
 ---
