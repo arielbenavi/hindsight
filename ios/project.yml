@@ -25,6 +25,12 @@ targets:
       # real saved-post data to build against.
       - path: ../data/ig-saved-posts-seed.md
         buildPhase: resources
+      # Data-contract fixtures, one per tester (data/fixtures/README.md).
+      - path: ../data/fixtures
+        buildPhase: resources
+        includes:
+          - "*.hindsight.json"
+          - "*.matches.json"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reutrabin.hindsight
@@ -34,6 +40,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hindsight shows the places you saved near where you are."
 
   HindsightTests:
     type: bundle.unit-test
