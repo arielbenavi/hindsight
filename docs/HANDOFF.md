@@ -2,7 +2,7 @@
 
 ## Current status (2026-09-29, branch `ariel/onboarding-data`)
 
-**Read [LESSONS.md](LESSONS.md) first**, then [DATA_FETCHING_RESEARCH.md](DATA_FETCHING_RESEARCH.md).
+**Read [LESSONS.md](LESSONS.md) first**, then [SYNC_PLAN.md](SYNC_PLAN.md) (what we're building next and why) and [DATA_FETCHING_RESEARCH.md](DATA_FETCHING_RESEARCH.md).
 
 ### Built in the iOS app (Ariel: onboarding + data)
 - **Data layer:** `SavedPost` (canonical model), `SavedPostParser` (Muse JSON + seed markdown), `SavedPostStore` (seed + imports, dedup, persisted JSON), `DataExportParser` + `ZipReader` (IG/FB/TikTok data-download exports; no UI yet).
