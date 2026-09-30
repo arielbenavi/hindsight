@@ -12,6 +12,8 @@ final class AppModel {
     private(set) var dataset: Dataset?
     private(set) var data: HindsightData?
     private(set) var loadError: String?
+    /// Beta: with several testers' data bundled, ask once whose saves these are.
+    private(set) var needsDatasetChoice: Bool
 
     private(set) var layout: LayoutConfig?
     /// Set once the post-layout place confirmation pass is finished or skipped.
@@ -33,17 +35,23 @@ final class AppModel {
          persist: Bool = true) {
         self.datasets = datasets
         self.persist = persist
+        needsDatasetChoice = persist && selected == nil && datasets.count > 1
         let empty = JSONFile<LayoutConfig>(name: "layout", directory: nil)
         layoutFile = empty
         flagsFile = JSONFile(name: "flags", directory: nil)
         places = PlaceStore(directory: nil, data: nil)
         practice = PracticeStore(directory: nil)
         let initial = datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first
-        if let initial { select(initial) }
+        if let initial {
+            let ask = needsDatasetChoice
+            select(initial)
+            needsDatasetChoice = ask
+        }
     }
 
     /// Switch testers' data. Each dataset keeps its own layout and user state.
     func select(_ dataset: Dataset) {
+        needsDatasetChoice = false
         self.dataset = dataset
         if persist { UserDefaults.standard.set(dataset.id, forKey: Self.datasetKey) }
         do {

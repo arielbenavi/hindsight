@@ -101,6 +101,7 @@ final class ProposalChatModel {
     }
 
     private func save() {
+        guard stage != .approved else { return }
         file.save(Saved(messages: messages, stage: stage, questionIndex: questionIndex, tabs: draft.tabs,
                         excluded: draft.excludedTopicIDs, answers: answers))
     }

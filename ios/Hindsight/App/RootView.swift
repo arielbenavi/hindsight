@@ -13,6 +13,8 @@ struct RootView: View {
         Group {
             if let error = app.loadError {
                 ContentUnavailableView("Couldn't load your saves", systemImage: "exclamationmark.triangle", description: Text(error))
+            } else if app.needsDatasetChoice {
+                DatasetPicker(app: app)
             } else if app.data == nil {
                 ContentUnavailableView("No saves yet", systemImage: "tray", description: Text("No data file is bundled."))
             } else if app.layout == nil {
@@ -121,12 +123,12 @@ struct EverythingElseSheet: View {
     }
 }
 
-/// DEBUG: switch testers' data and reset state.
+/// Beta menu: switch testers' data and redo the layout. In every build while
+/// we're on TestFlight with bundled data.
 struct DevMenu: View {
     let app: AppModel
 
     var body: some View {
-        #if DEBUG
         Menu {
             Section("Data") {
                 ForEach(app.datasets) { d in
@@ -141,7 +143,27 @@ struct DevMenu: View {
                 .foregroundStyle(Theme.muted)
                 .frame(width: 36, height: 36)
         }
-        .accessibilityLabel("Developer menu")
-        #endif
+        .accessibilityLabel("Beta menu")
+    }
+}
+
+/// First launch in the beta: whose saves are these? (One file per tester is bundled.)
+struct DatasetPicker: View {
+    let app: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Spacer()
+            Text("Whose saves are these?").font(Theme.number(40))
+            Text("This beta comes with a few people's saved posts. Pick yours. You can switch later from the bug menu.")
+                .font(Theme.body(17)).foregroundStyle(Theme.secondary)
+            VStack(spacing: 10) {
+                ForEach(app.datasets) { d in
+                    Button(d.displayName) { app.select(d) }.buttonStyle(.pillSecondary)
+                }
+            }
+            Spacer()
+        }
+        .padding(Theme.padding)
     }
 }
