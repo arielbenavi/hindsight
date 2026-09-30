@@ -37,7 +37,8 @@ From `data/ig-reut-export/` (179 posts in place-type collections):
 A full-screen map with a bottom sheet over it, like Apple Maps / Find My.
 
 - **Opens centered on you**, zoomed to include your nearest saved places (e.g. the closest 10, max ~3 km). If nothing is within ~25 km, it opens on the city picker (M3) instead.
-- **Pins:** one per place. The icon shows the type (fork and knife, cup, wine glass, bag, star). Want-to-go pins are lime, been-there pins are dimmed. Nearby pins merge into a count bubble when zoomed out.
+- **Pins are emoji**, one per place, showing the type: 🍽️ food · ☕️ café · 🥐 bakery & dessert · 🍸 bar · 📍 other. Been-there places stay fully visible but get a small lime ✓ badge on the emoji, so they look different without fading out. Nearby pins merge into a count bubble when zoomed out.
+  - ⚠️ The simulator can't render emoji (see `docs/LESSONS.md`). Check pins on a real device, or they'll look broken.
 - **Floating buttons:** locate me; city picker (shows the current city name, e.g. "NYC ▾").
 - **Bottom sheet, 3 heights:**
   - *Peek:* "12 saved spots near you" + the filter chips.
@@ -49,17 +50,26 @@ A full-screen map with a bottom sheet over it, like Apple Maps / Find My.
 
 This is the "list view"; it isn't a separate screen.
 
-- Rows sorted by distance: thumbnail, name, type · neighborhood, distance ("6 min walk" / "1.2 km"), a dot for been-there.
+- Rows sorted by distance: thumbnail, name, type · neighborhood, distance ("6 min walk" / "1.2 km"), the same ✓ badge for been-there.
 - Tap a row → the map centers on it and the place card opens (M2).
 - If the map was panned, the list follows what's visible: "12 spots in this area".
 
 ### M2. Place card (sheet)
 
 - **Top:** name (big, heavy type), type · neighborhood, distance.
-- **Why I saved it:** the post thumbnail + author + a one-line reason from the caption ("the meatball hero", "thinnest crispiest pizza"). Tap → opens the post in Instagram. If several of your posts mention this place, show them all.
+- **Why I saved it:** the post thumbnail (see *Thumbnail fallback*) + author + a one-line reason from the caption ("the meatball hero", "thinnest crispiest pizza"). Tap → opens the post in Instagram. If several of your posts mention this place, show them all.
 - **Actions (pills):** **Directions** (Apple Maps, primary), **Google Maps**, **Been there ✓** toggle.
 - **More:** "Wrong place?" → re-match (M4 flow for this one place); "Hide" (removes it from the map without deleting the save).
 - Apple's own place details (hours, photos, phone, website) show up when the user taps the place name, using MapKit's built-in place sheet. This gets us hours without building them.
+
+### Thumbnail fallback
+
+Used on the place card and list rows, in order:
+1. The post's thumbnail (`thumbnail_url`), when the data pull gives us one.
+2. Apple Maps **Look Around** street-level image of the place (MapKit's `MKLookAroundSnapshotter`), where Apple has coverage. Most of NYC does.
+3. A small Apple Maps **map snapshot** centered on the pin (`MKMapSnapshotter`). Always available once the place is matched.
+
+All three are Apple; Google's equivalents need an API key and billing.
 
 ### M3. City picker
 
@@ -74,7 +84,7 @@ A short list of posts where we think there's a place but couldn't match it confi
 ### Filters (chips in the sheet)
 
 - **Type:** All · Food · Café · Bakery & dessert · Bar · Other. Only types you actually have are shown.
-- **Status:** Want to go (default) · Been there · All.
+- **Status:** All (default) · Want to go · Been there.
 - **Collection:** a chip menu with your Instagram collections ("NYC Restaurants", "We love Yavan"…). This keeps the way you already organize things.
 
 Filters apply to both the map and the list at the same time, and are remembered between launches.
@@ -87,7 +97,7 @@ Filters apply to both the map and the list at the same time, and are remembered 
 
 **F3. Traveling.** You land in Buenos Aires → open Map → it's already centered on you with your Argentina saves. If you open it before the trip: city picker → Buenos Aires.
 
-**F4. After a visit.** Place card → Been there ✓ → the pin dims and it leaves the default Want to go filter.
+**F4. After a visit.** Place card → Been there ✓ → the pin gets its ✓ badge. It stays on the map.
 
 **F5. "Why did I save this?"** Place card → thumbnail → Instagram opens on the reel.
 
@@ -186,13 +196,13 @@ struct PlaceSource: Codable {      // the link back to a saved post
 - [ ] "Aesthetic coffee" home-barista posts are not on the map.
 - [ ] Low-confidence and unmatched places go to Needs review, not the map.
 - [ ] Filters (type, status, collection) change the map and list together and are remembered.
-- [ ] Been there dims the pin and removes it from the default filter.
+- [ ] Been there adds the ✓ badge to the pin and the row; the place stays visible under the default All filter.
 - [ ] Location denied still gives a usable map.
 - [ ] Apple Maps and Google Maps buttons open the right place.
 
-## Open questions
+## Decided (was open)
 
-1. **Default status filter:** hide been-there places by default, or show them dimmed? The draft hides them (Want to go is the default).
-2. **Pin color:** lime for all want-to-go pins, or one color per type? Lime is louder and more on-brand; type colors are easier to scan.
-3. **Thumbnails:** if we can't get `thumbnail_url` in time, do rows show the author's initial on a colored tile, or a type icon?
-4. **Places from Ariel's seed:** his data has a few NYC spots (rooftops, date-night bars). Should they show on his map in the MVP? The draft says yes, same rules.
+1. **Been-there places** stay visible with a ✓ badge on their emoji; they aren't hidden or dimmed. The default status filter is All.
+2. **Pins are emoji per type** rather than colors.
+3. **No thumbnail:** fall back to an Apple Maps asset: Look Around image, then a map snapshot.
+4. **Ariel's NYC spots** show on his map, same rules as everyone's.
