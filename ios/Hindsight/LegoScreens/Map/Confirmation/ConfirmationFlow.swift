@@ -213,6 +213,8 @@ struct ConfirmationFlow: View {
                                           },
                                           onFix: { ref in returnToReview = isReviewMode; phase = .alternatives(ref) },
                                           onSkip: { answerSkip(refs) })
+                            // a fresh card (and its ticks) per post, not the previous card's state
+                            .id(refs[0].key)
                         } else if let ref = refs.first, store.record(ref).status == .cantTell || store.record(ref).match == nil {
                             SearchItYourselfCard(store: store, ref: ref,
                                                  onPlaced: { advance() },
@@ -222,6 +224,7 @@ struct ConfirmationFlow: View {
                                                      advance()
                                                  },
                                                  onSkip: { answerSkip([ref]) })
+                            .id(ref.key)
                         } else if let ref = refs.first {
                             SwipeCard(onRight: { answerYes([ref]) }, onLeft: { answerNo(ref) }) {
                                 PlaceQuestionCard(store: store, ref: ref)
