@@ -1,19 +1,23 @@
 import SwiftUI
 
-/// "Sync with Muse": open Muse with our prompt, then paste its reply back.
-/// The paste step goes away once a hindsight MCP connector exists
-/// (see docs/DATA_FETCHING_RESEARCH.md).
+/// "Sync with Muse". Two ways:
+/// - **Automatic (connector):** Muse is asked to add the hindsight connector
+///   (connector/server.py) and send the saves to it; when the user comes back,
+///   we pull what arrived. No copying.
+/// - **Copy & paste (fallback):** Muse replies with a JSON list; the user
+///   copies it and pastes it here.
+/// Either way, Muse is opened in its app or via WhatsApp with our message ready.
 struct MuseSyncView: View {
     let store: SavedPostStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
-    @State fileprivate var phase: Phase = .ready
+    @State private var phase: Phase = .ready
     @State private var launchOutcome: MuseLauncher.Outcome?
     @State private var request: Request = .newer
-    #if DEBUG
-    /// Muse connector experiment: `<tunnel>/<token>/saves` (see connector/README.md).
-    @AppStorage("connectorSavesURL") private var connectorSavesURL = ""
-    #endif
+    @State private var method: Method = MuseConnector.baseURL == nil ? .paste : .connector
+    @State private var pollID: UUID?
+    @AppStorage(MuseConnector.baseURLKey) private var connectorBaseURL = ""
+    @AppStorage(MuseConnector.connectedKey) private var connectorConnected = false
 
     /// What to ask Muse for.
     enum Request: String, CaseIterable, Identifiable {
@@ -22,16 +26,34 @@ struct MuseSyncView: View {
         var id: Self { self }
     }
 
+    enum Method: String, CaseIterable, Identifiable {
+        case connector = "Automatic"
+        case paste = "Copy & paste"
+        var id: Self { self }
+    }
+
     enum Phase: Equatable {
         case ready
-        /// User went to Muse; waiting for them to come back with the reply.
+        /// User went to Muse; waiting for the reply (paste) or the connector.
         case waiting
+        /// Connector: checking for what Muse sent. `added` so far.
+        case receiving(added: Int)
         case imported(added: Int, found: Int)
         case failed(String)
     }
 
+    private var base: URL? { MuseConnector.normalized(connectorBaseURL) ?? MuseConnector.baseURL }
+
     private var prompt: String {
-        MusePrompt.text(window: window)
+        switch method {
+        case .paste:
+            return MusePrompt.text(window: window)
+        case .connector:
+            guard let base else { return MusePrompt.text(window: window) }
+            return connectorConnected
+                ? MuseConnector.syncPrompt(window: window)
+                : MuseConnector.connectPrompt(mcpURL: MuseConnector.mcpURL(base: base), window: window)
+        }
     }
 
     /// New saves: only what's newer than what we have. Older saves (backfill):
@@ -56,15 +78,28 @@ struct MuseSyncView: View {
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
+                if base != nil {
+                    Picker("How", selection: $method) {
+                        ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                }
                 Picker("What to sync", selection: $request) {
                     ForEach(Request.allCases) { Text($0.rawValue).tag($0) }
                 }
                 .pickerStyle(.segmented)
 
                 VStack(spacing: 10) {
-                    stepRow(1, "Open Muse", detail: openDetail, isActive: phase == .ready)
-                    stepRow(2, "Copy Muse's reply", detail: "Long-press the code block → Copy.", isActive: phase == .waiting)
-                    stepRow(3, "Paste it here", detail: "We'll pull out every post.", isActive: phase == .waiting)
+                    switch method {
+                    case .connector:
+                        stepRow(1, connectorConnected ? "Open Muse" : "Connect hindsight to Muse", detail: openDetail, isActive: phase == .ready)
+                        stepRow(2, "Send it", detail: "Muse sends your saves straight to hindsight.", isActive: phase == .waiting)
+                        stepRow(3, "Come back here", detail: "We check automatically. No copying.", isActive: isReceiving)
+                    case .paste:
+                        stepRow(1, "Open Muse", detail: openDetail, isActive: phase == .ready)
+                        stepRow(2, "Copy Muse's reply", detail: "Long-press the code block → Copy.", isActive: phase == .waiting)
+                        stepRow(3, "Paste it here", detail: "We'll pull out every post.", isActive: phase == .waiting)
+                    }
                 }
 
                 statusBanner
@@ -75,7 +110,7 @@ struct MuseSyncView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("PROMPT WE SEND")
+                    Text("MESSAGE WE SEND MUSE")
                         .font(.system(.caption, design: .rounded, weight: .heavy))
                         .tracking(1.4)
                         .foregroundStyle(OnboardingStyle.muted)
@@ -85,7 +120,7 @@ struct MuseSyncView: View {
                         .textSelection(.enabled)
                         .onboardingCard(padding: 14)
                     HStack {
-                        Button("Copy prompt") { UIPasteboard.general.string = prompt }
+                        Button("Copy message") { UIPasteboard.general.string = prompt }
                         Spacer()
                         ShareLink("Share to Muse…", item: prompt)
                     }
@@ -93,7 +128,7 @@ struct MuseSyncView: View {
                 }
 
                 #if DEBUG
-                connectorPull
+                connectorSettings
                 MuseLinkLab()
                 #endif
             } actions: {
@@ -110,11 +145,23 @@ struct MuseSyncView: View {
         .preferredColorScheme(.dark)
         .tint(OnboardingStyle.accent)
         .onChange(of: scenePhase) { _, newPhase in
-            // Back from Muse: move straight to the paste step.
-            if newPhase == .active, launchOutcome != nil, phase == .ready {
-                phase = .waiting
+            // Back from Muse: paste → show the paste step; connector → start checking.
+            guard newPhase == .active, launchOutcome != nil else { return }
+            switch (method, phase) {
+            case (.paste, .ready): phase = .waiting
+            case (.connector, .ready), (.connector, .waiting): startChecking()
+            default: break
             }
         }
+        .task(id: pollID) {
+            guard pollID != nil else { return }
+            await pollConnector()
+        }
+    }
+
+    private var isReceiving: Bool {
+        if case .receiving = phase { return true }
+        return false
     }
 
     @ViewBuilder
@@ -123,20 +170,30 @@ struct MuseSyncView: View {
         case .imported:
             Button("Done") { dismiss() }
                 .buttonStyle(.onboardingPrimary)
+        case .receiving:
+            Button("Done") { dismiss() }
+                .buttonStyle(.onboardingPrimary)
+            Button("Check again") { startChecking() }
+                .buttonStyle(.onboardingSecondary)
         default:
-            if phase == .ready {
-                Button("Open Muse") { Task { await openMuse(viaWhatsApp: false) } }
+            if phase == .ready || method == .connector {
+                Button(phase == .ready ? "Open Muse" : "Open Muse again") { Task { await openMuse(viaWhatsApp: false) } }
                     .buttonStyle(.onboardingPrimary)
                 Button("Ask Muse in WhatsApp") { Task { await openMuse(viaWhatsApp: true) } }
                     .buttonStyle(.onboardingSecondary)
             }
-            PasteButton(payloadType: String.self) { strings in
-                let text = strings.joined(separator: "\n")
-                Task { @MainActor in importReply(text) }
+            if method == .paste {
+                PasteButton(payloadType: String.self) { strings in
+                    let text = strings.joined(separator: "\n")
+                    Task { @MainActor in importReply(text) }
+                }
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
+                .tint(phase == .ready ? OnboardingStyle.surface : OnboardingStyle.accent)
+            } else if phase == .waiting {
+                Button("Check now") { startChecking() }
+                    .buttonStyle(.onboardingSecondary)
             }
-            .buttonBorderShape(.capsule)
-            .controlSize(.large)
-            .tint(phase == .ready ? OnboardingStyle.surface : OnboardingStyle.accent)
             #if DEBUG
             Button("Use sample reply (dev)") { importReply(MuseSampleReply.text) }
                 .buttonStyle(.onboardingSecondary)
@@ -149,6 +206,15 @@ struct MuseSyncView: View {
         switch phase {
         case .ready, .waiting:
             EmptyView()
+        case .receiving(let added):
+            HStack(spacing: 10) {
+                if pollID != nil { ProgressView() }
+                Text(added > 0
+                     ? "+\(added) saves arrived from Muse\(pollID != nil ? ". Still checking…" : ".")"
+                     : (pollID != nil ? "Waiting for Muse to send your saves…" : "Nothing arrived yet. Did Muse say it sent them?"))
+                    .font(OnboardingStyle.title)
+                    .foregroundStyle(added > 0 ? OnboardingStyle.accent : OnboardingStyle.text)
+            }
         case .imported(let added, let found):
             Label(
                 added > 0 ? "+\(added) new saves (\(found) in Muse's reply)" : "Nothing new. All \(found) were already here.",
@@ -165,9 +231,12 @@ struct MuseSyncView: View {
 
     private var openDetail: String {
         switch launchOutcome {
-        case .opened: "Our question is on your clipboard. If it isn't typed in already, paste it and send."
-        case .notInstalled: "Couldn't open Muse. The question is copied, so paste it into Muse yourself."
-        case nil: "We'll open it with the question ready."
+        case .opened: "Our message is on your clipboard. If it isn't typed in already, paste it and send."
+        case .notInstalled: "Couldn't open Muse. The message is copied, so paste it into Muse yourself."
+        case nil:
+            method == .connector && !connectorConnected
+                ? "One message sets it up and sends your saves."
+                : "We'll open it with the message ready."
         }
     }
 
@@ -193,22 +262,59 @@ struct MuseSyncView: View {
         let outcome = viaWhatsApp
             ? await MuseLauncher.launchWhatsApp(prompt: prompt)
             : await MuseLauncher.launch(prompt: prompt)
-        DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(request.rawValue)): \(outcome)")
+        DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(method.rawValue), \(request.rawValue), connected=\(connectorConnected)): \(outcome)")
         launchOutcome = outcome
-        if outcome == .notInstalled {
-            phase = .ready
-        }
+        phase = outcome == .notInstalled ? .ready : .waiting
     }
 
-    fileprivate func importReply(_ text: String) {
+    // MARK: - Connector
+
+    private func startChecking() {
+        if case .receiving = phase {} else { phase = .receiving(added: 0) }
+        pollID = UUID()
+    }
+
+    /// Muse can take a while to page through saves, so check every few seconds
+    /// for up to 3 minutes, merging whatever has arrived.
+    private func pollConnector() async {
+        guard let base else { return }
+        var added: Int = if case .receiving(let n) = phase { n } else { 0 }
+        for attempt in 0..<45 {
+            do {
+                let text = try await MuseConnector.fetchSaves(base: base)
+                let posts = SavedPostParser.parse(text, source: .muse).posts
+                let new = store.merge(posts)
+                added += new
+                if !posts.isEmpty && !connectorConnected { connectorConnected = true }
+                if new > 0 || attempt == 0 {
+                    DebugLog.write("connector check #\(attempt): \(posts.count) on server, +\(new) new (total +\(added))")
+                }
+                phase = .receiving(added: added)
+            } catch is CancellationError {
+                return
+            } catch {
+                DebugLog.write("connector check failed: \(error)")
+                phase = .failed("Couldn't reach hindsight's connector: \(error.localizedDescription)")
+                pollID = nil
+                return
+            }
+            try? await Task.sleep(for: .seconds(4))
+            if Task.isCancelled { return }
+        }
+        pollID = nil
+    }
+
+    // MARK: - Paste
+
+    private func importReply(_ text: String) {
         let result = SavedPostParser.parse(text)
         let byPlatform = Dictionary(grouping: result.posts, by: \.platform).mapValues(\.count)
         let fullCaptions = result.posts.count { ($0.caption?.count ?? 0) > 160 }
         let withCollections = result.posts.count { !$0.collections.isEmpty }
         DebugLog.write("paste: \(text.count) chars, \(result.posts.count) posts \(byPlatform), \(result.skipped) skipped, captions>160: \(fullCaptions), with collections: \(withCollections)")
-        if text.hasPrefix("List my saved posts from") {
+        if MuseConnector.isOurPrompt(text) {
             DebugLog.write("paste was our own prompt")
-            phase = .failed("That's our question, not Muse's answer. Paste it into Muse and send it first, then copy Muse's reply.")
+            phase = .failed("That's our message, not Muse's answer. Paste it into Muse and send it first, then copy Muse's reply.")
             return
         }
         guard !result.posts.isEmpty else {
@@ -227,34 +333,20 @@ struct MuseSyncView: View {
 
 #if DEBUG
 extension MuseSyncView {
-    /// Dev-only: pull what Muse sent to the local connector (connector/server.py).
-    var connectorPull: some View {
+    /// Dev-only: where the connector runs (`https://<tunnel>/<token>`, see connector/README.md).
+    var connectorSettings: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("MUSE CONNECTOR (DEV)")
+            Text("MUSE CONNECTOR URL (DEV)")
                 .font(.system(.caption, design: .rounded, weight: .heavy))
                 .tracking(1.4)
                 .foregroundStyle(OnboardingStyle.muted)
-            TextField("https://…trycloudflare.com/<token>/saves", text: $connectorSavesURL)
+            TextField("https://…trycloudflare.com/<token>", text: $connectorBaseURL)
                 .font(.system(.caption, design: .monospaced))
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .onboardingCard(padding: 12)
-            Button("Pull from connector") { Task { await pullFromConnector() } }
-                .buttonStyle(.onboardingSecondary)
-                .disabled(URL(string: connectorSavesURL)?.scheme?.hasPrefix("http") != true)
-        }
-    }
-
-    func pullFromConnector() async {
-        guard let url = URL(string: connectorSavesURL) else { return }
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let text = String(decoding: data, as: UTF8.self)
-            DebugLog.write("connector pull: \(data.count) bytes")
-            importReply(text)
-        } catch {
-            DebugLog.write("connector pull failed: \(error)")
-            phase = .failed("Couldn't reach the connector: \(error.localizedDescription)")
+            Toggle("Muse already has the connector", isOn: $connectorConnected)
+                .font(OnboardingStyle.caption)
         }
     }
 }

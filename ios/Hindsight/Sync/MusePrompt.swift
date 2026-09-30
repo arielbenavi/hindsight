@@ -52,7 +52,7 @@ enum MusePrompt {
         """
     }
 
-    private static func day(_ date: Date) -> String {
+    static func day(_ date: Date) -> String {
         date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
     }
 }

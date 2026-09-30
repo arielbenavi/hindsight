@@ -45,3 +45,28 @@ struct MuseSyncTests {
         #expect(store.count(for: .facebook) == 2)
     }
 }
+
+struct MuseConnectorTests {
+    @Test func normalizesPastedURLs() {
+        let base = "https://x.trycloudflare.com/tok123"
+        for pasted in [base, base + "/", base + "/mcp", base + "/saves", " \(base)/mcp "] {
+            #expect(MuseConnector.normalized(pasted)?.absoluteString == base)
+        }
+        #expect(MuseConnector.normalized("not a url") == nil)
+    }
+
+    @Test func connectPromptAddsConnectorThenSends() throws {
+        let base = try #require(MuseConnector.normalized("https://x.trycloudflare.com/tok123"))
+        let day = try #require(SavedPostParser.parseDate("2026-09-27"))
+        let connect = MuseConnector.connectPrompt(mcpURL: MuseConnector.mcpURL(base: base), window: .after(day))
+        #expect(connect.contains("https://x.trycloudflare.com/tok123/mcp"))
+        #expect(connect.contains("submit_saved_posts"))
+        #expect(connect.contains("saved after 2026-09-27"))
+        #expect(MuseConnector.isOurPrompt(connect))
+        let sync = MuseConnector.syncPrompt(window: .all)
+        #expect(!sync.contains("custom connector"))
+        #expect(MuseConnector.isOurPrompt(sync))
+        #expect(MuseConnector.isOurPrompt(MusePrompt.text()))
+        #expect(!MuseConnector.isOurPrompt("```json\n[]\n```"))
+    }
+}
