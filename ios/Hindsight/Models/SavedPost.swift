@@ -1,29 +1,86 @@
 import Foundation
 
-/// One saved item from any platform. This is the app's canonical format;
-/// the seed markdown and Muse's JSON replies are both parsed into it.
+/// One saved item from any platform: the `posts[]` record of
+/// docs/data-contract.md (v1). Every source (Muse, exports, X, the seed) is
+/// parsed into this; property names are the contract's keys in camelCase.
+///
+/// New fields are optional with defaults, and decoding accepts the pre-contract
+/// shape (a single `date`), so saves already stored on a device keep loading.
 struct SavedPost: Identifiable, Codable, Hashable, Sendable {
     /// `platform:shortcode` (e.g. `instagram:DdwJgsNABze`), stable across imports.
     let id: String
     let platform: Platform
-    let author: String
-    let kind: Kind
-    /// Date the source reported. For the IG seed this looks like the publish
-    /// date; list order (newest saved first) is preserved separately by the store.
-    let date: Date?
-    let caption: String?
     let url: URL
+    let kind: Kind
+    /// `author.username`, without the @.
+    let author: String
+    var authorDisplayName: String?
+    /// The full caption. Never truncated by us (the old seed file is, at 160 characters).
+    var caption: String?
+    /// Lowercase, without `#`. Parsed from the caption when the source doesn't list them.
+    var hashtags: [String]
+    /// Accounts tagged or @mentioned. Parsed from the caption when the source doesn't list them.
+    var mentions: [Mention]
+    /// The user's saved-collection names ("NYC Restaurants").
+    var collections: [String]
+    /// When the user saved it.
+    var savedAt: Date?
+    /// When the creator posted it.
+    var postedAt: Date?
+    var thumbnailURL: URL?
+    var locationTag: LocationTag?
+    /// BCP 47 code of the caption, e.g. "he", "en".
+    var language: String?
+    var onScreenText: String?
+    var transcript: String?
+    /// Where this record came from.
+    var source: Source
 
-    init(platform: Platform? = nil, author: String, kind: Kind, date: Date?, caption: String?, url: URL) {
+    /// Best date to sort or show: saved, else posted.
+    var date: Date? { savedAt ?? postedAt }
+
+    init(
+        platform: Platform? = nil,
+        url: URL,
+        kind: Kind,
+        author: String,
+        authorDisplayName: String? = nil,
+        caption: String?,
+        hashtags: [String]? = nil,
+        mentions: [Mention]? = nil,
+        collections: [String] = [],
+        savedAt: Date? = nil,
+        postedAt: Date? = nil,
+        thumbnailURL: URL? = nil,
+        locationTag: LocationTag? = nil,
+        language: String? = nil,
+        onScreenText: String? = nil,
+        transcript: String? = nil,
+        source: Source
+    ) {
         let platform = platform ?? Platform(url: url) ?? .instagram
+        let caption = caption.flatMap { $0.isEmpty ? nil : $0 }
         self.id = "\(platform.rawValue):\(Self.shortcode(for: url) ?? url.absoluteString)"
         self.platform = platform
-        self.author = author
-        self.kind = kind
-        self.date = date
-        self.caption = caption.flatMap { $0.isEmpty ? nil : $0 }
         self.url = url
+        self.kind = kind
+        self.author = author
+        self.authorDisplayName = authorDisplayName.flatMap { $0.isEmpty ? nil : $0 }
+        self.caption = caption
+        self.hashtags = hashtags ?? Self.hashtags(in: caption)
+        self.mentions = mentions ?? Self.mentions(in: caption)
+        self.collections = collections
+        self.savedAt = savedAt
+        self.postedAt = postedAt
+        self.thumbnailURL = thumbnailURL
+        self.locationTag = locationTag
+        self.language = language
+        self.onScreenText = onScreenText
+        self.transcript = transcript
+        self.source = source
     }
+
+    // MARK: - Nested types
 
     enum Kind: String, Codable, Sendable, CaseIterable {
         case reel, post, carousel, video, tweet, unknown
@@ -41,12 +98,116 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
         }
     }
 
+    struct Mention: Codable, Hashable, Sendable {
+        var username: String
+        var displayName: String?
+    }
+
+    struct LocationTag: Codable, Hashable, Sendable {
+        var name: String?
+        var address: String?
+        var lat: Double?
+        var lng: Double?
+    }
+
+    enum Source: String, Codable, Sendable {
+        case muse
+        case igExport = "ig_export"
+        case fbExport = "fb_export"
+        case tiktokExport = "tiktok_export"
+        case xAPI = "x_api"
+        case seedMD = "seed_md"
+    }
+
+    // MARK: - Merging
+
+    /// Fills this record's gaps from another record of the same post, e.g. an
+    /// export's full caption and collections over a truncated Muse/seed entry.
+    func filling(from other: SavedPost) -> SavedPost {
+        guard other.id == id else { return self }
+        var merged = self
+        if (other.caption?.count ?? 0) > (caption?.count ?? 0) {
+            merged.caption = other.caption
+            merged.hashtags = Self.unique(hashtags + other.hashtags)
+            merged.mentions = mentions.isEmpty ? other.mentions : mentions
+        }
+        merged.authorDisplayName = authorDisplayName ?? other.authorDisplayName
+        merged.collections = Self.unique(collections + other.collections)
+        merged.savedAt = savedAt ?? other.savedAt
+        merged.postedAt = postedAt ?? other.postedAt
+        merged.thumbnailURL = thumbnailURL ?? other.thumbnailURL
+        merged.locationTag = locationTag ?? other.locationTag
+        merged.language = language ?? other.language
+        merged.onScreenText = onScreenText ?? other.onScreenText
+        merged.transcript = transcript ?? other.transcript
+        return merged
+    }
+
+    // MARK: - Parsing helpers
+
+    private static func unique(_ values: [String]) -> [String] {
+        var seen = Set<String>()
+        return values.filter { seen.insert($0).inserted }
+    }
+
     /// Last path component of a known platform's URL: `/reel/CODE/` → `CODE`,
     /// `/status/123` → `123`. Nil for other sites (e.g. a link saved on Facebook),
     /// where the full URL is the identity.
     static func shortcode(for url: URL) -> String? {
         guard Platform(url: url) != nil else { return nil }
         return url.pathComponents.filter { $0 != "/" }.last
+    }
+
+    static func hashtags(in caption: String?) -> [String] {
+        guard let caption else { return [] }
+        var seen = Set<String>()
+        return caption.matches(of: /#([\p{L}\p{N}_]+)/).compactMap { match in
+            let tag = String(match.1).lowercased()
+            return seen.insert(tag).inserted ? tag : nil
+        }
+    }
+
+    static func mentions(in caption: String?) -> [Mention] {
+        guard let caption else { return [] }
+        var seen = Set<String>()
+        return caption.matches(of: /(?:^|[^\w.])@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)/).compactMap { match in
+            let username = String(match.1).lowercased()
+            return seen.insert(username).inserted ? Mention(username: username, displayName: nil) : nil
+        }
+    }
+
+    // MARK: - Codable (accepts the pre-contract shape)
+
+    private enum CodingKeys: String, CodingKey {
+        case id, platform, url, kind, author, authorDisplayName, caption, hashtags, mentions,
+             collections, savedAt, postedAt, thumbnailURL, locationTag, language,
+             onScreenText, transcript, source
+    }
+
+    private enum LegacyKeys: String, CodingKey { case date }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let legacy = try decoder.container(keyedBy: LegacyKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        platform = try c.decode(Platform.self, forKey: .platform)
+        url = try c.decode(URL.self, forKey: .url)
+        kind = try c.decode(Kind.self, forKey: .kind)
+        author = try c.decode(String.self, forKey: .author)
+        authorDisplayName = try c.decodeIfPresent(String.self, forKey: .authorDisplayName)
+        caption = try c.decodeIfPresent(String.self, forKey: .caption)
+        hashtags = try c.decodeIfPresent([String].self, forKey: .hashtags) ?? Self.hashtags(in: caption)
+        mentions = try c.decodeIfPresent([Mention].self, forKey: .mentions) ?? Self.mentions(in: caption)
+        collections = try c.decodeIfPresent([String].self, forKey: .collections) ?? []
+        savedAt = try c.decodeIfPresent(Date.self, forKey: .savedAt)
+            ?? legacy.decodeIfPresent(Date.self, forKey: .date)
+        postedAt = try c.decodeIfPresent(Date.self, forKey: .postedAt)
+        thumbnailURL = try c.decodeIfPresent(URL.self, forKey: .thumbnailURL)
+        locationTag = try c.decodeIfPresent(LocationTag.self, forKey: .locationTag)
+        language = try c.decodeIfPresent(String.self, forKey: .language)
+        onScreenText = try c.decodeIfPresent(String.self, forKey: .onScreenText)
+        transcript = try c.decodeIfPresent(String.self, forKey: .transcript)
+        source = try c.decodeIfPresent(Source.self, forKey: .source) ?? (platform == .x ? .xAPI : .seedMD)
     }
 }
 

@@ -4,7 +4,12 @@ import Foundation
 /// (a .zip, or the JSON file inside it) into `SavedPost`s.
 ///
 /// Formats, as of 2026 (keys vary between export versions, so matching is loose):
-/// - Instagram `saved_posts.json`: `saved_saved_media[].title` (author) +
+/// - Instagram, current (`your_instagram_activity/saved/`): `saved_posts.json` is a
+///   top-level array of `{timestamp (saved, Unix s), label_values[]}` where
+///   label_values holds `URL`, `Caption`, a "Hashtags" dict and an "Owner" dict
+///   (`Username`, `Name`). `saved_collections.json` is an array of collections
+///   (`Name` label + child post dicts, no per-post timestamp). See data/README.md.
+/// - Instagram, older: `saved_saved_media[].title` (author) +
 ///   `string_map_data["Saved on"].{href, timestamp}`
 /// - Facebook `saved_items_and_collections.json`: `saves_and_collections_v2[]`
 ///   with `timestamp`, `title`, and a URL somewhere under `attachments`
@@ -33,7 +38,23 @@ enum DataExportParser {
             posts = parse(json: try Data(contentsOf: url))
         }
         guard !posts.isEmpty else { throw ImportError.nothingFound }
-        return posts
+        return combined(posts)
+    }
+
+    /// One record per post: the same post shows up in `saved_posts.json` (with the
+    /// saved time) and in `saved_collections.json` (with the collection name).
+    static func combined(_ posts: [SavedPost]) -> [SavedPost] {
+        var order: [String] = []
+        var byID: [String: SavedPost] = [:]
+        for post in posts {
+            if let existing = byID[post.id] {
+                byID[post.id] = existing.filling(from: post)
+            } else {
+                order.append(post.id)
+                byID[post.id] = post
+            }
+        }
+        return order.compactMap { byID[$0] }
     }
 
     /// Only the files that can hold saves; exports also carry messages, media, etc.
@@ -51,6 +72,9 @@ enum DataExportParser {
     // MARK: - Instagram
 
     static func instagram(_ object: Any) -> [SavedPost] {
+        if let entries = object as? [[String: Any]] {
+            return entries.flatMap(instagramCurrent)
+        }
         guard let root = object as? [String: Any] else { return [] }
         let items = root.filter { $0.key.hasPrefix("saved_saved_media") || $0.key == "saved_media" }
             .values.compactMap { $0 as? [[String: Any]] }.joined()
@@ -62,13 +86,68 @@ enum DataExportParser {
             else { return nil }
             return SavedPost(
                 platform: .instagram,
-                author: fixMojibake(item["title"] as? String ?? ""),
+                url: url,
                 kind: kind(forPath: url.path()),
-                date: date(fromTimestamp: fields["timestamp"]),
+                author: fixMojibake(item["title"] as? String ?? ""),
                 caption: nil,
-                url: url
+                savedAt: date(fromTimestamp: fields["timestamp"]),
+                source: .igExport
             )
         }
+    }
+
+    /// One entry of the current export: a saved post, or a collection of them.
+    private static func instagramCurrent(_ entry: [String: Any]) -> [SavedPost] {
+        guard let labels = entry["label_values"] as? [[String: Any]] else { return [] }
+        if label("URL", in: labels) != nil {
+            return instagramPost(labels, savedAt: date(fromTimestamp: entry["timestamp"]), collection: nil)
+                .map { [$0] } ?? []
+        }
+        // A collection: its name, then its posts nested in `dict` groups.
+        let name = label("Name", in: labels)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return postLabelLists(in: labels).compactMap { instagramPost($0, savedAt: nil, collection: name) }
+    }
+
+    /// Every nested label list that describes a post (has a `URL` label).
+    private static func postLabelLists(in labels: [[String: Any]]) -> [[[String: Any]]] {
+        labels.flatMap { child -> [[[String: Any]]] in
+            guard let nested = child["dict"] as? [[String: Any]] else { return [] }
+            return label("URL", in: nested) != nil ? [nested] : postLabelLists(in: nested)
+        }
+    }
+
+    private static func instagramPost(_ labels: [[String: Any]], savedAt: Date?, collection: String?) -> SavedPost? {
+        guard let url = label("URL", in: labels).flatMap(URL.init(string:)) else { return nil }
+        let owner = (group("Owner", in: labels).first).flatMap { $0["dict"] as? [[String: Any]] } ?? []
+        let hashtags = group("Hashtags", in: labels)
+            .compactMap { ($0["dict"] as? [[String: Any]]).flatMap { label("Name", in: $0) } }
+            .map { $0.lowercased() }
+        let caption = label("Caption", in: labels)
+        return SavedPost(
+            platform: .instagram,
+            url: url,
+            kind: kind(forPath: url.path()),
+            author: label("Username", in: owner) ?? "",
+            authorDisplayName: label("Name", in: owner),
+            caption: caption,
+            hashtags: hashtags.isEmpty ? nil : hashtags,
+            collections: collection.map { [$0] } ?? [],
+            savedAt: savedAt,
+            source: .igExport
+        )
+    }
+
+    /// Value of a `{label, value}` entry, decoded and non-empty.
+    private static func label(_ name: String, in labels: [[String: Any]]) -> String? {
+        guard let entry = labels.first(where: { $0["label"] as? String == name }),
+              let raw = (entry["href"] as? String) ?? (entry["value"] as? String), !raw.isEmpty
+        else { return nil }
+        return fixMojibake(raw)
+    }
+
+    /// Children of a `{dict: [...], title: name}` group.
+    private static func group(_ title: String, in labels: [[String: Any]]) -> [[String: Any]] {
+        labels.first(where: { $0["title"] as? String == title && $0["dict"] != nil })?["dict"] as? [[String: Any]] ?? []
     }
 
     // MARK: - Facebook
@@ -84,11 +163,12 @@ enum DataExportParser {
             let name = firstString(forKey: "name", in: item["attachments"] as Any)
             return SavedPost(
                 platform: .facebook,
-                author: "",
+                url: url,
                 kind: kind(forPath: url.path()),
-                date: date(fromTimestamp: item["timestamp"]),
+                author: "",
                 caption: fixMojibake(name ?? item["title"] as? String ?? ""),
-                url: url
+                savedAt: date(fromTimestamp: item["timestamp"]),
+                source: .fbExport
             )
         }
     }
@@ -113,11 +193,12 @@ enum DataExportParser {
                    let url = URL(string: link) {
                     posts.append(SavedPost(
                         platform: .tiktok,
-                        author: tiktokAuthor(in: url) ?? "",
+                        url: url,
                         kind: .video,
-                        date: tiktokDate((dict["Date"] ?? dict["date"]) as? String),
+                        author: tiktokAuthor(in: url) ?? "",
                         caption: nil,
-                        url: url
+                        savedAt: tiktokDate((dict["Date"] ?? dict["date"]) as? String),
+                        source: .tiktokExport
                     ))
                     return
                 }
