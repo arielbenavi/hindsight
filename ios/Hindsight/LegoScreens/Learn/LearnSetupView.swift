@@ -96,7 +96,7 @@ struct LearnSetupView: View {
                 HStack(spacing: 12) {
                     Button { swipe(tip, yes: false) } label: { Label("Not for me", systemImage: "xmark") }
                         .buttonStyle(.pillSecondary)
-                    Button { swipe(tip, yes: true) } label: { Label("I want to try this", systemImage: "checkmark") }
+                    Button { swipe(tip, yes: true) } label: { Label("Want to try", systemImage: "checkmark") }
                         .buttonStyle(.pill)
                 }
                 .padding(.top, 14)
