@@ -31,7 +31,9 @@ struct ConfirmationFlow: View {
     private var store: PlaceStore { app.places }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        // The undo toast sits at the bottom, except on the done screen, where
+        // the bottom is the "go to the map" button: there it moves to the top.
+        ZStack(alignment: phase == .done ? .top : .bottom) {
             Group {
                 switch phase {
                 case .intro: intro
@@ -45,7 +47,7 @@ struct ConfirmationFlow: View {
             .transition(.opacity)
             if let undo {
                 UndoToast(message: undo.message) { performUndo() }
-                    .padding(.bottom, 12)
+                    .padding(phase == .done ? .top : .bottom, 12)
             }
         }
         .animation(.snappy, value: phase)
@@ -382,7 +384,7 @@ struct SavedPostHalf: View {
             HStack(spacing: 12) {
                 Button { PostOpener.open(post, openURL: openURL) } label: {
                     ZStack {
-                        PostThumbnail(post: post, symbol: "play.rectangle.fill", size: 64)
+                        PostLinkThumbnail(post: post, size: 64)
                         Image(systemName: "play.fill").font(.system(size: 16, weight: .bold)).foregroundStyle(.white.opacity(0.9))
                     }
                 }
