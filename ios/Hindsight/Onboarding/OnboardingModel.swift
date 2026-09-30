@@ -4,21 +4,22 @@ import Observation
 @Observable
 @MainActor
 final class OnboardingModel {
-    /// Onboarding ends once the user has connected their sources. How the saves
-    /// are shown is decided next, by the layout proposal (docs/merge-plan.md).
+    /// Onboarding is one screen now: Connect. Everything after it happens in the
+    /// setup chat (docs/specs/onboarding-chat.md). Kept as a step list so more
+    /// screens can come back without touching the flow.
     enum Step: Int, CaseIterable {
-        case welcome, howItWorks, connect
+        case connect
     }
 
     static let completedKey = "hasCompletedOnboarding"
 
-    private(set) var step: Step = .welcome
+    private(set) var step: Step = .connect
     private(set) var isMovingForward = true
     var isMuseSheetPresented = false
 
     init() {}
 
-    var canGoBack: Bool { step != .welcome }
+    var canGoBack: Bool { step != Step.allCases.first }
 
     func next() {
         guard let next = Step(rawValue: step.rawValue + 1) else { return }

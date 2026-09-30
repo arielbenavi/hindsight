@@ -4,18 +4,15 @@ import Testing
 
 @MainActor
 struct OnboardingTests {
-    @Test func stepsMoveForwardAndBackWithinBounds() {
+    /// Connect is the first and only onboarding screen; the setup chat takes it
+    /// from there (docs/specs/onboarding-chat.md).
+    @Test func connectIsTheOnlyStep() {
+        #expect(OnboardingModel.Step.allCases == [.connect])
         let model = OnboardingModel()
-        model.back()
-        #expect(model.step == .welcome)
-        for _ in 0..<10 { model.next() }
         #expect(model.step == .connect)
+        #expect(!model.canGoBack)
+        model.next()
         model.back()
-        #expect(model.step == .howItWorks)
-    }
-
-    /// Onboarding ends at Connect; the layout proposal decides how saves are shown.
-    @Test func endsAtConnect() {
-        #expect(OnboardingModel.Step.allCases.last == .connect)
+        #expect(model.step == .connect)
     }
 }

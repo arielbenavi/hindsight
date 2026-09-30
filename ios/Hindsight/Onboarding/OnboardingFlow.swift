@@ -17,8 +17,6 @@ struct OnboardingFlow: View {
             header
             Group {
                 switch model.step {
-                case .welcome: WelcomeStep(model: model)
-                case .howItWorks: HowItWorksStep(model: model)
                 case .connect: ConnectStep(model: model, store: store, onFinish: onFinish)
                 }
             }
@@ -36,7 +34,27 @@ struct OnboardingFlow: View {
         .tint(OnboardingStyle.accent)
     }
 
-    private var header: some View {
+    @ViewBuilder private var header: some View {
+        if OnboardingModel.Step.allCases.count > 1 { stepHeader } else { devSkip }
+    }
+
+    /// With a single screen there's no back button or step dots; just the dev Skip.
+    private var devSkip: some View {
+        HStack {
+            Spacer()
+            #if DEBUG
+            Button("Skip", action: onFinish)
+                .font(.system(.caption, design: .rounded, weight: .heavy))
+                .foregroundStyle(OnboardingStyle.muted)
+                .frame(minWidth: 36, minHeight: 36)
+                .accessibilityLabel("Skip onboarding (dev)")
+            #endif
+        }
+        .padding(.horizontal, OnboardingStyle.horizontalPadding - 8)
+        .frame(minHeight: 8)
+    }
+
+    private var stepHeader: some View {
         HStack(spacing: 14) {
             Button(action: model.back) {
                 Image(systemName: "chevron.left")
