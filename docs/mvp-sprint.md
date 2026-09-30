@@ -2,6 +2,8 @@
 
 Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in parallel and isn't tracked here.
 
+Frontend build order and checklist: [mvp-frontend-build-plan.md](mvp-frontend-build-plan.md).
+
 **Monday goal:** a TestFlight build that Reut, Ariel and Reut's girlfriend can install. It goes: seed or imported saves → proposed layout → approve → a working **Map** tab (with "is this right?" confirmation cards), a **Fitness** tab and an **Education** tab.
 
 **How we avoid waiting on Ariel:** each lego screen spec defines the data it needs (the data contract). A Claude agent then reads both seed files once and writes that data into a committed fixture file, so the app runs on real saves. When Ariel's pipeline outputs the same shape, it replaces the fixture.

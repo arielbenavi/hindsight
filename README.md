@@ -39,6 +39,7 @@ Next (planned): a hosted **ingestion backend**, ported from `web/backend/`, that
 
 - [docs/HANDOFF.md](docs/HANDOFF.md): current status, open decisions, and the web prototype's handoff notes
 - [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md): how the iOS app gets saves from each platform, what's verified, what's open
+- [docs/mvp-sprint.md](docs/mvp-sprint.md) and [docs/mvp-frontend-build-plan.md](docs/mvp-frontend-build-plan.md): the MVP sprint and the frontend (iOS screens) build checklist
 - [docs/LESSONS.md](docs/LESSONS.md): gotchas and dead ends. **Read before starting a session; add to it when something surprises you.**
 - [docs/research/SYNC_RESEARCH_PROMPT.md](docs/research/SYNC_RESEARCH_PROMPT.md): open research brief on the smoothest sync per platform
 - [docs/BACKFILL_STATUS.md](docs/BACKFILL_STATUS.md): what worked and what failed when pulling saved posts from each platform
