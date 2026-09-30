@@ -14,6 +14,7 @@ struct MapScreen: View {
     @State private var showCities = false
     @State private var showReview = false
     @State private var positioned = false
+    @State private var positionedOnUser = false
     @State private var explainerDismissed = false
     @State private var wrongPlace: Place?
 
@@ -24,7 +25,6 @@ struct MapScreen: View {
             map
             topBar
             BottomSheet(detent: $detent) { sheetContent }
-                .ignoresSafeArea(edges: .bottom)
             if location.notAskedYet && !explainerDismissed && !store.allPlaces.isEmpty {
                 LocationExplainer {
                     explainerDismissed = true
@@ -39,7 +39,10 @@ struct MapScreen: View {
             store.startMatching()
             positionIfNeeded()
         }
-        .onChange(of: location.location) { _, _ in positionIfNeeded() }
+        .onChange(of: location.location) { _, loc in
+            // the first fix arrives after we've fallen back to a city: move to you, once
+            if loc != nil && !positionedOnUser { positionIfNeeded(force: true) }
+        }
         .onChange(of: location.status) { _, _ in positionIfNeeded(force: location.isDenied) }
         .onChange(of: store.allPlaces.count) { old, new in if old == 0 && new > 0 { positionIfNeeded(force: true) } }
         .sheet(isPresented: $showCities) {
@@ -166,7 +169,7 @@ struct MapScreen: View {
                            selectedID = place.id
                            position = .camera(MapCamera(centerCoordinate: place.coordinate.clCoordinate, distance: 1_500))
                        },
-                       onJump: { city in fit(store.allPlaces.filter { CityName.normalize($0.locality) == city }.map(\.coordinate), fallback: nil) },
+                       onJump: { city in fit(store.places(inCity: city).map(\.coordinate), fallback: nil) },
                        onReview: { showReview = true })
         }
     }
@@ -207,16 +210,17 @@ struct MapScreen: View {
                 let near = nearest.prefix(10).filter { $0.coordinate.distance(to: me) < 3_000 }
                 fit([me] + (near.isEmpty ? [first.coordinate] : near.map(\.coordinate)), fallback: me)
                 positioned = true
+                positionedOnUser = true
                 return
             }
-            if !force && !places.isEmpty {
+            if !places.isEmpty && !positionedOnUser {
                 // nothing within 25 km: open the city picker (map.md → M1)
-                positioned = true
+                positionedOnUser = true
                 showCities = true
             }
         }
         if (location.isDenied || force || !location.notAskedYet), let city = store.cities.first {
-            fit(places.filter { CityName.normalize($0.locality) == city.name }.map(\.coordinate), fallback: city.center)
+            fit(store.places(inCity: city.name).map(\.coordinate), fallback: city.center)
             positioned = true
         }
     }

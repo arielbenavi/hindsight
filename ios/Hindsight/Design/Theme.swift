@@ -61,7 +61,9 @@ struct PillButtonStyle: ButtonStyle {
         let isCompact = kind == .compact || kind == .compactPrimary
         configuration.label
             .font(isCompact ? Theme.body(15, weight: .bold) : Theme.body(18, weight: .bold))
-            .padding(.horizontal, isCompact ? 16 : 24)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .padding(.horizontal, isCompact ? 16 : 20)
             .padding(.vertical, isCompact ? 10 : 15)
             .frame(maxWidth: isCompact ? nil : .infinity)
             .foregroundStyle(isPrimary ? Theme.onLime : Theme.text)

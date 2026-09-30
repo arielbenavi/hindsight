@@ -128,15 +128,22 @@ final class PlaceStore {
         return counts.sorted { ($0.value, $1.key) > ($1.value, $0.key) }.map(\.key)
     }
 
-    /// Cities with counts, biggest first ("New York · 142").
+    /// Cities with counts, biggest first ("New York · 142"). Apple often returns a
+    /// neighborhood as the city (Astoria, Williamsburg), so localities within 20 km
+    /// of a bigger one are folded into it.
     var cities: [(name: String, count: Int, center: Coordinate)] {
-        let groups = Dictionary(grouping: allPlaces.filter { !$0.isHidden }) { CityName.normalize($0.locality) }
-        return groups.map { name, places in
-            let lat = places.map(\.coordinate.latitude).reduce(0, +) / Double(places.count)
-            let lng = places.map(\.coordinate.longitude).reduce(0, +) / Double(places.count)
-            return (name, places.count, Coordinate(latitude: lat, longitude: lng))
-        }
-        .sorted { $0.count > $1.count }
+        CityName.group(allPlaces.filter { !$0.isHidden }).map { ($0.name, $0.places.count, $0.center) }
+    }
+
+    /// The pins grouped under a city from `cities`.
+    func places(inCity name: String) -> [Place] {
+        CityName.group(allPlaces.filter { !$0.isHidden }).first { $0.name == name }?.places ?? []
+    }
+
+    /// The city a place is grouped under (see `cities`).
+    func cityName(of place: Place) -> String {
+        CityName.group(allPlaces.filter { !$0.isHidden }).first { g in g.places.contains { $0.id == place.id } }?.name
+            ?? CityName.normalize(place.locality)
     }
 
     // MARK: - Review
@@ -310,6 +317,30 @@ final class PlaceStore {
 /// City grouping for the picker: boroughs are New York (map.md → M3).
 enum CityName {
     static let newYork: Set<String> = ["new york", "brooklyn", "manhattan", "queens", "bronx", "the bronx", "staten island", "long island city", "nyc"]
+
+    struct Group { var name: String; var places: [Place]; var center: Coordinate }
+
+    static func group(_ places: [Place], mergeWithin meters: Double = 20_000) -> [Group] {
+        let byName = Dictionary(grouping: places) { normalize($0.locality) }
+        var groups = byName.map { name, members in Group(name: name, places: members, center: centroid(members)) }
+            .sorted { $0.places.count > $1.places.count }
+        var merged: [Group] = []
+        for g in groups {
+            if let i = merged.firstIndex(where: { $0.center.distance(to: g.center) <= meters }) {
+                merged[i].places += g.places
+            } else {
+                merged.append(g)
+            }
+        }
+        groups = merged.map { Group(name: $0.name, places: $0.places, center: centroid($0.places)) }
+        return groups.sorted { $0.places.count > $1.places.count }
+    }
+
+    private static func centroid(_ places: [Place]) -> Coordinate {
+        let lat = places.map(\.coordinate.latitude).reduce(0, +) / Double(max(places.count, 1))
+        let lng = places.map(\.coordinate.longitude).reduce(0, +) / Double(max(places.count, 1))
+        return Coordinate(latitude: lat, longitude: lng)
+    }
 
     static func normalize(_ locality: String) -> String {
         let lower = locality.lowercased()

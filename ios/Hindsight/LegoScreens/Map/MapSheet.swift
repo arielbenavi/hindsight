@@ -187,16 +187,24 @@ struct PlaceCard: View {
                     CircleIconButton(systemImage: "xmark", label: "Close", size: 36, action: onClose)
                 }
 
-                HStack(spacing: 8) {
-                    Button { openDirections() } label: { Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill") }
-                        .buttonStyle(.pillCompactPrimary)
-                    Button { openURL(place.match.googleMapsURL) } label: { Text("Google Maps") }
-                        .buttonStyle(.pillCompact)
-                    Button { store.toggleBeenThere(place) } label: {
-                        Label("Been there", systemImage: place.visit == .beenThere ? "checkmark.circle.fill" : "circle")
+                VStack(spacing: 8) {
+                    Button { openDirections() } label: {
+                        Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
                     }
-                    .buttonStyle(PillButtonStyle(kind: place.visit == .beenThere ? .compactPrimary : .compact))
-                    .sensoryFeedback(.success, trigger: place.visit)
+                    .buttonStyle(.pill)
+                    HStack(spacing: 8) {
+                        Button { openURL(place.match.googleMapsURL) } label: {
+                            Text("Google Maps").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.pillCompact)
+                        Button { store.toggleBeenThere(place) } label: {
+                            Label("Been there", systemImage: place.visit == .beenThere ? "checkmark.circle.fill" : "circle")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(PillButtonStyle(kind: place.visit == .beenThere ? .compactPrimary : .compact))
+                        .sensoryFeedback(.success, trigger: place.visit)
+                    }
+                    .lineLimit(1)
                 }
 
                 preview
@@ -296,7 +304,7 @@ struct CityPicker: View {
                 }
                 ForEach(store.cities, id: \.name) { city in
                     Button {
-                        onPick(.city(city.center, store.allPlaces.filter { CityName.normalize($0.locality) == city.name }))
+                        onPick(.city(city.center, store.places(inCity: city.name)))
                     } label: {
                         HStack {
                             Text(city.name).font(Theme.body(17, weight: .semibold))
