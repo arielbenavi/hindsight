@@ -7,6 +7,10 @@ DATA_FETCHING_RESEARCH.md.)
 
 ## Apple Intelligence / on-device AI
 
+- **On a real iPhone (17 Pro, iOS 27.0), both Apple models beat the Mac test by a lot** (115 fixture posts, 2026-09-30):
+  on-device 82% buckets, 45/70 place names, 1.2 s/post; **Private Cloud Compute 86%, 57/70, 1.0 s/post**, quota still "below the limit" after ~150 requests.
+  **Hebrew captions worked on both** (PCC 15/15 answered, 14 correct), **even though `supportsLocale(he_IL)` says no.** Trust a real run over the language list.
+  The Mac numbers below are from the older macOS 26.6 model; don't plan from them. (2026-09-30)
 - ⚠️ **The iPhone's system language must be an Apple Intelligence language (e.g. English), or the app gets no AI at all.**
   Apple Intelligence only turns on when the iPhone language and Siri language are the same *supported* language.
   **Hebrew isn't one, even in iOS 27.** No Apple Intelligence means no on-device model *and* no Private Cloud Compute, even for English posts.

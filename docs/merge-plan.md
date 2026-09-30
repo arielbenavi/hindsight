@@ -28,7 +28,18 @@
 | Apple Intelligence on, model downloaded | `SystemLanguageModel.availability` | check in-app |
 | Signed in to iCloud | The Private Cloud Compute quota is per iCloud account | — |
 
-**Hebrew captions** (7% of Reut's saves, 13% of Ariel's) are refused by the on-device model even on an English phone (`unsupportedLanguageOrLocale`). Whether Private Cloud Compute accepts them is the first thing the on-phone test checks (see E3). Until then they go through rules, collections and questions.
+**Hebrew captions** (7% of Reut's saves, 13% of Ariel's): the Mac's older model refused them, but **on an iPhone 17 Pro on iOS 27 both models handled them** (Private Cloud Compute 15/15 answered, 14 correct), even though both report Hebrew as unsupported. The *phone's* language must still be a supported one.
+
+**E3 results (Reut's iPhone 17 Pro, iOS 27.0, 115 fixture posts, 2026-09-30):**
+
+| | On-device | Private Cloud Compute |
+|---|---|---|
+| Buckets vs fixtures | 82% | **86%** |
+| Place names | 45/70 | **57/70** |
+| Hebrew | 14/15 answered | **15/15 answered, 14 correct** |
+| Guardrail blocks | 3 | 2 |
+| Median time | 1.2 s/post | **1.0 s/post** |
+| Quota after the run | — | below the limit |
 
 **Private Cloud Compute terms:** free while enrolled in the App Store Small Business Program with < 2M first-time downloads (TestFlight doesn't count). Managed entitlement `com.apple.developer.private-cloud-compute`: **granted to Reut's account 2026-09-30**. The quota is per iCloud account and opaque (only below / approaching / reached + reset date). No paid tier: past 2M we have 6 months to migrate, which is why every model sits behind one `LanguageModel`-based interface.
 
