@@ -32,7 +32,14 @@ Every extracted place lands in one of three groups before we show anything:
 | **Ask** | We have a name and at least one MapKit result, but not both conditions above | A confirmation card |
 | **Can't tell** | No place name found (the place is only in the video), or MapKit found nothing | Not asked in onboarding. Goes to Needs review with a "Search it yourself" card |
 
-Rough numbers from Reut's data to design for: about 100 placed automatically, 40–60 to ask about, about 75 "can't tell". So the onboarding pass is dozens of cards, not hundreds, and we cap it anyway (below).
+**Target: a handful of cards (≤ 5–10), hard cap 20.** A first rough estimate for Reut's data is about 100 placed automatically, 40–60 to ask about, about 75 "can't tell". 40–60 is far too many, so the Ask group has to shrink before the cap ever matters:
+
+- Use the @mention's **display name** as the search term ("Cappone's", not "capponesnyc").
+- Use the **collection city** as the area hint when the caption has none ("NYC Restaurants" → New York).
+- If there's **only one plausible MapKit result** in the area hint, place it automatically.
+- Agree on the same place across posts: if two posts point to the same place, that's strong evidence.
+
+If more than 20 are still in Ask, show the 20 with the strongest evidence; the rest go to Needs review.
 
 ## Screens
 
@@ -41,7 +48,7 @@ Rough numbers from Reut's data to design for: about 100 placed automatically, 40
 One screen, before the first card.
 
 - Big heavy headline (example numbers): **"We found 187 spots in your saves."**
-- Subline: "142 are on your map already. Help us check 45 more? About a minute."
+- Subline: "142 are on your map already. Help us check 6 more? Takes 30 seconds."
 - Buttons: **Let's go** (primary) · **Later** (secondary; everything goes to Needs review and the user lands in the app).
 
 ### C2. Confirmation card
@@ -66,7 +73,9 @@ A full-screen card, one place at a time. Two halves stacked vertically (a phone 
 - **Skip** (text button) → goes to Needs review, next card.
 - **Undo** appears for 3 seconds after each action.
 
-**Progress:** a thin bar at the top plus "12 of 45". After 20 cards: "Nice. 25 left. Keep going or finish later?" This stops it from feeling endless.
+**Progress:** a thin bar at the top plus "3 of 6". **Hard stop at 20 cards**: after the 20th, the flow goes to C5 and anything left goes to Needs review.
+
+**Tone:** short playful lines between cards, in DailySpend's voice (see *Tone* below).
 
 ### C3. Alternatives
 
@@ -97,7 +106,7 @@ For "can't tell" posts. The top half is the same as C2. The bottom half is just 
 
 ## Flows
 
-**CF1. Onboarding pass.** Layout approved → C1 → Let's go → cards (C2 / C4) → C5 → Map tab. Target: **under 2 minutes** for Reut's data.
+**CF1. Onboarding pass.** Layout approved → C1 → Let's go → cards (C2 / C4) → C5 → Map tab. Target: **under a minute** for Reut's data.
 
 **CF2. Wrong guess.** C2 → No → C3 → tap the right result → placed, next card.
 
@@ -131,7 +140,7 @@ Adds to the Map spec's data needs. Everything else (thumbnail, caption, matched 
 
 ## Done when
 
-- [ ] With Reut's export, the onboarding pass asks about at most ~60 places and takes under 2 minutes at a normal pace.
+- [ ] With Reut's export, the onboarding pass shows a handful of cards (target ≤ 10) and never more than 20.
 - [ ] Strong-evidence exact matches never produce a card.
 - [ ] "Can't tell" posts never appear in the onboarding pass; they're in Needs review.
 - [ ] A Top-N post shows one checklist card, not N cards.
@@ -140,9 +149,19 @@ Adds to the Map spec's data needs. Everything else (thumbnail, caption, matched 
 - [ ] "It's not a place" removes the pin and the post from the Map.
 - [ ] Later / quitting never loses data and never blocks entering the app.
 
-## Open questions
+## Tone
 
-1. **Swipes:** Tinder-style swipes make it faster and more fun, but they're easy to trigger by accident. Swipes + buttons (draft), or buttons only?
-2. **Spot-checking automatic matches:** should C5 offer "Browse the 142 we placed automatically", or do we trust them and let "Wrong place?" catch mistakes? The draft trusts them.
-3. **The cap:** a nudge after 20 cards (draft), or a hard stop at 20 with the rest going to Needs review?
-4. **Tone:** DailySpend has playful one-liners ("Coffee's fine. Probably."). Do we want those between cards, e.g. after 10 Yeses: "You have taste."?
+Playful one-liners in DailySpend's voice, shown briefly between cards or on C5. Never more than one line, never blocking. Examples:
+
+- After 3 Yeses in a row: "You have taste."
+- After a No: "Good catch."
+- After "It's not a place": "Fair. That's a coffee machine."
+- On C5: "Map's ready. Go eat something."
+- When nothing needs asking: "Nailed all of them. Didn't even need you."
+
+## Decided (was open)
+
+1. **Swipes plus buttons.**
+2. **Trust automatic matches.** "Wrong place?" catches mistakes. A "browse what we placed automatically" view can come later; not needed for the MVP.
+3. **Hard stop at 20 cards**, with a target of a handful. The triage improvements above are what keep it small.
+4. **Playful tone** between cards (see *Tone*).
