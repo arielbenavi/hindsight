@@ -34,7 +34,7 @@ This replaces the current `PreferencesStep` (group by / feed-grid-collections / 
 | Lego screen | Gets topics like | Proposed when |
 |---|---|---|
 | 🗺️ **Map** | restaurants, cafés, bars, travel spots, things to do | ≥ 5 places. With fewer, the bot offers it as a chip instead ("Also add a map? 4 spots") |
-| 💪 **Fitness** | stretches, mobility, physical therapy, workouts | ≥ 5 exercise posts |
+| 💪 **Fitness** | stretches, mobility, physical therapy, workouts | ≥ 5 exercise posts. With fewer, they go to Learn (offering Fitness as an optional extra tab is for later) |
 | 📚 **Learn** (Education) | tips, tutorials, how-tos: guitar, coding, design, cooking, AI | ≥ 5 posts; each topic becomes a section in the tab |
 | (none) | memes, news, announcements, ads | Not shown in the MVP. The bot mentions them honestly (see B1) |
 

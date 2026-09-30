@@ -107,4 +107,7 @@ Each spec has its own table with details. The files where our work overlaps his:
 - Evaluating the app's LLM: Apple's on-device SDKs, cheap local models on a VPS, hosted providers
 - Google Maps as a full place-matching option
 - Sharing lists (e.g. with a partner)
-- More lego screens (e.g. guitar or other instructional content)
+- More lego screens (e.g. guitar or other instructional content), including a **Recipes** lego screen (food and nutrition saves live in Learn until then)
+- **Widgets:** home-screen / lock-screen widgets showing a practice ring; the user picks which tab it tracks (Learn or Fitness). DailySpend already has ring widgets to borrow from.
+- **Body map** for Fitness: a tappable front/back body outline instead of the area grid
+- **Optional tabs under the threshold:** offer e.g. Fitness as an extra tab when there are fewer than 5 matching saves

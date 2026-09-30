@@ -18,7 +18,7 @@ Keyword matches are noisy ("hip" matches hip-hop, "core" matches everything), so
 
 | Finding | Example | What it means for us |
 |---|---|---|
-| **Small but real:** about 10 true fitness saves in Ariel's 1,216, 2 in Reut's | Ariel: back pain, posture, thoracic spine, low back, abs. Reut: "Your upper back will thank you for this" | Fitness is a small tab for most people. It has to be useful with 5–15 saves. Reut's 2 are under the 5-save threshold (see the layout proposal). |
+| **Small but real:** about 10 true fitness saves in Ariel's 1,216, 2 in Reut's | Ariel: back pain, posture, thoracic spine, low back, abs. Reut: "Your upper back will thank you for this" | Fitness is a small tab for most people. It has to be useful with 5–15 saves. Reut's 2 are under the 5-save threshold, so they go to Learn (see *Decided*). |
 | **Almost everything is about a body area or a pain** | "Upper back pain / knot between shoulder blades? Try this movement…", "BEGINNER LOW BACK EXERCISES" | Body area + problem is the right way to organize and search, not muscle groups or workout types. |
 | **One post, several exercises** | "Try these 5 exercises to improve shoulder mobility" | The practice unit is the **routine** (the post); its exercises are listed inside for reference and search. |
 | **Many are promos for a course** | "NEW MOBILITY PROGRAM OUT NOW (link in bio)" | The caption often names the problem but not the moves. The moves are in the video. |
@@ -58,7 +58,7 @@ The ring starts with the setup segment filled, as in Learn.
 4. **Today's 1:** one routine card (F2). After it's handled: "Done for today." + one-liner ("Your spine sends its regards.") + "One more?".
 5. **Regulars:** routines the user pinned, each with its schedule ("Upper back release · Mon Wed Fri 8:00"). Tap → F4. Empty state: "Pin a routine you want to do regularly."
 6. **Search field:** plain-language problem search (F6).
-7. **Body areas:** a grid of area tiles, each with an SF Symbol and a count ("Lower back · 4"). Only areas with saves. Tap → F3.
+7. **Body areas:** a grid of area tiles, each with an SF Symbol and a count ("Lower back · 4"). **Only areas that have at least one saved routine**; never show empty tiles for areas with nothing saved. Tap → F3.
 
 ### F2. Routine card (Today's 1)
 
@@ -133,7 +133,7 @@ Same pure picker as Learn, with Fitness rules:
 
 | State | What the user sees |
 |---|---|
-| **Very few routines (< 5)** | Everything works; no body-area grid if there's only one area (show the routines as a list instead). |
+| **Very few routines (5–9)** | Everything works; no body-area grid if there's only one area (show the routines as a list instead). |
 | **Setup skipped** | Today's 1 from all routines; goal 3; reminders off, with a "Get a nudge?" row. |
 | **Notifications denied** | Regulars still show on the home screen on their days ("Today: Upper back release"), without a push. |
 | **All routines archived** | "Nothing left to do here. Save a stretch you like and it'll show up." |
@@ -229,9 +229,9 @@ struct RegularSchedule: Codable {            // user state
 - [ ] Across Learn + Fitness, the app never sends more than one app-chosen nudge a day.
 - [ ] Pain-related routines show the safety note.
 
-## Open questions
+## Decided (was open)
 
-1. **Body map:** a tappable body silhouette (front/back) instead of the area grid? Nicer and more "fitness", but more to build. Draft: grid for the MVP, body map later.
-2. **One ring or two?** Draft: separate rings for Learn and Fitness. Alternative: one combined "practice" ring on each tab.
-3. **Reut's 2 fitness saves:** under the 5-save threshold, so the layout proposal offers Fitness as a chip ("Also add Fitness? 2 stretches"). Or fold them into Learn?
-4. **Food/nutrition saves** (protein pancakes): Learn for now (draft), or a future "Recipes" lego screen?
+1. **Body areas are a grid in the MVP**, populated only with areas that have saves. A tappable body map is for later.
+2. **Separate rings** for Learn and Fitness. Later, home-screen / lock-screen **widgets** can show a ring, and the user picks which tab it tracks.
+3. **Under 5 fitness saves:** no Fitness tab; those saves go to Learn. Offering Fitness as an optional extra tab is for later.
+4. **Food and nutrition saves** go to Learn for now. A **Recipes** lego screen is planned for later.
