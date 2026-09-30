@@ -9,6 +9,14 @@ struct MuseSyncView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var phase: Phase = .ready
     @State private var launchOutcome: MuseLauncher.Outcome?
+    @State private var request: Request = .newer
+
+    /// What to ask Muse for.
+    enum Request: String, CaseIterable, Identifiable {
+        case newer = "New saves"
+        case older = "Older saves"
+        var id: Self { self }
+    }
 
     enum Phase: Equatable {
         case ready
@@ -19,15 +27,19 @@ struct MuseSyncView: View {
     }
 
     private var prompt: String {
-        MusePrompt.text(since: newestMetaSave)
+        MusePrompt.text(window: window)
     }
 
-    /// Only ask Muse for what's newer than what we already have.
-    private var newestMetaSave: Date? {
-        store.posts.lazy
+    /// New saves: only what's newer than what we have. Older saves (backfill):
+    /// what's older than our oldest, a page at a time.
+    private var window: MusePrompt.Window {
+        let dates = store.posts.lazy
             .filter { $0.platform == .instagram || $0.platform == .facebook }
-            .compactMap(\.date)
-            .max()
+            .compactMap(\.savedAt)
+        switch request {
+        case .newer: return dates.max().map(MusePrompt.Window.after) ?? .all
+        case .older: return dates.min().map(MusePrompt.Window.before) ?? .all
+        }
     }
 
     var body: some View {
@@ -39,6 +51,11 @@ struct MuseSyncView: View {
                 Text("Muse is Meta's AI. It can already see your Instagram and Facebook saves, so we just ask it nicely.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
+
+                Picker("What to sync", selection: $request) {
+                    ForEach(Request.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
 
                 VStack(spacing: 10) {
                     stepRow(1, "Open Muse", detail: openDetail, isActive: phase == .ready)
@@ -103,8 +120,10 @@ struct MuseSyncView: View {
                 .buttonStyle(.onboardingPrimary)
         default:
             if phase == .ready {
-                Button("Open Muse") { Task { await openMuse() } }
+                Button("Open Muse") { Task { await openMuse(viaWhatsApp: false) } }
                     .buttonStyle(.onboardingPrimary)
+                Button("Ask Muse in WhatsApp") { Task { await openMuse(viaWhatsApp: true) } }
+                    .buttonStyle(.onboardingSecondary)
             }
             PasteButton(payloadType: String.self) { strings in
                 let text = strings.joined(separator: "\n")
@@ -165,9 +184,11 @@ struct MuseSyncView: View {
         .onboardingCard(padding: 14)
     }
 
-    private func openMuse() async {
-        let outcome = await MuseLauncher.launch(prompt: prompt)
-        DebugLog.write("muse launch: \(outcome)")
+    private func openMuse(viaWhatsApp: Bool) async {
+        let outcome = viaWhatsApp
+            ? await MuseLauncher.launchWhatsApp(prompt: prompt)
+            : await MuseLauncher.launch(prompt: prompt)
+        DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(request.rawValue)): \(outcome)")
         launchOutcome = outcome
         if outcome == .notInstalled {
             phase = .ready
@@ -176,7 +197,10 @@ struct MuseSyncView: View {
 
     private func importReply(_ text: String) {
         let result = SavedPostParser.parse(text)
-        DebugLog.write("paste: \(text.count) chars, \(result.posts.count) posts, \(result.skipped) skipped")
+        let byPlatform = Dictionary(grouping: result.posts, by: \.platform).mapValues(\.count)
+        let fullCaptions = result.posts.count { ($0.caption?.count ?? 0) > 160 }
+        let withCollections = result.posts.count { !$0.collections.isEmpty }
+        DebugLog.write("paste: \(text.count) chars, \(result.posts.count) posts \(byPlatform), \(result.skipped) skipped, captions>160: \(fullCaptions), with collections: \(withCollections)")
         if text.hasPrefix("List my saved posts from") {
             DebugLog.write("paste was our own prompt")
             phase = .failed("That's our question, not Muse's answer. Paste it into Muse and send it first, then copy Muse's reply.")

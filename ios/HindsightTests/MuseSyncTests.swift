@@ -4,13 +4,26 @@ import Testing
 
 @MainActor
 struct MuseSyncTests {
-    @Test func promptPinsTheJSONSchema() throws {
-        let prompt = MusePrompt.text(since: SavedPostParser.parseDate("2026-09-27"))
-        #expect(prompt.contains("Instagram and Facebook"))
-        #expect(prompt.contains("saved after 2026-09-27"))
-        for key in ["\"platform\"", "\"author\"", "\"kind\"", "\"date\"", "\"caption\"", "\"url\""] {
-            #expect(prompt.contains(key))
+    @Test func promptAsksForTheContractFields() throws {
+        let day = try #require(SavedPostParser.parseDate("2026-09-27"))
+        let newer = MusePrompt.text(window: .after(day))
+        #expect(newer.contains("Instagram and Facebook"))
+        #expect(newer.contains("saved after 2026-09-27"))
+        #expect(newer.contains("full caption"))
+        #expect(!newer.contains("160"))
+        for key in ["\"platform\"", "\"url\"", "\"author\"", "\"author_display_name\"", "\"caption\"",
+                    "\"mentions\"", "\"collections\"", "\"saved_at\"", "\"posted_at\"", "\"location_tag\""] {
+            #expect(newer.contains(key))
         }
+        #expect(MusePrompt.text(window: .before(day)).contains("saved before 2026-09-27"))
+        #expect(!MusePrompt.text().contains("saved after"))
+    }
+
+    @Test func whatsAppLinkCarriesThePrompt() throws {
+        let url = MuseLauncher.whatsAppURL(prompt: "list my saves & more")
+        #expect(url.host() == "wa.me")
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        #expect(items?.first { $0.name == "text" }?.value == "list my saves & more")
     }
 
     @Test func deepLinkCarriesThePrompt() throws {
