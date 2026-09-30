@@ -19,6 +19,8 @@ final class AppModel {
 
     private(set) var places: PlaceStore
     private(set) var practice: PracticeStore
+    private(set) var learn: LearnCatalog?
+    private(set) var fitness: FitnessCatalog?
 
     private let persist: Bool
     private var layoutFile: JSONFile<LayoutConfig>
@@ -57,13 +59,36 @@ final class AppModel {
         flagsFile = JSONFile(name: "flags", directory: directory)
         layout = layoutFile.load()
         confirmationDone = flagsFile.load()?.confirmationDone ?? false
-        places = PlaceStore(directory: directory, data: data)
+        let bundledCache = Self.bundledMatchCache(for: dataset)
+        places = PlaceStore(directory: directory, data: data, bundledCache: bundledCache)
         practice = PracticeStore(directory: directory)
+        applyLayout()
+    }
+
+    /// `data/fixtures/<id>.matches.json`: a warm MapKit cache so first launch
+    /// doesn't need hundreds of live searches. Optional.
+    private static func bundledMatchCache(for dataset: Dataset) -> MatchCache? {
+        let url = dataset.url.deletingLastPathComponent().appending(path: "\(dataset.id).matches.json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(MatchCache.self, from: data)
+    }
+
+    /// Point the screens at the approved layout's topics (or the natural ones
+    /// while the proposal is still open, so matching can start early).
+    private func applyLayout() {
+        guard let data else { learn = nil; fitness = nil; return }
+        let natural = LayoutRules.propose(data).draft
+        let tabs = layout?.tabs ?? natural.tabs
+        let topics = { (s: LegoScreen) in tabs.first { $0.legoScreen == s }?.topicIDs ?? [] }
+        places.setMapTopics(layout == nil ? data.topics.filter { $0.legoScreen == .map }.map(\.id) : topics(.map))
+        learn = LearnCatalog(data: data, topicIDs: topics(.learn))
+        fitness = FitnessCatalog(data: data, topicIDs: topics(.fitness))
     }
 
     func approve(_ layout: LayoutConfig) {
         self.layout = layout
         layoutFile.save(layout)
+        applyLayout()
         if !layout.hasMap { finishConfirmation() }
     }
 
@@ -82,5 +107,27 @@ final class AppModel {
     }
 
     /// Posts that show in no tab, for the Everything else sheet.
-    var everythingElse: [ContractPost] { data?.everythingElse(layout: layout) ?? [] }
+    var everythingElse: [ContractPost] {
+        guard let data else { return [] }
+        let notAPlace = places.notAPlacePostIDs
+        let extra = notAPlace.isEmpty ? [] : data.posts.filter { notAPlace.contains($0.id) }
+        return data.everythingElse(layout: layout) + extra
+    }
+
+    // MARK: - Reminders
+
+    /// Rebuild all practice notifications (after opens and any reminder change).
+    func rescheduleReminders() {
+        var tabs: [ReminderScheduler.TabInput] = []
+        if layout?.tab(for: .learn) != nil, let learn {
+            tabs.append(.init(screen: .learn, practice: practice.screen(.learn), candidates: learn.candidates, config: .learn,
+                              describe: { id in learn.tipsByID[id].map { ($0.title, $0.post.savedDate) } }))
+        }
+        if layout?.tab(for: .fitness) != nil, let fitness {
+            tabs.append(.init(screen: .fitness, practice: practice.screen(.fitness), candidates: fitness.candidates, config: .fitness,
+                              describe: { id in fitness.byID[id].map { ($0.title, $0.post.savedDate) } }))
+        }
+        let handled = tabs.allSatisfy { practice.isDoneForToday($0.screen) }
+        Task { await ReminderScheduler.shared.reschedule(tabs: tabs, todayHandled: handled) }
+    }
 }
