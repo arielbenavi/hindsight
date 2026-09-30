@@ -213,7 +213,7 @@ struct PlaceCard: View {
                 ForEach(place.sources) { source in
                     Button { PostOpener.open(source.post, openURL: openURL) } label: {
                         HStack(spacing: 12) {
-                            PostThumbnail(post: source.post, symbol: "play.rectangle.fill", size: 56)
+                            PostLinkThumbnail(post: source.post, size: 56)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(source.extracted.reason ?? source.post.firstLine ?? "Saved post")
                                     .font(Theme.body(16, weight: .semibold)).lineLimit(2).multilineTextAlignment(.leading)
