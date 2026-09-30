@@ -6,6 +6,9 @@ import SwiftUI
 struct ConfirmationFlow: View {
     enum Mode {
         case onboarding
+        /// Opened from the setup chat, which already asked "want to check them?":
+        /// straight to the cards, and back to the chat at the end.
+        case fromChat
         case review
         case wrongPlace([PlaceRef])
     }
@@ -63,6 +66,9 @@ struct ConfirmationFlow: View {
         case .onboarding:
             store.startMatching()
             phase = .intro
+        case .fromChat:
+            store.startMatching()
+            beginCards()
         case .review:
             phase = .review
         case .wrongPlace(let refs):
@@ -93,6 +99,7 @@ struct ConfirmationFlow: View {
     }
 
     private var isReviewMode: Bool { if case .review = mode { true } else { false } }
+    private var isFromChat: Bool { if case .fromChat = mode { true } else { false } }
 
     private func record(_ refs: [PlaceRef], message: String, _ change: () -> Void) {
         let before = refs.map { ($0, store.record($0)) }
@@ -338,7 +345,7 @@ struct ConfirmationFlow: View {
                 Text("\(skipped) are in Needs review whenever you want.").font(Theme.body(16)).foregroundStyle(Theme.secondary)
             }
             Spacer()
-            Button("Open map") { onFinish() }.buttonStyle(.pill)
+            Button(isFromChat ? "Done" : "Open map") { onFinish() }.buttonStyle(.pill)
         }
         .padding(Theme.padding)
     }

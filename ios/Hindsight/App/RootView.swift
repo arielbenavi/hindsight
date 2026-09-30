@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Everything after Ariel's onboarding: layout proposal → place confirmation
-/// (if there's a Map) → the tabs. `HindsightApp` shows this once onboarding is done.
+/// Everything after the Connect screen: the setup chat (receipt → reading →
+/// proposal → place check → "You're in"), then the tabs. `HindsightApp` shows
+/// this once onboarding is done. Spec: docs/specs/onboarding-chat.md.
 struct RootView: View {
     @State private var app = AppModel()
 
@@ -13,14 +14,10 @@ struct RootView: View {
         Group {
             if let error = app.loadError {
                 ContentUnavailableView("Couldn't load your saves", systemImage: "exclamationmark.triangle", description: Text(error))
-            } else if app.needsDatasetChoice {
-                DatasetPicker(app: app)
             } else if app.data == nil {
                 ContentUnavailableView("No saves yet", systemImage: "tray", description: Text("No data file is bundled."))
-            } else if app.layout == nil {
-                LayoutProposalView(app: app)
-            } else if !app.confirmationDone {
-                ConfirmationFlow(app: app, mode: .onboarding) { app.finishConfirmation() }
+            } else if !app.setupDone {
+                SetupChatView(app: app)
             } else {
                 MainTabView(app: app)
             }
@@ -29,8 +26,7 @@ struct RootView: View {
         .tint(Theme.lime)
         // Start matching places right away: by the time the chat is done, most are.
         .task(id: app.dataset?.id) { app.places.startMatching() }
-        .animation(.snappy(duration: 0.35), value: app.layout == nil)
-        .animation(.snappy(duration: 0.35), value: app.confirmationDone)
+        .animation(.snappy(duration: 0.35), value: app.setupDone)
         .id(app.dataset?.id)
     }
 }
@@ -144,26 +140,5 @@ struct DevMenu: View {
                 .frame(width: 36, height: 36)
         }
         .accessibilityLabel("Beta menu")
-    }
-}
-
-/// First launch in the beta: whose saves are these? (One file per tester is bundled.)
-struct DatasetPicker: View {
-    let app: AppModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Spacer()
-            Text("Whose saves are these?").font(Theme.number(40))
-            Text("This beta comes with a few people's saved posts. Pick yours. You can switch later from the bug menu.")
-                .font(Theme.body(17)).foregroundStyle(Theme.secondary)
-            VStack(spacing: 10) {
-                ForEach(app.datasets) { d in
-                    Button(d.displayName) { app.select(d) }.buttonStyle(.pillSecondary)
-                }
-            }
-            Spacer()
-        }
-        .padding(Theme.padding)
     }
 }

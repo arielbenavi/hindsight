@@ -1,41 +1,36 @@
 import SwiftUI
 
-/// "Here's your app" (layout-proposal.md): a short chat that ends in an approved
-/// `LayoutConfig`. Rules only (no LLM in the MVP): fixed wording, chips, and a
-/// rule-based parser for typed edits.
-///
-/// Integration point for Ariel's onboarding chat: `LayoutProposalView(app:)` for now;
-/// when his chat lands it can call `LayoutProposalChat(data:onApprove:)` directly.
-struct LayoutProposalView: View {
+/// The setup chat (docs/specs/onboarding-chat.md): one transcript from "got your
+/// saves" to "You're in". R1 receipt → R2 a taste → R3 reading & grouping (live)
+/// → B1–B5 the layout proposal (layout-proposal.md) → C the place check
+/// (confirm.md, opened from the chat) → done. Fixed wording with real numbers;
+/// Apple's models do the sorting, not the talking.
+struct SetupChatView: View {
     let app: AppModel
-
-    var body: some View {
-        if let data = app.data {
-            LayoutProposalChat(data: data, datasetID: app.dataset?.id ?? "default") { config in
-                app.approve(config)
-            }
-        }
-    }
-}
-
-/// The chat itself: data in, `LayoutConfig` out.
-struct LayoutProposalChat: View {
-    let data: HindsightData
-    let datasetID: String
-    let onApprove: (LayoutConfig) -> Void
-
-    @State private var model: ProposalChatModel?
+    @State private var model: SetupChatModel?
 
     var body: some View {
         Group {
-            if let model {
-                ChatContent(model: model, data: data, onApprove: onApprove)
+            if let model, let data = app.data {
+                ChatContent(model: model, data: data, isSample: app.isSampleData)
+                    .onChange(of: model.approvedConfig) { _, config in
+                        if let config { app.approve(config) }
+                    }
+                    .fullScreenCover(isPresented: Binding(get: { model.isPlaceCheckOpen }, set: { if !$0 { model.placeCheckClosed() } })) {
+                        ConfirmationFlow(app: app, mode: .fromChat) { model.placeCheckClosed() }
+                    }
+                    .onChange(of: model.isFinished) { _, finished in
+                        if finished { app.finishSetup() }
+                    }
             } else {
                 Color.clear
             }
         }
         .onAppear {
-            if model == nil { model = ProposalChatModel(data: data, datasetID: datasetID) }
+            if model == nil, let data = app.data {
+                model = SetupChatModel(data: data, datasetID: app.dataset?.id ?? "default", places: app.places,
+                                       progress: { SimulatedSort.progress(for: data) })
+            }
         }
     }
 }
@@ -45,11 +40,15 @@ struct LayoutProposalChat: View {
 /// Chat state. Persisted so quitting mid-chat resumes at the last bot message.
 @Observable
 @MainActor
-final class ProposalChatModel {
-    enum Stage: String, Codable { case found, questions, proposal, editing, approved }
+final class SetupChatModel {
+    enum Stage: String, Codable {
+        case receipt, reading                                   // R1–R3
+        case found, questions, proposal, editing, approved      // B1–B5
+        case placeCheck, done                                   // C, end
+    }
 
     struct Message: Identifiable, Codable, Equatable {
-        enum Kind: String, Codable { case bot, user, topics, question, preview }
+        enum Kind: String, Codable { case bot, user, topics, question, preview, receipt, samples, progress }
         var id = UUID()
         var kind: Kind
         var text: String = ""
@@ -57,13 +56,22 @@ final class ProposalChatModel {
     }
 
     private(set) var messages: [Message] = []
-    private(set) var stage: Stage = .found
+    private(set) var stage: Stage = .receipt
     private(set) var draft: LayoutRules.Draft
     private(set) var questionIndex = 0
     private(set) var isTyping = false
     var lastTouched: LegoScreen?
 
+    /// Live while reading (R3); only the final line is persisted.
+    private(set) var progress: SortProgress?
+    /// The place check deck is open (it's presented by the view).
+    private(set) var isPlaceCheckOpen = false
+    /// "Open my app" tapped.
+    private(set) var isFinished = false
+
     let data: HindsightData
+    private let places: PlaceStore
+    private let progressStream: () -> AsyncStream<SortProgress>
     private(set) var proposal: LayoutRules.Proposal
     private var assignment: LayoutRules.Assignment
     private let file: JSONFile<Saved>
@@ -79,29 +87,35 @@ final class ProposalChatModel {
 
     private var answers: [String: String] = [:]
 
-    init(data: HindsightData, datasetID: String) {
+    init(data: HindsightData, datasetID: String, places: PlaceStore, progress: @escaping () -> AsyncStream<SortProgress>) {
         self.data = data
+        self.places = places
+        progressStream = progress
         let proposal = LayoutRules.propose(data)
         self.proposal = proposal
         draft = proposal.draft
         assignment = LayoutRules.naturalAssignment(data)
-        file = JSONFile(name: "proposal-chat", directory: JSONFile<Saved>.directory(for: datasetID))
-        if let saved = file.load(), !saved.messages.isEmpty, saved.stage != .approved {
-            messages = saved.messages
-            stage = saved.stage
-            questionIndex = saved.questionIndex
-            draft = LayoutRules.Draft(tabs: saved.tabs, excludedTopicIDs: saved.excluded)
-            answers = saved.answers
-            for (topic, screen) in saved.answers { assignment[topic] = .some(LegoScreen(rawValue: screen)) }
-            self.proposal = LayoutRules.propose(data, assignment: assignment)
-            self.proposal.questions = proposal.questions
-        } else {
+        file = JSONFile(name: "setup-chat", directory: JSONFile<Saved>.directory(for: datasetID))
+        guard let saved = file.load(), !saved.messages.isEmpty, saved.stage != .receipt, saved.stage != .reading else {
             Task { await start() }
+            return
+        }
+        messages = saved.messages
+        stage = saved.stage
+        questionIndex = saved.questionIndex
+        draft = LayoutRules.Draft(tabs: saved.tabs, excludedTopicIDs: saved.excluded)
+        answers = saved.answers
+        for (topic, screen) in saved.answers { assignment[topic] = .some(LegoScreen(rawValue: screen)) }
+        self.proposal = LayoutRules.propose(data, assignment: assignment)
+        self.proposal.questions = proposal.questions
+        // Quit between "Looks good" and the place check: approve again (idempotent) and carry on.
+        if stage == .approved {
+            approvedConfig = draft.config()
+            Task { await afterApproval() }
         }
     }
 
     private func save() {
-        guard stage != .approved else { return }
         file.save(Saved(messages: messages, stage: stage, questionIndex: questionIndex, tabs: draft.tabs,
                         excluded: draft.excludedTopicIDs, answers: answers))
     }
@@ -119,21 +133,61 @@ final class ProposalChatModel {
         save()
     }
 
-    // B1
+    // R1–R3
     private func start() async {
-        let total = data.posts.count
+        stage = .receipt
+        await say(Self.receiptLine(data.posts), delay: .milliseconds(500))
+        await say("", kind: .receipt, delay: .milliseconds(250))
+        await say("Here's a taste of what's in there:", delay: .milliseconds(700))
+        await say("", kind: .samples, delay: .milliseconds(300))
+        await read()
+        await found()
+    }
+
+    /// "Got them. 412 saves: 324 from Instagram and 88 from X."
+    static func receiptLine(_ posts: [ContractPost]) -> String {
+        let counts = Platform.allCases.map { p in (p, posts.count { $0.platform == p }) }.filter { $0.1 > 0 }
+        let total = posts.count.formatted()
+        guard !counts.isEmpty else { return "Got them." }
+        if counts.count == 1 { return "Got them. \(total) saves from \(counts[0].0.displayName)." }
+        let parts = counts.map { "\($0.1.formatted()) from \($0.0.displayName)" }.formatted(.list(type: .and))
+        return "Got them. \(total) saves: \(parts)."
+    }
+
+    /// R3: one message that updates in place while the saves are sorted. Moves on
+    /// at ≥ 90% decided or after 20 s (spec decision 3); the rest finish behind.
+    private func read() async {
+        stage = .reading
+        messages.append(Message(kind: .progress))
+        let index = messages.count - 1
+        let clock = ContinuousClock()
+        let started = clock.now
+        for await snapshot in progressStream() {
+            progress = snapshot
+            if snapshot.fraction >= SortProgress.handOffFraction || clock.now - started >= SortProgress.handOffAfter { break }
+        }
+        let total = data.posts.count.formatted()
+        messages[index].text = (progress?.isComplete ?? true)
+            ? "Done. That's all \(total)."
+            : "Done with most of them. I'll finish the rest in the background."
+        progress = nil
+        save()
+    }
+
+    // B1
+    private func found() async {
         switch proposal.situation {
         case .nothingFits:
-            await say("Okay, I went through your \(total) saves.")
             await say("", kind: .topics, delay: .milliseconds(300))
             await say("Your saves are mostly memes and news, which I can't organize yet. Here's the closest I've got:")
         default:
-            await say("Okay, I went through your \(total) saves. Here's what's in there:")
+            await say("Here's what I found:", delay: .milliseconds(500))
             await say("", kind: .topics, delay: .milliseconds(400))
             let none = data.topics.filter { $0.legoScreen == nil }.reduce(0) { $0 + $1.postIds.count }
             if none > 0 { await say("The random stuff (\(none) memes, news and ads) I'll leave out for now. It's all still in Everything else.") }
             if proposal.situation == .fewSaves { await say("That's not a lot yet. The more you save, the smarter this gets.") }
         }
+        stage = .found
         await askNextQuestionOrPropose()
     }
 
@@ -231,21 +285,86 @@ final class ProposalChatModel {
     func approveNow() {
         if messages.last?.kind != .user { userSays("Looks good") }
         stage = .approved
-        file.delete()
+        save()
         Task {
             await say("Building it… 🔨", delay: .milliseconds(350))
             try? await Task.sleep(for: .milliseconds(700))
             approvedConfig = draft.config()
+            await afterApproval()
         }
+    }
+
+    // C: the place check, if there's a Map
+    private(set) var placeCheckAsks = 0
+
+    private func afterApproval() async {
+        guard draft.tab(for: .map) != nil else {
+            await finishLine()
+            return
+        }
+        places.startMatching()
+        // Matching started back at the receipt; wait until a full hand of cards is ready.
+        var waited = false
+        while places.isMatching && places.onboardingCards().count < Triage.onboardingLimit && !places.isOffline {
+            if !waited { await say("Putting your spots on the map…", delay: .milliseconds(400)); waited = true }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        placeCheckAsks = places.onboardingCards().count
+        let placed = places.placedCount
+        if places.isOffline {
+            await say("I'll finish putting your spots on the map when you're back online.")
+            await finishLine()
+        } else if placeCheckAsks == 0 {
+            await say("I put \(placed.formatted()) spots on your map. Nailed all of them. Didn't even need you.")
+            await finishLine()
+        } else {
+            stage = .placeCheck
+            await say("One last thing. I put \(placed.formatted()) spots on your map. \(placeCheckAsks) I'm not sure about. Want to check them? About a minute.")
+        }
+    }
+
+    func checkPlaces() {
+        userSays("Check them")
+        isPlaceCheckOpen = true
+    }
+
+    func placeCheckLater() {
+        userSays("Later")
+        Task {
+            await say("No problem. They're in Needs review whenever you want.", delay: .milliseconds(400))
+            await finishLine()
+        }
+    }
+
+    func placeCheckClosed() {
+        guard isPlaceCheckOpen else { return }
+        isPlaceCheckOpen = false
+        // Closed with cards left: say where they went instead of "Map's ready".
+        let left = places.needsReviewCount
+        Task {
+            await say(left == 0 ? "Map's ready. Go eat something."
+                                : "Map's ready. \(left) spots are in Needs review whenever you want.", delay: .milliseconds(500))
+            await finishLine()
+        }
+    }
+
+    private func finishLine() async {
+        stage = .done
+        await say("You're in. 🎉", delay: .milliseconds(600))
+    }
+
+    func finish() {
+        file.delete()
+        isFinished = true
     }
 }
 
 // MARK: - Views
 
 private struct ChatContent: View {
-    let model: ProposalChatModel
+    let model: SetupChatModel
     let data: HindsightData
-    let onApprove: (LayoutConfig) -> Void
+    let isSample: Bool
 
     @State private var typed = ""
     @FocusState private var typing: Bool
@@ -255,6 +374,14 @@ private struct ChatContent: View {
             HStack {
                 Text("Hindsight").font(Theme.title(20))
                 Spacer()
+                if isSample {
+                    Text("Sample saves")
+                        .font(Theme.body(12, weight: .bold))
+                        .foregroundStyle(Theme.secondary)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(Theme.surface, in: Capsule())
+                        .overlay(Capsule().strokeBorder(Theme.stroke))
+                }
             }
             .padding(.horizontal, Theme.padding)
             .padding(.vertical, 10)
@@ -278,15 +405,15 @@ private struct ChatContent: View {
                 .onChange(of: model.isTyping) { _, _ in
                     withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
                 }
+                .onChange(of: model.progress?.topics.count) { _, _ in
+                    withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
+                }
             }
             replies
         }
-        .onChange(of: model.approvedConfig) { _, config in
-            if let config { onApprove(config) }
-        }
     }
 
-    @ViewBuilder private func row(_ message: ProposalChatModel.Message) -> some View {
+    @ViewBuilder private func row(_ message: SetupChatModel.Message) -> some View {
         switch message.kind {
         case .bot:
             BotBubble(text: message.text)
@@ -298,6 +425,16 @@ private struct ChatContent: View {
                     .foregroundStyle(Theme.onLime)
                     .padding(.horizontal, 14).padding(.vertical, 10)
                     .background(Theme.lime, in: .rect(cornerRadius: 18))
+            }
+        case .receipt:
+            ReceiptCard(posts: data.posts)
+        case .samples:
+            TasteCards(posts: SetupChatModel.tastePosts(data.posts), data: data)
+        case .progress:
+            if let progress = model.progress {
+                ReadingBubble(progress: progress)
+            } else {
+                BotBubble(text: message.text)
             }
         case .topics:
             TopicCloud(data: data)
@@ -334,7 +471,18 @@ private struct ChatContent: View {
                     }
                 case .editing:
                     Button("Looks good") { model.approveNow() }.buttonStyle(.pill)
-                case .found, .approved:
+                case .placeCheck:
+                    if !model.isPlaceCheckOpen {
+                        HStack(spacing: 10) {
+                            Button("Later") { model.placeCheckLater() }.buttonStyle(.pillSecondary)
+                            Button("Check them") { model.checkPlaces() }.buttonStyle(.pill)
+                        }
+                    }
+                case .done:
+                    if model.messages.last?.kind == .bot {
+                        Button("Open my app") { model.finish() }.buttonStyle(.pill)
+                    }
+                case .receipt, .reading, .found, .approved:
                     EmptyView()
                 }
             }
@@ -364,6 +512,103 @@ private struct ChatContent: View {
         let text = typed
         typed = ""
         model.handleTyped(text)
+    }
+}
+
+extension SetupChatModel {
+    /// R2: the 3 newest saves, one per platform first, then the next newest.
+    static func tastePosts(_ posts: [ContractPost], count: Int = 3) -> [ContractPost] {
+        var picked: [ContractPost] = []
+        var platforms = Set<Platform>()
+        for post in posts where picked.count < count && platforms.insert(post.platform).inserted { picked.append(post) }
+        for post in posts where picked.count < count && !picked.contains(post) { picked.append(post) }
+        return picked
+    }
+}
+
+/// R1: one tile per platform with its count (Ariel's "You're in" numbers).
+private struct ReceiptCard: View {
+    let posts: [ContractPost]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(Platform.allCases) { platform in
+                let count = posts.count { $0.platform == platform }
+                VStack(spacing: 6) {
+                    PlatformGlyph(platform: platform, size: 30).clipShape(.rect(cornerRadius: 8))
+                    Text(count.formatted()).font(Theme.body(15, weight: .bold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Theme.surface, in: .rect(cornerRadius: 16))
+                .opacity(count > 0 ? 1 : 0.35)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(platform.displayName): \(count)")
+            }
+        }
+    }
+}
+
+/// R2: a few real posts; tapping one opens it.
+private struct TasteCards: View {
+    let posts: [ContractPost]
+    let data: HindsightData
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ForEach(posts) { post in
+                Button { PostOpener.open(post, openURL: openURL) } label: {
+                    HStack(alignment: .top, spacing: 12) {
+                        PostLinkThumbnail(post: post, size: 48)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("@\(post.author.username)").font(Theme.body(14, weight: .bold))
+                            Text(post.caption ?? "No caption")
+                                .font(Theme.body(14))
+                                .foregroundStyle(post.caption == nil ? Theme.muted : Theme.secondary)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .card(padding: 12)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+/// R3, live: "Reading your saves… 180 of 412", a bar, and topic chips popping in.
+private struct ReadingBubble: View {
+    let progress: SortProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Reading your saves… \(progress.decided.formatted()) of \(progress.total.formatted())")
+                .font(Theme.body(17))
+                .contentTransition(.numericText(value: Double(progress.decided)))
+            ProgressView(value: progress.fraction).tint(Theme.lime)
+            if !progress.topics.isEmpty {
+                WrapLayout(spacing: 8) {
+                    ForEach(progress.topics) { topic in
+                        HStack(spacing: 6) {
+                            Text(topic.emoji)
+                            Text(topic.label).font(Theme.body(14, weight: .bold))
+                            Text("\(topic.count)").font(Theme.body(14, weight: .bold)).foregroundStyle(Theme.secondary)
+                                .contentTransition(.numericText(value: Double(topic.count)))
+                        }
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(Theme.surfaceRaised, in: Capsule())
+                        .transition(.opacity)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Theme.surface, in: .rect(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Theme.stroke))
+        .animation(.snappy, value: progress)
     }
 }
 
@@ -449,7 +694,7 @@ private struct SampleStrip: View {
 /// B3/B4: the proposed app as a card: a mini tab bar + one row per tab.
 /// In edit mode: drag to reorder, tap a tab for Rename · Remove · Change emoji, "+ Add".
 private struct AppPreviewCard: View {
-    let model: ProposalChatModel
+    let model: SetupChatModel
     let data: HindsightData
     let isEditing: Bool
 

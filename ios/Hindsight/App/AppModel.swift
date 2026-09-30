@@ -12,12 +12,12 @@ final class AppModel {
     private(set) var dataset: Dataset?
     private(set) var data: HindsightData?
     private(set) var loadError: String?
-    /// Beta: with several testers' data bundled, ask once whose saves these are.
-    private(set) var needsDatasetChoice: Bool
 
     private(set) var layout: LayoutConfig?
     /// Set once the post-layout place confirmation pass is finished or skipped.
     private(set) var confirmationDone = false
+    /// Set when the user taps "Open my app" at the end of the setup chat.
+    private(set) var setupDone = false
 
     private(set) var places: PlaceStore
     private(set) var practice: PracticeStore
@@ -28,30 +28,29 @@ final class AppModel {
     private var layoutFile: JSONFile<LayoutConfig>
     private var flagsFile: JSONFile<Flags>
 
-    private struct Flags: Codable { var confirmationDone = false }
+    private struct Flags: Codable {
+        var confirmationDone = false
+        /// Missing in flags saved before the setup chat: those users finished
+        /// setup when they finished confirmation.
+        var setupDone: Bool?
+    }
 
     /// `persist: false` keeps everything in memory (previews, tests).
     init(datasets: [Dataset] = Dataset.bundled(), selected: String? = UserDefaults.standard.string(forKey: AppModel.datasetKey),
          persist: Bool = true) {
         self.datasets = datasets
         self.persist = persist
-        needsDatasetChoice = persist && selected == nil && datasets.count > 1
         let empty = JSONFile<LayoutConfig>(name: "layout", directory: nil)
         layoutFile = empty
         flagsFile = JSONFile(name: "flags", directory: nil)
         places = PlaceStore(directory: nil, data: nil)
         practice = PracticeStore(directory: nil)
         let initial = datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first
-        if let initial {
-            let ask = needsDatasetChoice
-            select(initial)
-            needsDatasetChoice = ask
-        }
+        if let initial { select(initial) }
     }
 
     /// Switch testers' data. Each dataset keeps its own layout and user state.
     func select(_ dataset: Dataset) {
-        needsDatasetChoice = false
         self.dataset = dataset
         if persist { UserDefaults.standard.set(dataset.id, forKey: Self.datasetKey) }
         do {
@@ -66,7 +65,9 @@ final class AppModel {
         layoutFile = JSONFile(name: "layout", directory: directory)
         flagsFile = JSONFile(name: "flags", directory: directory)
         layout = layoutFile.load()
-        confirmationDone = flagsFile.load()?.confirmationDone ?? false
+        let flags = flagsFile.load()
+        confirmationDone = flags?.confirmationDone ?? false
+        setupDone = flags?.setupDone ?? confirmationDone
         let bundledCache = Self.bundledMatchCache(for: dataset)
         places = PlaceStore(directory: directory, data: data, bundledCache: bundledCache)
         practice = PracticeStore(directory: directory)
@@ -102,8 +103,23 @@ final class AppModel {
 
     func finishConfirmation() {
         confirmationDone = true
-        flagsFile.save(Flags(confirmationDone: true))
+        saveFlags()
     }
+
+    /// End of the setup chat: show the tabs.
+    func finishSetup() {
+        finishConfirmation()
+        setupDone = true
+        saveFlags()
+    }
+
+    private func saveFlags() {
+        flagsFile.save(Flags(confirmationDone: confirmationDone, setupDone: setupDone))
+    }
+
+    /// Bundled data (the sample saves) rather than the user's own sorted saves.
+    /// Always true until the sort engine writes a live dataset (ADR-001, A3).
+    var isSampleData: Bool { dataset != nil }
 
     /// Dev: forget the layout and all user state for this dataset.
     func resetCurrentDataset() {
