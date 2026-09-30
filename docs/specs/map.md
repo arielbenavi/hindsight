@@ -79,7 +79,7 @@ All three are Apple; Google's equivalents need an API key and billing.
 
 ### M4. Needs review
 
-A short list of posts where we think there's a place but couldn't match it confidently. Each row opens a single confirmation card (the same component as the post-onboarding confirmation flow; see its own spec): post on one side, best guess on the other, **Yes / No / Search** buttons.
+A short list of posts where we think there's a place but couldn't match it confidently. Each row opens a single confirmation card (the same component as the post-onboarding confirmation flow; see [confirm.md](confirm.md)): post on one side, best guess on the other, **Yes / No / Search** buttons.
 
 ### Filters (chips in the sheet)
 

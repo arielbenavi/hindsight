@@ -21,7 +21,7 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 ## Wed 9/30: Specs
 
 - [x] Map lego screen spec: screens, flows, states, data needs ([specs/map.md](specs/map.md))
-- [ ] Confirmation flow spec ("is this right?" cards)
+- [x] Confirmation flow spec ("is this right?" cards) ([specs/confirm.md](specs/confirm.md))
 - [ ] Fitness lego screen spec: search by problem area or muscle group, reminders
 - [ ] Education lego screen spec
 - [ ] Layout proposal screen spec (onboarding handoff: "here's your app", approve or edit)
