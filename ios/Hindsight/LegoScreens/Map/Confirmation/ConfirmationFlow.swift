@@ -30,6 +30,11 @@ struct ConfirmationFlow: View {
     @State private var toneLine: String?
     /// After alternatives, go back to the review list instead of the next card.
     @State private var returnToReview = false
+    /// Checklist ticks per card (keyed by the card's first place), kept here so
+    /// they survive a detour to fix one of the places.
+    @State private var checklistUnticked: [String: Set<PlaceRef>] = [:]
+    /// Fixing one place of a checklist card: come back to that card after.
+    @State private var fixingFromChecklist = false
 
     private var store: PlaceStore { app.places }
 
@@ -153,6 +158,19 @@ struct ConfirmationFlow: View {
         case .cancel: toneLine = nil
         }
         if case .wrongPlace = mode { onFinish(); return }
+        if fixingFromChecklist, cards.indices.contains(index), let key = cards[index].first?.key {
+            // Back to the same post's checklist, with the other places' ticks as they were.
+            fixingFromChecklist = false
+            var unticked = checklistUnticked[key] ?? []
+            switch answered {
+            case .picked: unticked.remove(ref)
+            case .notAPlace, .dontKnow: unticked.insert(ref)
+            case .cancel: break
+            }
+            checklistUnticked[key] = unticked
+            phase = .cards
+            return
+        }
         if answered == .cancel && cards.indices.contains(index) { phase = .cards; return }
         advance()
     }
@@ -213,6 +231,8 @@ struct ConfirmationFlow: View {
                     Group {
                         if refs.count > 1 {
                             ChecklistCard(store: store, refs: refs,
+                                          unticked: Binding(get: { checklistUnticked[refs[0].key] },
+                                                            set: { checklistUnticked[refs[0].key] = $0 }),
                                           onConfirm: { ticked, unticked in
                                               record(refs, message: "Placed \(ticked.count).") {
                                                   ticked.forEach(store.confirm)
@@ -220,9 +240,9 @@ struct ConfirmationFlow: View {
                                               }
                                               advance()
                                           },
-                                          onFix: { ref in returnToReview = isReviewMode; phase = .alternatives(ref) },
+                                          onFix: { ref in fixingFromChecklist = true; returnToReview = isReviewMode; phase = .alternatives(ref) },
                                           onSkip: { answerSkip(refs) })
-                            // a fresh card (and its ticks) per post, not the previous card's state
+                            // a fresh card per post; its ticks live in checklistUnticked
                             .id(refs[0].key)
                         } else if let ref = refs.first, store.record(ref).status == .cantTell || store.record(ref).match == nil {
                             SearchItYourselfCard(store: store, ref: ref,
@@ -468,7 +488,20 @@ struct ChecklistCard: View {
     let onConfirm: ([PlaceRef], [PlaceRef]) -> Void
     let onFix: (PlaceRef) -> Void
     let onSkip: () -> Void
-    @State private var unticked: Set<PlaceRef> = []
+    /// Owned by the flow so a fix detour doesn't reset it; nil until first shown.
+    @Binding var ticks: Set<PlaceRef>?
+
+    init(store: PlaceStore, refs: [PlaceRef], unticked: Binding<Set<PlaceRef>?>,
+         onConfirm: @escaping ([PlaceRef], [PlaceRef]) -> Void, onFix: @escaping (PlaceRef) -> Void, onSkip: @escaping () -> Void) {
+        self.store = store
+        self.refs = refs
+        _ticks = unticked
+        self.onConfirm = onConfirm
+        self.onFix = onFix
+        self.onSkip = onSkip
+    }
+
+    private var unticked: Set<PlaceRef> { ticks ?? [] }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -480,7 +513,9 @@ struct ChecklistCard: View {
                 let rec = store.record(ref)
                 HStack(spacing: 12) {
                     Button {
-                        if unticked.contains(ref) { unticked.remove(ref) } else { unticked.insert(ref) }
+                        var next = unticked
+                        if next.contains(ref) { next.remove(ref) } else { next.insert(ref) }
+                        ticks = next
                     } label: {
                         Image(systemName: unticked.contains(ref) ? "circle" : "checkmark.circle.fill")
                             .font(.system(size: 24)).foregroundStyle(unticked.contains(ref) ? Theme.muted : Theme.lime)
@@ -507,8 +542,9 @@ struct ChecklistCard: View {
         }
         .card(padding: 18)
         .onAppear {
-            // ✓ on by default only for good matches (confirm.md → C4).
-            unticked = Set(refs.filter { !isGoodMatch($0) })
+            // ✓ on by default only for good matches (confirm.md → C4). Only the
+            // first time: coming back from a fix keeps the user's ticks.
+            if ticks == nil { ticks = Set(refs.filter { !isGoodMatch($0) }) }
         }
     }
 
