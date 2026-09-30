@@ -9,7 +9,7 @@ struct OnboardingFlow: View {
     init(store: SavedPostStore, onFinish: @escaping () -> Void) {
         self.store = store
         self.onFinish = onFinish
-        _model = State(initialValue: OnboardingModel(posts: store.posts))
+        _model = State(initialValue: OnboardingModel())
     }
 
     var body: some View {
@@ -19,9 +19,7 @@ struct OnboardingFlow: View {
                 switch model.step {
                 case .welcome: WelcomeStep(model: model)
                 case .howItWorks: HowItWorksStep(model: model)
-                case .connect: ConnectStep(model: model, store: store)
-                case .preferences: PreferencesStep(model: model)
-                case .done: DoneStep(store: store, onFinish: onFinish)
+                case .connect: ConnectStep(model: model, store: store, onFinish: onFinish)
                 }
             }
             .id(model.step)

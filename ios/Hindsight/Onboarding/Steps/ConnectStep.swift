@@ -3,6 +3,8 @@ import SwiftUI
 struct ConnectStep: View {
     @Bindable var model: OnboardingModel
     let store: SavedPostStore
+    /// The last step: done connecting → the layout proposal.
+    let onFinish: () -> Void
 
     var body: some View {
         OnboardingPage {
@@ -17,15 +19,22 @@ struct ConnectStep: View {
             comingSoonRow("WhatsApp notes", symbol: "message.fill",
                           detail: "Links and notes you send yourself on WhatsApp.")
         } actions: {
-            Button("Continue", action: model.next)
+            Button(finishTitle, action: onFinish)
                 .buttonStyle(.onboardingPrimary)
-            Text("You can connect more later.")
+            Text("Connected everything you want to start with? You can add more later.")
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.muted)
         }
         .sheet(isPresented: $model.isMuseSheetPresented) {
             MuseSyncView(store: store)
         }
+    }
+
+    /// Counts only what the user brought in (not the bundled seed).
+    private var importedCount: Int { store.posts.count { $0.source != .seedMD } }
+
+    private var finishTitle: String {
+        importedCount > 0 ? "Start with \(importedCount.formatted()) saves" : "I'm done connecting"
     }
 
     private var museCard: some View {
