@@ -55,7 +55,7 @@ enum MuseConnector {
 
     private static func sendInstruction(window: MusePrompt.Window) -> String {
         let scope = switch window {
-        case .all: ""
+        case .all: " (all of them, however many, not just recent ones; ignore any date limits from earlier messages)"
         case .after(let date): " saved after \(MusePrompt.day(date))"
         case .before(let date): " saved before \(MusePrompt.day(date))"
         }

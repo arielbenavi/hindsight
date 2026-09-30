@@ -30,7 +30,7 @@ struct MuseSyncView: View {
         /// User went to Muse; waiting for the reply (paste) or the connector.
         case waiting
         /// Connector: checking for what Muse sent. `added` so far.
-        case receiving(added: Int)
+        case receiving(added: Int, received: Int)
         case imported(added: Int, found: Int)
         case failed(String)
     }
@@ -76,7 +76,9 @@ struct MuseSyncView: View {
                     switch method {
                     case .connector:
                         stepRow(1, connectorConnected ? "Open Muse" : "Connect hindsight to Muse", detail: openDetail, isActive: phase == .ready)
-                        stepRow(2, "Send it", detail: "Muse sends your saves straight to hindsight.", isActive: phase == .waiting)
+                        stepRow(2, "Send it", detail: connectorConnected
+                                    ? "Muse sends your new saves straight to hindsight."
+                                    : "When Muse asks, tap \u{201C}Always allow this site\u{201D} so future syncs just work.", isActive: phase == .waiting)
                         stepRow(3, "Come back here", detail: "We check automatically. No copying.", isActive: isReceiving)
                     case .paste:
                         stepRow(1, "Open Muse", detail: openDetail, isActive: phase == .ready)
@@ -196,14 +198,12 @@ struct MuseSyncView: View {
         switch phase {
         case .ready, .waiting:
             EmptyView()
-        case .receiving(let added):
+        case .receiving(let added, let received):
             HStack(spacing: 10) {
                 if pollID != nil { ProgressView() }
-                Text(added > 0
-                     ? "+\(added) saves arrived from Muse\(pollID != nil ? ". Still checking…" : ".")"
-                     : (pollID != nil ? "Waiting for Muse to send your saves…" : "Nothing arrived yet. Did Muse say it sent them?"))
+                Text(receivingMessage(added: added, received: received))
                     .font(OnboardingStyle.title)
-                    .foregroundStyle(added > 0 ? OnboardingStyle.accent : OnboardingStyle.text)
+                    .foregroundStyle(received > 0 ? OnboardingStyle.accent : OnboardingStyle.text)
             }
         case .imported(let added, let found):
             Label(
@@ -216,6 +216,16 @@ struct MuseSyncView: View {
             Label(message, systemImage: "exclamationmark.triangle.fill")
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(.orange)
+        }
+    }
+
+    private func receivingMessage(added: Int, received: Int) -> String {
+        let checking = pollID != nil ? " Still checking…" : ""
+        switch (added, received) {
+        case (0, 0): return pollID != nil ? "Waiting for Muse to send your saves…" : "Nothing arrived yet. Did Muse say it sent them?"
+        case (0, _): return "Muse sent \(received), all already in hindsight.\(checking)"
+        case (_, _) where added == received: return "+\(added) saves arrived from Muse.\(checking)"
+        default: return "+\(added) new saves from Muse (\(received - added) you already had).\(checking)"
         }
     }
 
@@ -264,7 +274,7 @@ struct MuseSyncView: View {
     // MARK: - Connector
 
     private func startChecking() {
-        if case .receiving = phase {} else { phase = .receiving(added: 0) }
+        if case .receiving = phase {} else { phase = .receiving(added: 0, received: 0) }
         pollID = UUID()
     }
 
@@ -272,7 +282,7 @@ struct MuseSyncView: View {
     /// for up to 3 minutes, merging whatever has arrived.
     private func pollConnector() async {
         guard let base else { return }
-        var added: Int = if case .receiving(let n) = phase { n } else { 0 }
+        var added: Int = if case .receiving(let n, _) = phase { n } else { 0 }
         for attempt in 0..<45 {
             do {
                 let text = try await MuseConnector.fetchSaves(base: base)
@@ -283,7 +293,7 @@ struct MuseSyncView: View {
                 if new > 0 || attempt == 0 {
                     DebugLog.write("connector check #\(attempt): \(posts.count) on server, +\(new) new (total +\(added))")
                 }
-                phase = .receiving(added: added)
+                phase = .receiving(added: added, received: posts.count)
             } catch is CancellationError {
                 return
             } catch {
