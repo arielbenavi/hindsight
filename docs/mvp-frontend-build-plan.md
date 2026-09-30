@@ -52,47 +52,47 @@ Design/Theme.swift          DailySpend Theme + OnboardingStyle merged (Onboardin
 - [ ] Tell Ariel about the one-line `HindsightApp.swift` change and the `project.yml` additions
 
 ### 1. Data: fixtures — everything else depends on this
-- [ ] `data/fixtures/tools/build_posts.py`: deterministic `posts[]` for both seeds (Reut's export: fix Latin-1 mojibake, collections from `saved_collections.json`, hashtags, @mentions, `saved_at`; Ariel's markdown: parse entries). Note: Ariel's seed captions are cut at 160 chars, so his extraction is weaker.
-- [ ] Extraction by Claude subagents in batches (~100 posts each): per post `lego_screen`, topic label, and `places` / `tip` / `routine` per the contract; never invent content
-- [ ] Consolidation pass: stable `topics[]` (each post in exactly one), samples, `source_collections`, ≤ 2 `ambiguity` questions ("Aesthetic coffee" for Reut); apply the < 5 fitness → learn rule
-- [ ] `data/fixtures/tools/validate.py`: contract rules (snake_case, no `""`, ids exist, every non-`none` post has exactly one item, lengths) → commit `data/fixtures/reut.hindsight.json`, `ariel.hindsight.json`
+- [x] `data/fixtures/tools/build_posts.py`: deterministic `posts[]` for both seeds (Reut's export: fix Latin-1 mojibake, collections from `saved_collections.json`, hashtags, @mentions, `saved_at`; Ariel's markdown: parse entries). Note: Ariel's seed captions are cut at 160 chars, so his extraction is weaker.
+- [x] Extraction by Claude subagents in batches (~100 posts each): per post `lego_screen`, topic label, and `places` / `tip` / `routine` per the contract; never invent content
+- [x] Consolidation pass: stable `topics[]` (each post in exactly one), samples, `source_collections`, ≤ 2 `ambiguity` questions ("Aesthetic coffee" for Reut); apply the < 5 fitness → learn rule
+- [x] `data/fixtures/tools/validate.py`: contract rules (snake_case, no `""`, ids exist, every non-`none` post has exactly one item, lengths) → commit `data/fixtures/reut.hindsight.json`, `ariel.hindsight.json`
 - [ ] Third tester: generate her fixture the same way once Reut has her Instagram export
-- [ ] Sanity check against the specs' "Done when" data points (Salt Hank's, Top-12 cookies, gym memes → none, protein pancakes → learn, ~10 Ariel fitness saves)
+- [x] Sanity check against the specs' "Done when" data points (Salt Hank's, Top-12 cookies, gym memes → none, protein pancakes → learn, ~10 Ariel fitness saves)
 
 ### 2. Foundations in the app
-- [ ] `Design/Theme.swift`: DailySpend theme + OnboardingStyle merged (colors, heavy rounded type, pill buttons, cards, lime accent)
-- [ ] `Contract/`: Codable types for the whole file + `HindsightData` index; decoding tests on both fixtures
-- [ ] Fixture selection: bundled fixtures, chosen by a DEBUG/settings switch (Reut / Ariel / third tester), remembered
-- [ ] `Layout/LayoutConfig.swift` + `LayoutStore` (persisted)
-- [ ] `App/RootView.swift` + `MainTabView` built only from `LayoutConfig`; placeholder tabs; Everything else header button + sheet
-- [ ] The one-line `HindsightApp.swift` commit; `project.yml` fixture bundling
+- [x] `Design/Theme.swift`: DailySpend theme + OnboardingStyle merged (colors, heavy rounded type, pill buttons, cards, lime accent)
+- [x] `Contract/`: Codable types for the whole file + `HindsightData` index; decoding tests on both fixtures
+- [x] Fixture selection: bundled fixtures, chosen by a DEBUG/settings switch (Reut / Ariel / third tester), remembered
+- [x] `Layout/LayoutConfig.swift`, persisted per dataset by `App/AppModel`
+- [x] `App/RootView.swift` + `MainTabView` built only from `LayoutConfig`; placeholder tabs; Everything else header button + sheet
+- [x] The one-line `HindsightApp.swift` commit; `project.yml` fixture bundling
 
 ### 3. Map
-- [ ] `Place` model + `PlaceStore` (matching results + user state: visit status, hidden, filters), persisted
-- [ ] `PlaceMatcher`: MapKit `MKLocalSearch` (name + area hint), throttled queue, on-disk cache, Apple/Google Maps URLs, candidates (≤ 5), de-dupe by `map_item_id` across posts
-- [ ] `Triage` (pure): placed / ask / can't tell, per confirm.md incl. the shrink rules and the 20 cap; tests
-- [ ] M1 map: emoji pins by type, ✓ badge, clustering, locate-me, opens on you / nearest city
-- [ ] M1a bottom sheet (peek / half / full) with distance-sorted list following the visible region
-- [ ] M2 place card: reason, post thumbnail/fallback (Look Around → snapshot), Directions / Google Maps / Been there, Wrong place?, Hide, Apple's place sheet
-- [ ] Filters (type, status, collection) remembered; M3 city picker
-- [ ] States: location ask / denied, nothing nearby, no places, matching in progress, offline
+- [x] `Place` model + `PlaceStore` (matching results + user state: visit status, hidden, filters), persisted
+- [x] `PlaceMatcher`: MapKit `MKLocalSearch` (name + area hint), throttled queue, on-disk cache, Apple/Google Maps URLs, candidates (≤ 5), de-dupe by `map_item_id` across posts
+- [x] `Triage` (pure): placed / ask / can't tell, per confirm.md incl. the shrink rules and the 20 cap; tests
+- [x] M1 map: emoji pins by type, ✓ badge, clustering, locate-me, opens on you / nearest city
+- [x] M1a bottom sheet (peek / half / full) with distance-sorted list following the visible region
+- [x] M2 place card: reason, post thumbnail/fallback (Look Around → snapshot), Directions / Google Maps / Been there, Wrong place?, Hide, Apple's place sheet
+- [x] Filters (type, status, collection) remembered; M3 city picker
+- [x] States: location ask / denied, nothing nearby, no places, matching in progress, offline
 
 ### 4. Confirmation + proposal
-- [ ] Confirmation: C1 intro, C2 swipe card (evidence highlighted in lime), C3 alternatives + search, C4 multi-place checklist, C5 done, C6 search it yourself; undo; tone one-liners; answers persisted; M4 Needs review uses the same card
-- [ ] `LayoutRules` (pure): thresholds, tab order, questions, states (one tab / nothing fits / < 20 saves); tests for Reut's and Ariel's expected proposals
-- [ ] Proposal chat UI: B1 topic card, B2 questions with thumbnails, B3 app preview card, B4 edit mode (drag reorder, rename, remove, change emoji, + Add), B5 approve; resume mid-chat
-- [ ] Typed edits without an LLM: small rule-based parser (remove / rename / reorder / leave out); falls back to chips when unsure
-- [ ] Routing end to end: onboarding → proposal → confirmation → Map tab
+- [x] Confirmation: C1 intro, C2 swipe card (evidence highlighted in lime), C3 alternatives + search, C4 multi-place checklist, C5 done, C6 search it yourself; undo; tone one-liners; answers persisted; M4 Needs review uses the same card
+- [x] `LayoutRules` (pure): thresholds, tab order, questions, states (one tab / nothing fits / < 20 saves); tests for Reut's and Ariel's expected proposals
+- [x] Proposal chat UI: B1 topic card, B2 questions with thumbnails, B3 app preview card, B4 edit mode (drag reorder, rename, remove, change emoji, + Add), B5 approve; resume mid-chat
+- [x] Typed edits without an LLM: small rule-based parser (remove / rename / reorder / leave out); falls back to chips when unsure
+- [x] Routing end to end: onboarding → proposal → confirmation → Map tab
 
 ### 5. Practice loop + Learn
-- [ ] `Practice/`: `PracticeState`, `PracticeStore`, `TodayPicker` (config per screen), `WeeklyProgress`, spaced review 3/10/30, `ReminderPolicy` (incl. cross-tab cap), `ReminderScheduler` (owns the notification delegate); `PracticeTests`
-- [ ] Views: `PracticeCard`, `WeeklyRing`, `WhenChips`, swipe deck (shared with confirmation)
-- [ ] Learn: L0 setup, L1 home, L2 card (Still got it? variant, CTA-keyword variant), L3 topic, L4 detail, L5 progress, L6 search (`TipSearch`, Hebrew/accents); `LearnTests`
+- [x] `Practice/`: `PracticeState`, `PracticeStore`, `TodayPicker` (config per screen), `WeeklyProgress`, spaced review 3/10/30, `ReminderPolicy` (incl. cross-tab cap), `ReminderScheduler` (owns the notification delegate); `PracticeTests`
+- [x] Views: `PracticeCard`, `WeeklyRing`, `WhenChips`, swipe deck (shared with confirmation)
+- [x] Learn: L0 setup, L1 home, L2 card (Still got it? variant, CTA-keyword variant), L3 topic, L4 detail, L5 progress, L6 search (`TipSearch`, Hebrew/accents); `LearnTests`
 
 ### 6. Fitness
-- [ ] `Routine` + enums, `ProblemSearch` synonym table; `FitnessTests`
-- [ ] F0 setup, F1 home (ring, Today's 1, Regulars, search, area grid), F2 routine card (thin follow-along, safety note), F3 area page, F4 detail, F5 Regular schedule + repeating notifications, progress
-- [ ] Picker config for Fitness (thin allowed, done ×1.5 capped, 3-day window, area rotation)
+- [x] `Routine` + enums, `ProblemSearch` synonym table; `FitnessTests`
+- [x] F0 setup, F1 home (ring, Today's 1, Regulars, search, area grid), F2 routine card (thin follow-along, safety note), F3 area page, F4 detail, F5 Regular schedule + repeating notifications, progress
+- [x] Picker config for Fitness (thin allowed, done ×1.5 capped, 3-day window, area rotation)
 
 ### 7. Polish + ship
 - [ ] Look-and-feel pass; every view has previews with seed data
