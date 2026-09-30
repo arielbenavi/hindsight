@@ -5,7 +5,8 @@ struct HindsightApp: App {
     @AppStorage(OnboardingModel.completedKey) private var hasCompletedOnboarding = false
     /// "mine" once the user starts with their own saves; empty = the sample.
     @AppStorage("setupSource") private var setupSource = ""
-    @State private var store = SavedPostStore()
+    /// The user's own imports only: no bundled seed (the sample lives in data/fixtures).
+    @State private var store = SavedPostStore(seed: { [] })
 
     init() {
         // Launch with -resetOnboarding to replay the first-run flow.

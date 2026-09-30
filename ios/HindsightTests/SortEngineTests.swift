@@ -134,3 +134,18 @@ struct SortEngineTests {
         #expect(posts[0].savedDate != nil)
     }
 }
+
+struct SeedMergeTests {
+    /// A post the user imports that's also in the bundled seed becomes theirs;
+    /// before, it kept the seed label and the sort engine skipped it.
+    @Test func importingASeedPostMakesItTheUsers() throws {
+        let url = URL(string: "https://www.instagram.com/p/DdwJgsNABze/")!
+        let seed = SavedPost(url: url, kind: .post, author: "a", caption: "short", source: .seedMD)
+        let muse = SavedPost(url: url, kind: .post, author: "a", caption: "the full caption", source: .muse)
+        let merged = seed.filling(from: muse)
+        #expect(merged.source == .muse)
+        #expect(ContractPost.userPosts(from: [merged]).count == 1)
+        // …but a seed record never downgrades a real import.
+        #expect(muse.filling(from: seed).source == .muse)
+    }
+}
