@@ -214,7 +214,7 @@ struct HandledRow: View {
         switch handling {
         case .tried: "Done"
         case .reviewed: "Still got it"
-        case .reminded(let date): Calendar.current.isDateInToday(date) ? "Tonight ⏰" : date.formatted(.dateTime.weekday(.wide)) + " ⏰"
+        case .reminded(let date): Calendar.current.isDateInToday(date) ? "Tonight" : date.formatted(.dateTime.weekday(.wide))
         case .archived: "Not for me"
         }
     }
