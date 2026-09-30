@@ -11,7 +11,8 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - **Lego screens in the MVP:** Map, Fitness, Education. The tab bar is one tab per lego screen, never per category.
 - **Map:** any place, built for deciding in the moment (what's near me now). One Map tab; cities and collections are filters.
 - **Confirmation flow:** after onboarding, cards show the saved post next to the best-guess match: "is this right?"
-- **Fitness:** reminders to do saved stretches, plus search by problem area or muscle group. Not live workout tracking.
+- **Saving is aspirational.** People save tips and stretches as promises to their future self. Learn and Fitness don't just help find saves again; they nudge the user to practice and build a routine (see the practice loop in [specs/learn.md](specs/learn.md)).
+- **Fitness:** reuses Learn's practice loop ("Did it" instead of "Tried it"), plus search by problem area or muscle group. Not live workout tracking.
 - **Place matching:** Apple Maps (MapKit search) for now. Every place also gets an "Open in Google Maps" link. A full Google Maps option comes later.
 - **Video:** thumbnail + tap-through to the original app. ⚠️ **Known gap:** we want in-app playback (Instagram/TikTok/X embeds), which needs API access. Tracked for after the MVP.
 - **Users:** Reut, Ariel, Reut's girlfriend → then a friends beta on TestFlight. Everyone has their own data; no sharing.
@@ -51,13 +52,14 @@ Reut (frontend/UX) + Claude. Ariel's data-pull and onboarding work runs in paral
 - [ ] Confirmation cards: saved post on one side, best-guess match on the other. Yes, no, or pick another result. "Couldn't place" goes to a review list
 - [ ] Layout proposal screen: read topics → suggest lego screens → approve, rename, reorder, remove
 - [ ] Hook into Ariel's onboarding: onboarding done → layout proposal → confirmation cards → app
-- [ ] Education lego screen: grouped by topic, search, tip cards linking to the post
+- [ ] Practice loop (shared, `ios/Hindsight/Practice/`): Today's 3 picker, weekly ring, practice card, "When?" reminders, spaced reviews, notification policy
+- [ ] Learn lego screen on top of it: setup, home, topic page, tip detail, progress sheet, search
 - [ ] "Everything else" sheet: saves that fit no tab, reachable from every tab's header
 
 ## Sun 10/4: Fitness + polish
 
 - [ ] Fitness: browse by body area or problem, exercise cards (name, target area, form tips, link to the reel)
-- [ ] Reminders: pick exercises → local notification schedule → tapping the notification opens those exercises
+- [ ] Fitness on the shared practice loop ("Did it"), reusing its reminders
 - [ ] Thumbnails, if we find a way to fetch them (otherwise a styled placeholder)
 - [ ] Look-and-feel pass across all tabs
 - [ ] Unit tests: export parser, contract decoding, layout config
@@ -88,10 +90,11 @@ Each spec has its own table with details. The files where our work overlaps his:
 
 ## Cut order if we slip
 
-1. Fitness reminders (keep browse and search)
-2. Thumbnails (styled placeholders)
-3. Editing on the layout proposal screen (approve only)
-4. Map list view
+1. Fitness practice loop (keep browse and search)
+2. Learn progress sheet (L5) and notification back-off rules (keep one daily reminder)
+3. Thumbnails (styled placeholders)
+4. Editing on the layout proposal screen (approve only)
+5. Map list view
 
 ## After the MVP
 
