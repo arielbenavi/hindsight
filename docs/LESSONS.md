@@ -20,6 +20,18 @@ DATA_FETCHING_RESEARCH.md.)
 - **Private Cloud Compute:** free only under the App Store Small Business Program with < 2M downloads. Needs the managed entitlement `com.apple.developer.private-cloud-compute` (granted to Reut's account 2026-09-30). The quota is per iCloud account and opaque (only below / approaching / reached + reset date). No paid tier. (2026-09-30)
 - `.permissiveContentTransformations` guardrails only work for plain `String` output, not `@Generable`, so structured sorting always runs with default guardrails. 2–5% of benign English posts got `guardrailViolation` / `refusal`. (2026-09-30)
 
+## Meta data download (Instagram/Facebook export)
+
+- **It's the dependable Instagram/Facebook path while Muse fails** (2026-09-30). The app's guided sheet:
+  Connect → Instagram + Facebook → *Get your saves from Meta*. Meta's page is
+  `https://accountscenter.instagram.com/info_and_permissions/dyi/` (asks you to sign in first).
+- **Saves are split across two files:** in Reut's export, `saved_posts.json` has 113 posts (with saved dates) and
+  `saved_collections.json` has 252 (with collection names); together 324. **Import the whole .zip**, not one file.
+  `DataExportParser` reads a zip as-is (0.2 s) and only opens the saved files. (2026-09-30)
+- **A full download is mostly sensitive data we must never read**: synced contacts, login activity and
+  locations, ads history (33 of 35 files in Reut's). Tell users to request only **Saved** (JSON, All time).
+- `data/ig-reut-export/` is byte-identical to the saved files in the raw zip; it just leaves the rest out.
+
 ## Muse
 
 - **`muse://new?text=` isn't real.** It only appears in a feature request for an

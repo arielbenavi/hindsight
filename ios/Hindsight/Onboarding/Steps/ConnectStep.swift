@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// The first screen of the app: bring your saves in. Once the user says they're
 /// done, the setup chat takes over (docs/specs/onboarding-chat.md).
@@ -9,8 +8,7 @@ struct ConnectStep: View {
     /// Done connecting → the setup chat, on the user's saves or the sample.
     let onFinish: (OnboardingChoice) -> Void
 
-    @State private var isImporting = false
-    @State private var importMessage: String?
+    @State private var showsMetaImport = false
 
     var body: some View {
         OnboardingPage {
@@ -22,10 +20,9 @@ struct ConnectStep: View {
                 .font(OnboardingStyle.body)
                 .foregroundStyle(OnboardingStyle.muted)
 
-            museCard
+            metaCard
 
             XConnectRow(store: store)
-            importRow
             comingSoonRow(Platform.tiktok.displayName, symbol: Platform.tiktok.symbol,
                           detail: "Share any TikTok to hindsight. Coming soon.")
             comingSoonRow("WhatsApp notes", symbol: "message.fill",
@@ -42,48 +39,9 @@ struct ConnectStep: View {
         .sheet(isPresented: $model.isMuseSheetPresented) {
             MuseSyncView(store: store)
         }
-        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.zip, .json], allowsMultipleSelection: true) { result in
-            importFiles(result)
+        .sheet(isPresented: $showsMetaImport) {
+            MetaImportSheet(store: store)
         }
-    }
-
-    /// "Import a file": an Instagram / Facebook / TikTok data download (zip or json).
-    private var importRow: some View {
-        Button { isImporting = true } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "square.and.arrow.down")
-                    .font(.system(size: 15, weight: .bold))
-                    .frame(width: 36, height: 36)
-                    .background(OnboardingStyle.stroke, in: .circle)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Import a file").font(OnboardingStyle.title)
-                    Text(importMessage ?? "Your Instagram, Facebook or TikTok data download (.zip or .json).")
-                        .font(OnboardingStyle.caption)
-                        .foregroundStyle(importMessage == nil ? OnboardingStyle.muted : OnboardingStyle.accent)
-                }
-                Spacer()
-            }
-            .onboardingCard(padding: 16)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func importFiles(_ result: Result<[URL], Error>) {
-        guard case .success(let urls) = result else { return }
-        var posts: [SavedPost] = []
-        for url in urls {
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            posts += (try? DataExportParser.parse(fileAt: url)) ?? []
-        }
-        guard !posts.isEmpty else {
-            importMessage = "Couldn't find saves in that file. Try the whole .zip."
-            return
-        }
-        let added = store.merge(DataExportParser.combined(posts))
-        importMessage = "+\(added.formatted()) saves imported"
-        DebugLog.write("file import: \(urls.count) files, \(posts.count) posts, +\(added) new")
     }
 
     /// Counts only what the user brought in (not the bundled seed).
@@ -93,7 +51,9 @@ struct ConnectStep: View {
         importedCount > 0 ? "Start with \(importedCount.formatted()) saves" : "Connect at least one to start"
     }
 
-    private var museCard: some View {
+    /// Instagram + Facebook: Meta's data download is the dependable way in; Muse is
+    /// the quicker one when it works (beta).
+    private var metaCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 HStack(spacing: 10) {
@@ -110,12 +70,16 @@ struct ConnectStep: View {
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text("Instagram + Facebook").font(OnboardingStyle.title)
-                Text("Through Muse, Meta's AI. It can already see your saves. One tap, no passwords.")
+                Text("Ask Meta for a file of everything you've saved, then import it here. We'll walk you through it.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
             }
-            Button("Sync with Muse") { model.isMuseSheetPresented = true }
+            Button("Get your saves from Meta") { showsMetaImport = true }
                 .buttonStyle(.onboardingSecondary)
+            Button("Or try Muse, Meta's AI (beta)") { model.isMuseSheetPresented = true }
+                .font(OnboardingStyle.caption)
+                .foregroundStyle(OnboardingStyle.muted)
+                .frame(maxWidth: .infinity)
         }
         .onboardingCard()
     }

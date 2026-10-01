@@ -25,6 +25,10 @@ targets:
       # real saved-post data to build against.
       - path: ../data/ig-saved-posts-seed.md
         buildPhase: resources
+      # Reut's Instagram export (the saved-posts files of a Meta data download),
+      # for the "Use Reut's export (dev)" button in the Meta import sheet.
+      - path: ../data/ig-reut-export
+        buildPhase: resources
       # Data-contract fixtures, one per tester (data/fixtures/README.md).
       - path: ../data/fixtures
         buildPhase: resources
