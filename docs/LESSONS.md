@@ -87,8 +87,30 @@ DATA_FETCHING_RESEARCH.md.)
   still returned 0 (`openFavorite` stayed false; it has no collections endpoint).
   TikTok now exposes Collections, not Favorites. (2026-09-30)
 
+## WhatsApp
+
+- **No official way to read a user's existing chats.** The Cloud API Groups API needs
+  a blue-tick Official Business Account, caps groups at 8, and can't join existing
+  groups. "Link your own account by QR" services (Unipile, whatsapp-web.js) break
+  App Store 5.1.1 (no social tokens off-device) and risk the *user's* account.
+  (2026-10-01)
+- **A bot on *our own* number (Baileys) is different:** users only add a contact, and
+  their account is never involved. The risk is the bot number getting banned
+  (unofficial client), so keep the export import as the fallback. (2026-10-01)
+- **History:** since 2026, adding someone to a group can share the last 25–100
+  messages (max 14 days). That's the most the bot can backfill; older notes need
+  "Export chat". (2026-10-01)
+- "Export chat" **with media** can be 1.5 GB; **Without media** is a few MB. Say
+  "Without media" loudly in the UI. (2026-10-01)
+- Muse's WhatsApp chat has no number and isn't in WhatsApp's send-to picker. A
+  `wa.me/<number>` link only works for real numbers (e.g. our bot's). (2026-09-30)
+
 ## Process
 
+- Before building anything that touches another person's files (Reut's open PR),
+  test the merge locally in a worktree (`git worktree add … origin/<branch>`, then
+  merge ours in and build). This caught the Xcode 26.3 MapKit errors and confirmed
+  the PRs merge cleanly. (2026-10-01)
 - Screenshots of developer consoles leak secrets (X showed consumer secret,
   bearer token and OAuth 2.0 client secret on creation). Ask for only the specific
   public value (e.g. client ID) as pasted text, and regenerate anything exposed.
