@@ -126,14 +126,41 @@ mcp = MCPServer(
     title="hindsight",
     description="Sends your saved posts to your hindsight app.",
     instructions=(
-        "hindsight is the user's app for organizing their saved posts. When the user asks to "
-        "sync or send their saved posts to hindsight, read their saved posts and pass them to "
-        "submit_saved_posts in batches of up to 50, newest first, until there are no more (or "
-        "until you reach posts saved before `since`, if the user gave one). Don't print the "
-        "posts in the chat."
+        "hindsight is the user's app for organizing their saved posts. To sync: first call "
+        "get_sync_status to see what hindsight already has. Then read the user's Instagram and "
+        "Facebook saved posts newest first and pass them to submit_saved_posts in batches of up "
+        "to 50. Stop when a batch comes back with continue=false, or when you reach a post whose "
+        "url is in recent_urls (everything older is already there). On the very first sync "
+        "(total_saves is 0) send all of them. Don't print the posts in the chat."
     ),
     version="0.1",
 )
+
+
+@mcp.tool(
+    description=(
+        "What hindsight already has, so you only send what's missing. Returns total_saves, "
+        "counts per platform, newest_saved_at, last_received_at, and recent_urls: the "
+        "permalinks of the 30 most recently received saves. When syncing newest-first, stop "
+        "at the first post whose url is in recent_urls."
+    )
+)
+def get_sync_status() -> dict[str, Any]:
+    saves = list(load_saves().values())
+    recent = sorted(saves, key=lambda p: p.get("received_at", ""), reverse=True)
+    platforms: dict[str, int] = {}
+    for post in saves:
+        key = str(post.get("platform") or "unknown")
+        platforms[key] = platforms.get(key, 0) + 1
+    status = {
+        "total_saves": len(saves),
+        "platforms": platforms,
+        "newest_saved_at": max((str(p.get("saved_at")) for p in saves if p.get("saved_at")), default=None),
+        "last_received_at": recent[0].get("received_at") if recent else None,
+        "recent_urls": [p.get("url") for p in recent[:30] if p.get("url")],
+    }
+    log_call("get_sync_status", total=status["total_saves"])
+    return status
 
 
 @mcp.tool(description="Check that the hindsight connector is reachable. Returns 'pong'.")
