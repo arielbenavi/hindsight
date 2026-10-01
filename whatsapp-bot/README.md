@@ -33,6 +33,14 @@ With `BOT_PHONE`, it prints a pairing code: on the bot phone, go to WhatsApp →
 
 `state/groups.json` remembers each chat's name and owner. `state/outbox.jsonl` queues posts if the connector is down.
 
+## Getting the bot a number (Ariel, once)
+- **Use a new number only for the bot,** not an existing WhatsApp/WhatsApp Business account. If WhatsApp bans the bot, only that number is lost.
+- **Cheapest:** a **Tello** eSIM ("build your own" plan, about $5/mo; activates online in ~5 min). It only has to receive one SMS to register WhatsApp, and the bot itself runs on our server, so the line needs no data. Adding a line to Mint (Mint Family) works too, but costs ~$15/mo. Avoid Google Voice and other virtual numbers (WhatsApp often rejects them).
+- **The bot account needs a "primary" WhatsApp somewhere:** Baileys runs as a *linked device*, and WhatsApp wants the primary to come online about every 14 days. Ariel's iPhone already uses WhatsApp (Israeli number) and WhatsApp Business (US number), so put the bot account on a **spare phone** (any old iPhone/Android on Wi-Fi), or as a second account if WhatsApp offers "Add account" on that phone.
+
+## Next: send the export to the bot (planned)
+For older history, users can export **straight to the bot**, with no Files app and no hindsight app needed: notes chat → name → Export chat → Without media → share → **WhatsApp → hindsight** → Send. The bot receives the zip as a document, downloads it, parses `_chat.txt` (same rules as the app's `WhatsAppExportParser`) and ingests it. To build once the bot is live.
+
 ## Risks (why it's an experiment)
 - **Unofficial client.** Baileys speaks the WhatsApp Web protocol, which breaks WhatsApp's terms. The *bot number* can be banned; user accounts aren't at risk, since they never log in here. Keep the bot quiet (no bulk messaging) and keep export as the fallback.
 - **Consent in shared groups:** the hello message, owner-only notes, and removal is one tap.

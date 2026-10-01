@@ -47,6 +47,11 @@ DATA_FETCHING_RESEARCH.md.)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
 
+- **Muse carries chat context into new requests** (an old "after Sep 28" limit; an
+  old broken connector). Our first-time message now says to replace any existing
+  "hindsight" connector and ignore earlier hindsight messages. Fresh-user tests use
+  a new connector tenant, so the URL is new too. (2026-10-01)
+
 ## iOS / Xcode
 
 - **Fresh Xcode installs have no iOS platform.** `xcodebuild -downloadPlatform iOS`
@@ -60,6 +65,9 @@ DATA_FETCHING_RESEARCH.md.)
   (2026-09-29)
 - `Regex` isn't `Sendable`, so a regex literal can't be a `static let` under Swift 6.
   Use a computed `static var`. (2026-09-29)
+- **`Dictionary.max` on ties is random** (hash order varies per run). A test passed
+  by luck and then failed. Always break ties explicitly (WhatsApp owner = most
+  messages, then earliest). Run new tests a few times. (2026-10-01)
 - Long `Data` concatenations with `+` time out the type checker. Build them in
   steps. (2026-09-29)
 
