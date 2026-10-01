@@ -111,6 +111,14 @@ DATA_FETCHING_RESEARCH.md.)
 
 ## Signing / devices
 
+- **An App ID (developer account) is not an app record (App Store Connect).** Registering
+  `com.reutrabin.hindsight` with Private Cloud Compute made signing work, but TestFlight uploads also need
+  an app in App Store Connect using that bundle ID. Without it, `xcodebuild -exportArchive` (upload) fails
+  with "Error Downloading App Information" (`missingApp` in the distribution log). Created 2026-09-30;
+  first TestFlight build 0.1.0 (2) uploaded the same day. (2026-09-30)
+- TestFlight upload from the command line: archive (Release, `generic/platform=iOS`), then
+  `xcodebuild -exportArchive` with `method app-store-connect`, `destination upload`, `-allowProvisioningUpdates`.
+
 - **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists
   the team, but builds fail with `No Account for Team`. (2026-09-29)
 - **Reut's Apple Developer account is an Individual membership, and only Organization
