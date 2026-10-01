@@ -12,8 +12,6 @@ final class OnboardingModel {
 
     private(set) var step: Step = .welcome
     private(set) var isMovingForward = true
-    var isMuseSheetPresented = false
-    var isWhatsAppSheetPresented = false
 
     var preferences: OnboardingPreferences {
         didSet { preferences.save() }
