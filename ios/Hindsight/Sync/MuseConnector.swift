@@ -46,6 +46,8 @@ enum MuseConnector {
         """
         Please add a custom connector called "hindsight" with this MCP server URL:
         \(mcpURL.absoluteString)
+        If you already have a connector named "hindsight", remove it and use this one instead. \
+        Treat this as a new request: ignore anything earlier in this chat about hindsight.
 
         Then \(syncInstruction)
 
@@ -72,6 +74,27 @@ enum MuseConnector {
     static func isOurPrompt(_ text: String) -> Bool {
         ["List my saved posts from", "Please add a custom connector", "Please sync my saves with hindsight"]
             .contains { text.hasPrefix($0) }
+    }
+
+    // MARK: - Tenants (isolated stores; dev "fresh user" tests, later one per user)
+
+    /// Asks the server for a new, empty store and returns its base URL
+    /// (`https://<host>/<token>/t/<tenant>`).
+    static func createTenant(base: URL) async throws -> URL {
+        // Tenants hang off the server's main base, never off another tenant.
+        let root = base.path().contains("/t/")
+            ? URL(string: String(base.absoluteString.prefix(upTo: base.absoluteString.range(of: "/t/")!.lowerBound)))!
+            : base
+        var request = URLRequest(url: root.appending(path: "tenants"))
+        request.httpMethod = "POST"
+        request.timeoutInterval = 15
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let basePath = json["base_path"] as? String,
+              let url = URL(string: basePath, relativeTo: root)?.absoluteURL
+        else { throw URLError(.badServerResponse) }
+        return url
     }
 
     // MARK: - Pull

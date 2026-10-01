@@ -153,9 +153,15 @@ enum WhatsAppExportParser {
             || lower.contains("messages and calls are end-to-end encrypted")
     }
 
-    private static func mostFrequentSender(_ messages: [Message]) -> String? {
-        let counts = Dictionary(grouping: messages.compactMap(\.sender), by: { $0 }).mapValues(\.count)
-        return counts.max { $0.value < $1.value }?.key
+    /// The user = whoever wrote the most; on a tie, whoever wrote first (usually
+    /// the person who made the notes chat). Deterministic, unlike a plain max.
+    static func mostFrequentSender(_ messages: [Message]) -> String? {
+        let senders = messages.compactMap(\.sender)
+        let counts = Dictionary(grouping: senders, by: { $0 }).mapValues(\.count)
+        let firstSeen = Dictionary(senders.enumerated().map { ($1, $0) }, uniquingKeysWith: min)
+        return counts.max { a, b in
+            a.value != b.value ? a.value < b.value : firstSeen[a.key, default: 0] > firstSeen[b.key, default: 0]
+        }?.key
     }
 
     // MARK: - Dates

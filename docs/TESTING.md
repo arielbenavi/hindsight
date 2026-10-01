@@ -4,8 +4,8 @@
 
 | Part | Command | What it covers |
 |---|---|---|
-| iOS app (41 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), SavedPost contract fields + old-data loading, store merge, onboarding model, Muse prompts/links, X PKCE + bookmarks mapping, server records |
-| Connector (6 tests) | `cd connector && .venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth |
+| iOS app (42 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), SavedPost contract fields + old-data loading, store merge, onboarding model, Muse prompts/links, X PKCE + bookmarks mapping, server records |
+| Connector (7 tests) | `cd connector && .venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation |
 | WhatsApp bot (4 tests) | `cd whatsapp-bot && npm test` | message → posts rules (links, owner-only notes, chat as collection) |
 
 No test calls a real API (X, Muse, Gemini, WhatsApp).
@@ -17,13 +17,12 @@ Use the **logo** Hindsight app (Reut's app + our work, installed from the Mac) u
 ### A. Muse as a brand-new user (the important one)
 **Why "fresh":** the existing Muse chat remembers earlier instructions (e.g. "only saves after Sep 28") and the old broken trycloudflare connector. Muse mixes those into new requests, which is why the first real sync sent only 2 posts. A new user has none of that.
 
-1. **Muse:** Settings → Connectors → remove every "hindsight" connector. Then **start a new chat**, not the old thread.
-2. **Mac:** ask Claude to run `connector/reset_for_new_user.sh` and restart the server. The server then has 0 saves; the old data is archived, not deleted.
-3. **App:** 🐞 → **Restart onboarding**. In the Muse sheet's dev section, turn **off** "Muse already has the connector".
-4. Onboarding → Plug in your apps → **Sync with Muse** → **Open Muse** → paste → send → **"Always allow this site"**.
-5. Expected: Muse calls `get_sync_status` (total 0), then `submit_saved_posts` in batches of ≤50 until done, then confirms a **daily 9am routine**. Back in hindsight, it shows "+N saves arrived from Muse".
-6. Tell Claude "check the log": it reports number of batches, total received, platforms (Facebook?), caption lengths, collections.
-7. **Next day ~9am:** did the routine fire on its own? `calls.log` shows it. Needs the Mac awake + ngrok up overnight (or real hosting).
+1. **App:** 🐞 → **Restart onboarding** → Plug in your apps → **Sync with Muse** → scroll to the dev section → **Fresh Muse test (new user)**. This creates a new empty store on the server (so Muse gets a brand-new connector URL), empties the app's saves, and resets "connected".
+2. Nothing to do in Muse by hand: the message tells Muse to **replace any old "hindsight" connector** and **ignore earlier hindsight messages** in the chat. (If Muse still mixes things up, start a new Muse chat. That's worth noting as a finding.)
+3. Onboarding → Plug in your apps → **Sync with Muse** → **Open Muse** → paste → send → **"Always allow this site"**.
+4. Expected: Muse calls `get_sync_status` (total 0), then `submit_saved_posts` in batches of ≤50 until done, then confirms a **daily 9am routine**. Back in hindsight, it shows "+N saves arrived from Muse".
+5. Tell Claude "check the log": it reports number of batches, total received, platforms (Facebook?), caption lengths, collections.
+6. **Next day ~9am:** did the routine fire on its own? `calls.log` shows it. Needs the Mac awake + ngrok up overnight (or real hosting).
 
 ### B. WhatsApp: past notes (export)
 1. App → Plug in your apps → **WhatsApp notes → Import**.

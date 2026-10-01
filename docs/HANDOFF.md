@@ -11,12 +11,13 @@
 | Parsers: seed md, Muse JSON, IG (current + old)/FB/TikTok exports, WhatsApp export | ✅ tested | `ios/Hindsight/Import` |
 | Onboarding (5 screens) + shared source cards + Sources page | ✅ merged | `ios/Hindsight/Onboarding`, `Sync/SourceCards.swift`, `Sync/SourcesView.swift` |
 | **Muse → connector → app (no copy/paste)** | ✅ **verified on device 2026-09-30** | `connector/`, `Sync/MuseSyncView.swift` |
-| Muse `get_sync_status` + daily routine in the onboarding message | ✅ built, needs device test (TESTING.md A) | branch `ariel/muse-routine` |
+| Muse `get_sync_status` + daily routine in the onboarding message | ✅ merged, needs device test (TESTING.md A) | `connector/`, `Sync/MuseConnector.swift` |
+| Fresh-user Muse tests (connector tenants + dev button) | ✅ built, needs device test | branch `ariel/fresh-muse-test` |
 | X sign-in + bookmarks | ✅ verified (97 bookmarks) | `Sync/X` |
 | WhatsApp past notes (export import + animated guide) | ✅ built, needs device test (B) | `Import/WhatsAppExportParser.swift`, `Sync/WhatsAppImportView.swift` |
 | WhatsApp bot (add hindsight's number to your notes group) | 🟡 built, needs a phone number (C) | `whatsapp-bot/` |
 | Xcode Cloud (TestFlight on every push) | 🟡 script ready, **Reut sets up the workflow** | `ios/ci_scripts`, [XCODE_CLOUD.md](XCODE_CLOUD.md) |
-| Hosting (connector + bot 24/7) | 🟡 Dockerfiles/fly.toml ready, **decision pending** | [HOSTING.md](HOSTING.md) |
+| Hosting (connector + bot 24/7) | 🟡 Dockerfiles/fly.toml ready; Railway or Fly recommended (Vercel can't run the bot), **decision pending** | [HOSTING.md](HOSTING.md) |
 | TikTok | ⏸ parked: no API for US users; share extension later | DATA_FETCHING_RESEARCH.md |
 | Sorting/extraction pipeline (contract items 4–6) | ⏳ not started (Reut generated fixtures once; pipeline is ours) | data-contract.md |
 
@@ -27,7 +28,8 @@
   - set up Xcode Cloud ([XCODE_CLOUD.md](XCODE_CLOUD.md))
   - agree on the proposed contract additions (`web`/`whatsapp`, `link`/`note`)
 - **After #4 merges:** add Info.plist document types so "Export chat → hindsight" appears in WhatsApp's share menu (removes the Save to Files step).
-- **Ariel:** the WhatsApp bot number ([whatsapp-bot/README.md](../whatsapp-bot/README.md)), hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
+- **Reut:** was sent the full request list (merge #4 + MapKit fix, Sources/🐞 hooks, Xcode Cloud, contract additions, hosting) on 2026-10-01.
+- **Ariel:** the WhatsApp bot number (Tello eSIM ~$5/mo + a spare phone for the bot's WhatsApp, see whatsapp-bot/README.md) ([whatsapp-bot/README.md](../whatsapp-bot/README.md)), hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
 
 ### Running things locally
 - Connector: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.

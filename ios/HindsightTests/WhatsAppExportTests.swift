@@ -65,6 +65,16 @@ struct WhatsAppExportTests {
         #expect(!result.posts.contains { $0.caption?.contains("private") == true })
     }
 
+    @Test func ownerTieBreakIsDeterministic() {
+        let messages = [
+            WhatsAppExportParser.Message(date: nil, sender: "Ariel", text: "a"),
+            WhatsAppExportParser.Message(date: nil, sender: "Reut", text: "b"),
+            WhatsAppExportParser.Message(date: nil, sender: "Reut", text: "c"),
+            WhatsAppExportParser.Message(date: nil, sender: "Ariel", text: "d"),
+        ]
+        for _ in 0..<20 { #expect(WhatsAppExportParser.mostFrequentSender(messages) == "Ariel") }
+    }
+
     @Test func reimportingIsIdempotent() {
         let text = "[28/09/2026, 09:13:10] Ariel: call mom\n[28/09/2026, 09:14:00] Ariel: https://x.com/a/status/42"
         let first = WhatsAppExportParser.parse(text: text).posts.map(\.id)
