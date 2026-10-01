@@ -28,6 +28,7 @@ struct RootView: View {
         .tint(Theme.lime)
         // Start matching places right away: by the time the chat is done, most are.
         .task(id: app.dataset?.id) { app.places.startMatching() }
+
         .animation(.snappy(duration: 0.35), value: app.setupDone)
         .id(app.dataset?.id)
     }

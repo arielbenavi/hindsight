@@ -57,6 +57,15 @@ final class AppModel {
         let initial = useMySaves ? mine
             : (datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first)
         if let initial { select(initial) }
+        // Before any screen appears: my saves but none imported → back to Connect;
+        // imports changed mid-setup → the setup chat starts over on the new set.
+        if persist, isMySaves, !setupDone {
+            if myPosts.isEmpty {
+                UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
+            } else if mySavesAreOutdated {
+                restartMySetup()
+            }
+        }
     }
 
     /// Switch testers' data. Each dataset keeps its own layout and user state.
@@ -146,6 +155,23 @@ final class AppModel {
     }
 
     func sortProgress() -> AsyncStream<SortProgress> { sortEngine().progressStream() }
+
+    /// The sorted file no longer matches the user's imports (they added or
+    /// removed saves mid-setup): the chat should start over on the new set.
+    var mySavesAreOutdated: Bool {
+        guard isMySaves, !setupDone, let data else { return false }
+        return Set(data.posts.map(\.id)) != Set(myPosts.map(\.id))
+    }
+
+    /// Start the setup chat over on the current imports. The sort cache stays, so
+    /// posts sorted before aren't sorted again.
+    func restartMySetup() {
+        guard let mine = datasets.first(where: \.isMine) else { return }
+        for name in ["hindsight.json", "setup-chat.json", "layout.json", "flags.json"] {
+            try? FileManager.default.removeItem(at: mine.url.deletingLastPathComponent().appending(path: name))
+        }
+        select(mine)
+    }
 
     /// End of reading: write the user's contract file from what's sorted so far
     /// and load it. The rest joins later (`rewriteMySaves`).
