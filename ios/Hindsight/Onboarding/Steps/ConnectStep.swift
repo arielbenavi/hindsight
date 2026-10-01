@@ -51,8 +51,7 @@ struct ConnectStep: View {
         importedCount > 0 ? "Start with \(importedCount.formatted()) saves" : "Connect at least one to start"
     }
 
-    /// Instagram + Facebook: Meta's data download is the dependable way in; Muse is
-    /// the quicker one when it works (beta).
+    /// Instagram + Facebook: Muse first, then Meta's data download (the dependable way).
     private var metaCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -70,16 +69,15 @@ struct ConnectStep: View {
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text("Instagram + Facebook").font(OnboardingStyle.title)
-                Text("Ask Meta for a file of everything you've saved, then import it here. We'll walk you through it.")
+                Text("Through Muse, Meta's AI: it can already see your saves. Or import the file Meta can send you.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
             }
-            Button("Get your saves from Meta") { showsMetaImport = true }
+            // Muse first (Ariel's flow); the Meta data download is the dependable second way.
+            Button("Sync with Muse") { model.isMuseSheetPresented = true }
                 .buttonStyle(.onboardingSecondary)
-            Button("Or try Muse, Meta's AI (beta)") { model.isMuseSheetPresented = true }
-                .font(OnboardingStyle.caption)
-                .foregroundStyle(OnboardingStyle.muted)
-                .frame(maxWidth: .infinity)
+            Button("Import your Meta data file") { showsMetaImport = true }
+                .buttonStyle(.onboardingSecondary)
         }
         .onboardingCard()
     }

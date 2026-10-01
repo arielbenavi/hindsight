@@ -13,7 +13,7 @@ settings:
     DEVELOPMENT_TEAM: HE6MENN8S6
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    CURRENT_PROJECT_VERSION: "2"
 
 targets:
   Hindsight:
@@ -50,9 +50,16 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDisplayName: Hindsight
+        # No custom encryption (HTTPS only), so TestFlight doesn't ask per build.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: LaunchBackground
     settings:
+      configs:
+        # TestFlight / App Store builds leave out raw data only dev builds use:
+        # Reut's Instagram export (the dev import button) and the old seed (tests).
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: saved_posts.json saved_collections.json ig-saved-posts-seed.md
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reutrabin.hindsight
         TARGETED_DEVICE_FAMILY: "1"
