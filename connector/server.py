@@ -27,7 +27,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-DATA = Path(__file__).parent / "data"
+DATA = Path(os.environ.get("HINDSIGHT_CONNECTOR_DATA") or Path(__file__).parent / "data")
 DATA.mkdir(exist_ok=True)
 SAVES = DATA / "saves.json"
 CALLS = DATA / "calls.log"
