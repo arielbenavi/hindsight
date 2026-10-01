@@ -20,6 +20,30 @@ DATA_FETCHING_RESEARCH.md.)
 - The Muse paste flow works end to end on device. Asking only for saves after our
   newest date made the first real reply tiny (2 posts). That's expected, not a
   bug. (2026-09-29)
+- ✅ **First real send (2026-09-30 21:04): Muse called `submit_saved_posts`** through
+  the ngrok connector. Handshake: initialize (200), initialized (202), tools/list,
+  then tools/call, all from `Python-urllib/3.12` on Meta's side. **Muse ignores our
+  field names**: `author` = display name + `author_username`, `post_creation_time`,
+  `tagged_users`, `media_type`, and the default "Saved"/"All posts" folders as
+  collections. The server normalizes to the contract (`normalized()` in
+  connector/server.py). Never trust an LLM to follow a schema; normalize at the edge.
+- **Muse accepts a custom MCP connector from a chat message.** It asks "Allow the
+  agent to share information with <host>?" (Allow once / Always allow / Deny). So
+  Meta does allow sending saves to a third-party connector. (2026-09-30)
+- **Muse's WhatsApp chat has no number and isn't in WhatsApp's "send to…" picker**,
+  so `wa.me/?text=` can't reach it. The WhatsApp route = copy + open WhatsApp +
+  user pastes into the Muse chat. (2026-09-30)
+- MCP server: answer `GET /mcp` with 405 unless you really serve an SSE stream.
+  Holding it open made Muse's requests hang and get cancelled (cloudflared: "stream
+  canceled by remote"). Muse then blamed "Cloudflare 403" and fell back to its
+  browser tool. Log every HTTP request (method, path, UA, status) from the start.
+  (2026-09-30)
+- **Cloudflare quick tunnels (trycloudflare.com) block AI agents with 403**: a
+  GPTBot user agent gets 403 at the edge, and Muse's server-side calls never reached
+  our server. Muse's *browser* got through, which is why it kept falling back to the
+  browser. localhost.run's free domains rotate every few minutes. For an MCP
+  connector Muse can call, use a fixed-address tunnel without AI-bot blocking
+  (ngrok static domain) or real hosting. (2026-09-30)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
 

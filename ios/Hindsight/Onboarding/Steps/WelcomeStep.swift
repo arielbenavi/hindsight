@@ -26,7 +26,7 @@ struct WelcomeStep: View {
 
     private var hero: some View {
         ZStack {
-            ForEach(Array(Platform.allCases.enumerated()), id: \.element) { index, platform in
+            ForEach(Array(Platform.social.enumerated()), id: \.element) { index, platform in
                 let offset = CGFloat(index) - 1.5
                 Image(systemName: platform.symbol)
                     .font(.system(size: 36, weight: .bold))
