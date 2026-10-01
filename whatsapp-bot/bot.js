@@ -77,14 +77,19 @@ async function flushOutbox() {
 async function chatInfo(sock, chatId) {
   if (!chatId.endsWith('@g.us')) return { name: null, owner: chatId, humans: 1 };
   let info = groups[chatId];
-  if (!info?.name || info.humans == null) {
+  if (!info?.name || info.humans == null || !info.owner) {
     try {
       const meta = await sock.groupMetadata(chatId);
       const me = userOf(sock.user?.id);
       const humans = meta.participants.filter((p) => userOf(p.id) !== me && userOf(p.phoneNumber) !== me);
       info = { ...info, name: meta.subject, humans: humans.length };
-      // A group with one person besides the bot is that person's notes group.
-      if (!info.owner && humans.length === 1) info.owner = humans[0].phoneNumber || humans[0].id;
+      // Owner: whoever added the bot (set by group-participants.update), else the
+      // group's creator (the bot was added when the group was made), else the
+      // only other person in it.
+      if (!info.owner) {
+        info.owner = meta.owner || (humans.length === 1 ? humans[0].id : undefined);
+        info.ownerAlt = meta.ownerPn || (humans.length === 1 ? humans[0].phoneNumber : undefined);
+      }
       groups[chatId] = info; saveGroups();
     } catch (err) { log('groupMetadata failed', err.message); info = info || {}; }
   }
@@ -106,7 +111,7 @@ async function start() {
   const { state, saveCreds } = await useMultiFileAuthState('auth');
   const { version } = await fetchLatestBaileysVersion();
   const sock = makeWASocket({
-    version, auth: state, browser: Browsers.macOS('hindsight'),
+    version, auth: state, browser: Browsers.macOS('Chrome'),
     logger: pino({ level: 'warn' }), markOnlineOnConnect: false, syncFullHistory: false,
   });
   sock.ev.on('creds.update', saveCreds);
@@ -134,15 +139,24 @@ async function start() {
   });
 
   // Added to a group: remember who added us (the owner) and say hello once.
-  sock.ev.on('group-participants.update', async ({ id, author, participants, action }) => {
+  sock.ev.on('group-participants.update', async ({ id, author, authorPn, participants, action }) => {
     const me = userOf(sock.user?.id);
     const ids = participants.map((p) => (typeof p === 'string' ? p : p.id || p.phoneNumber));
     if (action !== 'add' || !ids.some((p) => userOf(p) === me)) return;
-    groups[id] = { ...groups[id], owner: author || groups[id]?.owner, humans: undefined };
+    groups[id] = { ...groups[id], owner: author || groups[id]?.owner, ownerAlt: authorPn || groups[id]?.ownerAlt, humans: undefined };
     saveGroups();
     const info = await chatInfo(sock, id);
     log(`added to "${info.name}" by ${author} (${info.humans} people)`);
     await hello(sock, id, info.humans);
+  });
+
+  // Added while the group was being created: no participants.update, only a new group.
+  sock.ev.on('groups.upsert', async (metas) => {
+    for (const meta of metas) {
+      const info = await chatInfo(sock, meta.id);
+      log(`new group "${info.name}" (${info.humans} people, owner ${info.owner})`);
+      await hello(sock, meta.id, info.humans);
+    }
   });
 
   // Shared history: when a member adds the bot and picks "share recent messages"
@@ -168,14 +182,16 @@ async function start() {
       const info = await chatInfo(sock, chatId);
       const sender = msg.key.participant || chatId;
       const senderAlt = msg.key.participantAlt || msg.key.participantPn;
-      const fromOwner = info.humans <= 1 || [sender, senderAlt].some((j) => j && userOf(j) === userOf(info.owner));
+      const ownerIds = [info.owner, info.ownerAlt].filter(Boolean).map(userOf);
+      const fromOwner = info.humans <= 1 || [sender, senderAlt].some((j) => j && ownerIds.includes(userOf(j)));
       const posts = toPosts({
         text, messageId: msg.key.id, timestamp: Number(msg.messageTimestamp) || Date.now() / 1000,
         fromOwner, chatName: info.name, senderName: msg.pushName || null,
       });
-      log(`${info.name ?? 'DM'}: ${posts.length} posts from ${fromOwner ? 'owner' : 'someone else'}`);
-      if (!chatId.endsWith('@g.us') && !groups[chatId]?.announced) {
-        groups[chatId] = { announced: false }; await hello(sock, chatId, 1);
+      log(`${info.name ?? 'DM'}: ${posts.length} posts from ${fromOwner ? 'owner' : 'someone else'} (${userOf(senderAlt || sender)})`);
+      if (!groups[chatId]?.announced) {
+        if (!chatId.endsWith('@g.us')) groups[chatId] = { announced: false };
+        await hello(sock, chatId, info.humans ?? 1);
       }
       await deliver(posts);
     }

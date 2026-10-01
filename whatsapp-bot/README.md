@@ -33,7 +33,7 @@ With `BOT_PHONE`, it prints a pairing code: on the bot phone, go to WhatsApp →
 
 `state/groups.json` remembers each chat's name and owner. `state/outbox.jsonl` queues posts if the connector is down.
 
-## Getting the bot a number (Ariel, once)
+## Getting the bot a number (done 2026-10-01: Tello eSIM + WhatsApp Business on a spare phone, named "hindsight" with the app icon as photo)
 - **Use a new number only for the bot,** not an existing WhatsApp/WhatsApp Business account. If WhatsApp bans the bot, only that number is lost.
 - **Cheapest:** a **Tello** eSIM ("build your own" plan, about $5/mo; activates online in ~5 min). It only has to receive one SMS to register WhatsApp, and the bot itself runs on our server, so the line needs no data. Adding a line to Mint (Mint Family) works too, but costs ~$15/mo. Avoid Google Voice and other virtual numbers (WhatsApp often rejects them).
 - **The bot account needs a "primary" WhatsApp somewhere:** Baileys runs as a *linked device*, and WhatsApp wants the primary to come online about every 14 days. Ariel's iPhone already uses WhatsApp (Israeli number) and WhatsApp Business (US number), so put the bot account on a **spare phone** (any old iPhone/Android on Wi-Fi), or as a second account if WhatsApp offers "Add account" on that phone.

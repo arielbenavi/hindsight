@@ -146,6 +146,18 @@ DATA_FETCHING_RESEARCH.md.)
 - The phone needs Developer Mode (Settings → Privacy & Security) before Xcode
   can use it. (2026-09-29)
 
+## WhatsApp bot (Baileys)
+
+- Pairing codes fail ("Couldn't link device") with a made-up browser name like
+  `Browsers.macOS('hindsight')`. Use a real one (`Browsers.macOS('Chrome')`). (2026-10-01)
+- Right after pairing, WhatsApp closes the stream with code 515 ("restart required").
+  That's normal; the bot reconnects and is linked. (2026-10-01)
+- Adding the bot while *creating* a group fires `groups.upsert`, not
+  `group-participants.update`, so "who added the bot" is unknown. Fall back to the
+  group creator (`meta.owner` / `meta.ownerPn`). Owners show up as `@lid` ids, so
+  compare against both the LID and the phone number. (2026-10-01)
+- Instagram share links carry `?stkn=` / `?igsh=`; strip the query for IG/X/TikTok. (2026-10-01)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.
