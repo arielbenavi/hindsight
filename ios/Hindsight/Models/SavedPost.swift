@@ -125,6 +125,7 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
         case xAPI = "x_api"
         case seedMD = "seed_md"
         case whatsappExport = "whatsapp_export"
+        case whatsappBot = "whatsapp_bot"
     }
 
     // MARK: - Merging

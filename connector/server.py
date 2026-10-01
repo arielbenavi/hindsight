@@ -27,7 +27,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-DATA = Path(__file__).parent / "data"
+DATA = Path(os.environ.get("HINDSIGHT_CONNECTOR_DATA") or Path(__file__).parent / "data")
 DATA.mkdir(exist_ok=True)
 SAVES = DATA / "saves.json"
 CALLS = DATA / "calls.log"
@@ -113,6 +113,8 @@ def normalized(post: dict[str, Any]) -> dict[str, Any]:
         ]
     if isinstance(post.get("collections"), list):
         out["collections"] = [c for c in post["collections"] if str(c).strip().lower() not in DEFAULT_COLLECTIONS]
+    if post.get("kind") in ("note", "link"):
+        return out
     if not post.get("kind") or post.get("kind") == "post":
         media = str(post.get("media_type") or post.get("post_type") or "").lower()
         path = str(out.get("url") or "")
@@ -126,14 +128,41 @@ mcp = MCPServer(
     title="hindsight",
     description="Sends your saved posts to your hindsight app.",
     instructions=(
-        "hindsight is the user's app for organizing their saved posts. When the user asks to "
-        "sync or send their saved posts to hindsight, read their saved posts and pass them to "
-        "submit_saved_posts in batches of up to 50, newest first, until there are no more (or "
-        "until you reach posts saved before `since`, if the user gave one). Don't print the "
-        "posts in the chat."
+        "hindsight is the user's app for organizing their saved posts. To sync: first call "
+        "get_sync_status to see what hindsight already has. Then read the user's Instagram and "
+        "Facebook saved posts newest first and pass them to submit_saved_posts in batches of up "
+        "to 50. Stop when a batch comes back with continue=false, or when you reach a post whose "
+        "url is in recent_urls (everything older is already there). On the very first sync "
+        "(total_saves is 0) send all of them. Don't print the posts in the chat."
     ),
     version="0.1",
 )
+
+
+@mcp.tool(
+    description=(
+        "What hindsight already has, so you only send what's missing. Returns total_saves, "
+        "counts per platform, newest_saved_at, last_received_at, and recent_urls: the "
+        "permalinks of the 30 most recently received saves. When syncing newest-first, stop "
+        "at the first post whose url is in recent_urls."
+    )
+)
+def get_sync_status() -> dict[str, Any]:
+    saves = list(load_saves().values())
+    recent = sorted(saves, key=lambda p: p.get("received_at", ""), reverse=True)
+    platforms: dict[str, int] = {}
+    for post in saves:
+        key = str(post.get("platform") or "unknown")
+        platforms[key] = platforms.get(key, 0) + 1
+    status = {
+        "total_saves": len(saves),
+        "platforms": platforms,
+        "newest_saved_at": max((str(p.get("saved_at")) for p in saves if p.get("saved_at")), default=None),
+        "last_received_at": recent[0].get("received_at") if recent else None,
+        "recent_urls": [p.get("url") for p in recent[:30] if p.get("url")],
+    }
+    log_call("get_sync_status", total=status["total_saves"])
+    return status
 
 
 @mcp.tool(description="Check that the hindsight connector is reachable. Returns 'pong'.")
@@ -159,19 +188,27 @@ def submit_saved_posts(
     sync_id: str | None = None,
     final_batch: bool = False,
 ) -> dict[str, Any]:
+    result = ingest(posts, source="muse")
+    log_call("submit_saved_posts", sync_id=sync_id, final_batch=final_batch, **result["log"])
+    return {**result["counts"], "continue": not final_batch}
+
+
+def ingest(posts: list[dict[str, Any]], source: str) -> dict[str, Any]:
+    """The one write path for every source (Muse, the WhatsApp bot, …): normalize to
+    the contract, dedupe by id, keep the richer record on a re-send."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     accepted = duplicates = rejected = 0
     with _lock:
         saves = load_saves()
         for post in map(normalized, posts):
+            post.setdefault("source", source)
             url = str(post.get("url") or "").strip()
-            if not url.startswith("http"):
+            if not (url.startswith("http") or url.startswith("hindsight-note:")):
                 rejected += 1
                 continue
-            pid = post_id(url, post.get("platform"))
+            pid = post.get("id") if url.startswith("hindsight-note:") and post.get("id") else post_id(url, post.get("platform"))
             if pid in saves:
                 duplicates += 1
-                # Keep the richer record (e.g. a longer caption on a re-send).
                 old = saves[pid]
                 if len(post.get("caption") or "") > len(old.get("caption") or ""):
                     saves[pid] = {**old, **post, "id": pid, "received_at": old.get("received_at", now)}
@@ -179,18 +216,25 @@ def submit_saved_posts(
             saves[pid] = {**post, "id": pid, "received_at": now}
             accepted += 1
         SAVES.write_text(json.dumps(saves, ensure_ascii=False, indent=1))
-    log_call(
-        "submit_saved_posts",
-        sync_id=sync_id,
-        received=len(posts),
-        accepted=accepted,
-        duplicates=duplicates,
-        rejected=rejected,
-        final_batch=final_batch,
-        platforms=sorted({str(p.get("platform")) for p in posts}),
-        caption_chars=sum(len(p.get("caption") or "") for p in posts),
-    )
-    return {"accepted": accepted, "duplicates": duplicates, "rejected": rejected, "continue": not final_batch}
+    return {
+        "counts": {"accepted": accepted, "duplicates": duplicates, "rejected": rejected},
+        "log": {
+            "received": len(posts), "accepted": accepted, "duplicates": duplicates, "rejected": rejected,
+            "platforms": sorted({str(p.get("platform")) for p in posts}),
+            "caption_chars": sum(len(p.get("caption") or "") for p in posts),
+        },
+    }
+
+
+@mcp.custom_route(f"/{TOKEN}/ingest", methods=["POST"])
+async def ingest_route(request: Request) -> JSONResponse:
+    """Other hindsight services (the WhatsApp bot, …) post contract-shaped posts here."""
+    body = await request.json()
+    posts = body.get("posts", []) if isinstance(body, dict) else body
+    source = (body.get("source") if isinstance(body, dict) else None) or "unknown"
+    result = ingest(posts, source=source)
+    log_call("ingest", source=source, **result["log"])
+    return JSONResponse(result["counts"])
 
 
 @mcp.custom_route(f"/{TOKEN}/saves", methods=["GET"])

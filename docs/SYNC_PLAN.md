@@ -21,6 +21,12 @@ Every item keeps its provenance (`ingest_method`, original + canonical URL, capt
 
 **Never:** cookie/session scraping, or storing social logins. Not for any platform.
 
+## Status (2026-10-01)
+- ✅ Phase 1 answered: **Meta allows it.** Muse added the connector from a chat message and sent saves via `submit_saved_posts` (needs a tunnel without AI-bot blocking: ngrok, not Cloudflare). Since then: `get_sync_status` so Muse sends only what's missing, and the daily routine requested in the same onboarding message (to verify: TESTING.md A).
+- ✅ WhatsApp past notes: export import built. 🟡 WhatsApp ongoing: bot built (`whatsapp-bot/`), needs a number. It replaces the "hindsight on WhatsApp" Cloud API idea for now. The bot gets the last ≤100 messages if the user shares history when adding it; older history still needs the export.
+- 🟡 Phase 2 (hosting): configs ready (HOSTING.md), decision pending. Required for the routine and the bot to run 24/7.
+- ⏳ Share extension: after Reut's PR #4 (Info.plist) and with Reut's signing (App Groups).
+
 ## Phases
 
 ### Phase 0: no backend needed (now)

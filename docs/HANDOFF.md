@@ -1,32 +1,38 @@
 # hindsight — Handoff
 
-## Current status (2026-09-29, branch `ariel/onboarding-data`)
+## Current status (2026-10-01)
 
-**Read [LESSONS.md](LESSONS.md) first**, then [SYNC_PLAN.md](SYNC_PLAN.md) (what we're building next and why) and [DATA_FETCHING_RESEARCH.md](DATA_FETCHING_RESEARCH.md).
+**Read [LESSONS.md](LESSONS.md) first**, then [SYNC_PLAN.md](SYNC_PLAN.md), [TESTING.md](TESTING.md) and [HOSTING.md](HOSTING.md).
 
-### Built in the iOS app (Ariel: onboarding + data)
-- **Data layer:** `SavedPost` (canonical model), `SavedPostParser` (Muse JSON + seed markdown), `SavedPostStore` (seed + imports, dedup, persisted JSON), `DataExportParser` + `ZipReader` (IG/FB/TikTok data-download exports; no UI yet).
-- **Onboarding (5 screens):** welcome → how it works → connect apps → "how do you want to see it" → done. The look is brrr.now-inspired, and all styling lives in `OnboardingStyle.swift` so it can be reskinned. Preferences (grouping, layout, topics, resurface cadence) are saved via `OnboardingPreferences.save()`/`.load()` for the dashboard to read. Topic chips show real counts from the user's saves (keyword heuristic, a placeholder for real clustering).
-- **Muse sync (IG + FB):** works on device through copy/paste (details in DATA_FETCHING_RESEARCH.md).
-- **Connect X:** works on device (OAuth 2.0 PKCE, 97 bookmarks). Client ID is in `Sync/X/XConfig.swift`.
-- **Device testing:** `ios/scripts/device.sh install|log`, plus a DEBUG event log on the phone.
-- 26 unit tests (Swift Testing), all passing. None of them call real APIs.
+### What exists and works
+| Area | Status | Where |
+|---|---|---|
+| Data model (`SavedPost` = contract v1 posts[]) | ✅ merged | `ios/Hindsight/Models` |
+| Parsers: seed md, Muse JSON, IG (current + old)/FB/TikTok exports, WhatsApp export | ✅ tested | `ios/Hindsight/Import` |
+| Onboarding (5 screens) + shared source cards + Sources page | ✅ merged | `ios/Hindsight/Onboarding`, `Sync/SourceCards.swift`, `Sync/SourcesView.swift` |
+| **Muse → connector → app (no copy/paste)** | ✅ **verified on device 2026-09-30** | `connector/`, `Sync/MuseSyncView.swift` |
+| Muse `get_sync_status` + daily routine in the onboarding message | ✅ built, needs device test (TESTING.md A) | branch `ariel/muse-routine` |
+| X sign-in + bookmarks | ✅ verified (97 bookmarks) | `Sync/X` |
+| WhatsApp past notes (export import + animated guide) | ✅ built, needs device test (B) | `Import/WhatsAppExportParser.swift`, `Sync/WhatsAppImportView.swift` |
+| WhatsApp bot (add hindsight's number to your notes group) | 🟡 built, needs a phone number (C) | `whatsapp-bot/` |
+| Xcode Cloud (TestFlight on every push) | 🟡 script ready, **Reut sets up the workflow** | `ios/ci_scripts`, [XCODE_CLOUD.md](XCODE_CLOUD.md) |
+| Hosting (connector + bot 24/7) | 🟡 Dockerfiles/fly.toml ready, **decision pending** | [HOSTING.md](HOSTING.md) |
+| TikTok | ⏸ parked: no API for US users; share extension later | DATA_FETCHING_RESEARCH.md |
+| Sorting/extraction pipeline (contract items 4–6) | ⏳ not started (Reut generated fixtures once; pipeline is ours) | data-contract.md |
 
-### Open decisions
-1. **Ingestion backend hosting:** Fly.io vs Google Cloud Run. Ariel + Reut to decide. Tradeoffs are in DATA_FETCHING_RESEARCH.md → "Ingestion backend".
-2. **Video storage:** proposal is to keep transcript/summary/on-screen text/thumbnail/embedding only, and delete video files after processing.
-3. **TikTok:** no official path for US users. Share extension + export import is the current plan. Research brief: [research/SYNC_RESEARCH_PROMPT.md](research/SYNC_RESEARCH_PROMPT.md).
-4. **Share extension** needs a new target in `project.yml` (coordinate with Reut).
+### Waiting on others
+- **Reut:**
+  - merge PR #4 with `@preconcurrency import MapKit` in `MapSheet.swift` (needed on Xcode 26.3)
+  - add 🐞 "Restart onboarding" + a profile/settings button opening `SourcesView`
+  - set up Xcode Cloud ([XCODE_CLOUD.md](XCODE_CLOUD.md))
+  - agree on the proposed contract additions (`web`/`whatsapp`, `link`/`note`)
+- **After #4 merges:** add Info.plist document types so "Export chat → hindsight" appears in WhatsApp's share menu (removes the Save to Files step).
+- **Ariel:** the WhatsApp bot number ([whatsapp-bot/README.md](../whatsapp-bot/README.md)), hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
 
-### Next up
-- Ingestion backend: port `web/backend/` adapters + Gemini into a service and run it locally on seed data first.
-- Muse: a "Get older saves" paging button, then the MCP connector on the backend (removes the paste).
-- Share extension ("Share → hindsight") for TikTok and everything else.
-- Try the remaining Muse link-lab candidates on device, looking for a prompt-prefill link.
-
-### Setup notes
-- Reut's Apple Developer account is an **Individual** membership, so it can't give Ariel signing rights (that needs an Organization account). Ariel builds locally with Personal Team overrides (see ios/README.md). Shared builds go through TestFlight (Reut uploads). Next step: Xcode Cloud (builds on push, Apple signs), which needs a `ci_scripts/ci_post_clone.sh` running `xcodegen`.
-- X console: regenerate the unused hindsight-ios secrets that were exposed in screenshots during setup.
+### Running things locally
+- Connector: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.
+- Phone builds (Personal Team, 7-day expiry): `ios/scripts/device.sh install|log` with `HINDSIGHT_TEAM=Y93Y9ZACWZ HINDSIGHT_BUNDLE_ID=…`. Launch args: `-resetOnboarding`, `-museConnectorBaseURL <https://host/token>`, `-whatsAppBotNumber <digits>`.
+- Reut's Apple account is **Individual**, so Ariel can't sign under it. TestFlight (Reut uploads) or Xcode Cloud are the shared-build paths.
 
 ---
 

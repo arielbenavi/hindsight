@@ -38,37 +38,39 @@ enum MuseConnector {
 
     // MARK: - Prompts
 
-    /// First time: add the connector, then send everything.
-    static func connectPrompt(mcpURL: URL, window: MusePrompt.Window) -> String {
+    /// First time: add the connector, send everything hindsight doesn't have,
+    /// and set up the daily routine so it keeps happening on its own.
+    /// (`window` is kept for the paste fallback; the connector asks the
+    /// server what it already has via get_sync_status instead of dates.)
+    static func connectPrompt(mcpURL: URL, window: MusePrompt.Window = .all) -> String {
         """
         Please add a custom connector called "hindsight" with this MCP server URL:
         \(mcpURL.absoluteString)
 
-        Then \(sendInstruction(window: window))
+        Then \(syncInstruction)
+
+        After that, set up a routine: every day at 9am, sync my saves with hindsight the same way \
+        (only new ones), without asking me first.
         """
     }
 
-    /// After that: Muse already knows the connector.
-    static func syncPrompt(window: MusePrompt.Window) -> String {
-        "Please \(sendInstruction(window: window))"
+    /// After that: Muse already knows the connector (and normally runs the routine itself).
+    static func syncPrompt(window: MusePrompt.Window = .all) -> String {
+        "Please \(syncInstruction)"
     }
 
-    private static func sendInstruction(window: MusePrompt.Window) -> String {
-        let scope = switch window {
-        case .all: " (all of them, however many, not just recent ones; ignore any date limits from earlier messages)"
-        case .after(let date): " saved after \(MusePrompt.day(date))"
-        case .before(let date): " saved before \(MusePrompt.day(date))"
-        }
-        return """
-        use hindsight's submit_saved_posts tool to send it my Instagram and Facebook saved posts\(scope), \
-        newest first, in batches of up to 50, with the full captions, collection names and mentions. \
-        Keep going until you've sent them all. Don't list the posts in the chat, just tell me how many you sent.
+    private static let syncInstruction = """
+        sync my saves with hindsight: call hindsight's get_sync_status to see what it already has, \
+        then send my Instagram and Facebook saved posts it doesn't have yet (all of them, \
+        however many; ignore date limits from earlier messages) with submit_saved_posts, newest \
+        first, in batches of up to 50, with the full captions, collection names and mentions. \
+        Stop at the first post whose url is in recent_urls. Don't list the posts in the chat, \
+        just tell me how many you sent.
         """
-    }
 
     /// Our own prompts, so pasting one back by mistake can be caught.
     static func isOurPrompt(_ text: String) -> Bool {
-        ["List my saved posts from", "Please add a custom connector", "Please use hindsight's"]
+        ["List my saved posts from", "Please add a custom connector", "Please sync my saves with hindsight"]
             .contains { text.hasPrefix($0) }
     }
 
