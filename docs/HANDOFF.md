@@ -6,7 +6,25 @@
 
 ### What exists and works
 | Area | Status | Where |
-|---|---|---|
+|### To decide with Reut (sync 2026-10-01)
+1. **Hosting** (blocking real users): connector + WhatsApp bot must run 24/7 with a persistent disk (the bot's WhatsApp login in `auth/`, its `state/`, and the saves). Today both run on Ariel's Mac behind ngrok, so everything stops when the Mac sleeps. Recommendation: one small Railway or Fly machine with a volume (see HOSTING.md). Needs: who owns the account/billing, a domain (e.g. `api.hindsight…`), and moving the token + bot number to env vars.
+2. **Accounts:** each install should get its own store. The server already has tenants; the app needs to create one on first launch (`POST /<token>/tenants`) instead of using the one URL from a launch argument. The WhatsApp connect code already uses the tenant, so the bot files each person's notes under their store.
+3. **App plumbing in Reut's area:** Info.plist document types ("Export chat → hindsight" in the share sheet), the share extension (TikTok/any link), TestFlight/Xcode Cloud, and where the Sources page lives in her UI.
+4. **Shared-group privacy:** OK with "links from anyone, text only from the owner" + the hello message?
+
+---|### To decide with Reut (sync 2026-10-01)
+1. **Hosting** (blocking real users): connector + WhatsApp bot must run 24/7 with a persistent disk (the bot's WhatsApp login in `auth/`, its `state/`, and the saves). Today both run on Ariel's Mac behind ngrok, so everything stops when the Mac sleeps. Recommendation: one small Railway or Fly machine with a volume (see HOSTING.md). Needs: who owns the account/billing, a domain (e.g. `api.hindsight…`), and moving the token + bot number to env vars.
+2. **Accounts:** each install should get its own store. The server already has tenants; the app needs to create one on first launch (`POST /<token>/tenants`) instead of using the one URL from a launch argument. The WhatsApp connect code already uses the tenant, so the bot files each person's notes under their store.
+3. **App plumbing in Reut's area:** Info.plist document types ("Export chat → hindsight" in the share sheet), the share extension (TikTok/any link), TestFlight/Xcode Cloud, and where the Sources page lives in her UI.
+4. **Shared-group privacy:** OK with "links from anyone, text only from the owner" + the hello message?
+
+---|### To decide with Reut (sync 2026-10-01)
+1. **Hosting** (blocking real users): connector + WhatsApp bot must run 24/7 with a persistent disk (the bot's WhatsApp login in `auth/`, its `state/`, and the saves). Today both run on Ariel's Mac behind ngrok, so everything stops when the Mac sleeps. Recommendation: one small Railway or Fly machine with a volume (see HOSTING.md). Needs: who owns the account/billing, a domain (e.g. `api.hindsight…`), and moving the token + bot number to env vars.
+2. **Accounts:** each install should get its own store. The server already has tenants; the app needs to create one on first launch (`POST /<token>/tenants`) instead of using the one URL from a launch argument. The WhatsApp connect code already uses the tenant, so the bot files each person's notes under their store.
+3. **App plumbing in Reut's area:** Info.plist document types ("Export chat → hindsight" in the share sheet), the share extension (TikTok/any link), TestFlight/Xcode Cloud, and where the Sources page lives in her UI.
+4. **Shared-group privacy:** OK with "links from anyone, text only from the owner" + the hello message?
+
+---|
 | Data model (`SavedPost` = contract v1 posts[]) | ✅ merged | `ios/Hindsight/Models` |
 | Parsers: seed md, Muse JSON, IG (current + old)/FB/TikTok exports, WhatsApp export | ✅ tested | `ios/Hindsight/Import` |
 | Onboarding (5 screens) + shared source cards + Sources page | ✅ merged | `ios/Hindsight/Onboarding`, `Sync/SourceCards.swift`, `Sync/SourcesView.swift` |
@@ -14,8 +32,9 @@
 | Muse `get_sync_status` + daily routine in the onboarding message | ✅ merged, needs device test (TESTING.md A) | `connector/`, `Sync/MuseConnector.swift` |
 | Fresh-user Muse tests (connector tenants + dev button) | ✅ built, needs device test | branch `ariel/fresh-muse-test` |
 | X sign-in + bookmarks | ✅ verified (97 bookmarks) | `Sync/X` |
-| WhatsApp past notes (export import + animated guide) | ✅ built, needs device test (B) | `Import/WhatsAppExportParser.swift`, `Sync/WhatsAppImportView.swift` |
-| WhatsApp bot (add hindsight's number to your notes group) | ✅ live on the Mac since 2026-10-01: linked to the Tello number (WhatsApp Business on a spare phone); a note + an IG reel from a test group landed in /saves. Next: hello message check, Reut's-message privacy check, "last 100" history, export → bot | `whatsapp-bot/` |
+| WhatsApp bot (add hindsight's number to your notes group) | ✅ live on the Mac since 2026-10-01 (launchd keeps it running): linked to the Tello number (WhatsApp Business on a spare phone). Verified: group hello, a note + an IG reel landed in /saves. Not yet verified: Reut's-message privacy rule, "last 100" history | `whatsapp-bot/` |
+| WhatsApp screen v2: 1) "Open the hindsight chat" (connect code links the WhatsApp number to the app's store) + "Save hindsight to contacts" 2) "chat with myself" (→ use the hindsight chat) vs "a group" (→ add hindsight) 3) old notes: export → send to hindsight in WhatsApp (bot imports it), Files import as fallback | ✅ built + simulator-checked, needs device test (TESTING.md C, F) | `Sync/WhatsAppImportView.swift`, `Sync/NewContactSheet.swift`, `whatsapp-bot/exportParser.js` |
+| Bot health log (tests the "relink every 14 days" assumption) | ✅ every 2 days via launchd → `whatsapp-bot/state/health.log`, Mac notification on problems | `whatsapp-bot/healthcheck.sh` |
 | Xcode Cloud (TestFlight on every push) | 🟡 script ready, **Reut sets up the workflow** | `ios/ci_scripts`, [XCODE_CLOUD.md](XCODE_CLOUD.md) |
 | Hosting (connector + bot 24/7) | 🟡 Dockerfiles/fly.toml ready; Railway or Fly recommended (Vercel can't run the bot), **decision pending** | [HOSTING.md](HOSTING.md) |
 | TikTok | ⏸ parked: no API for US users; share extension later | DATA_FETCHING_RESEARCH.md |
@@ -29,12 +48,19 @@
   - agree on the proposed contract additions (`web`/`whatsapp`, `link`/`note`)
 - **After #4 merges:** add Info.plist document types so "Export chat → hindsight" appears in WhatsApp's share menu (removes the Save to Files step).
 - **Reut:** was sent the full request list (merge #4 + MapKit fix, Sources/🐞 hooks, Xcode Cloud, contract additions, hosting) on 2026-10-01.
-- **Ariel:** keep the bot's spare phone online at least every ~14 days (or the bot gets logged out); hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
+- **Ariel:** after opening WhatsApp on the bot phone, run `whatsapp-bot/healthcheck.sh opened` (feeds the 14-day log); keep the bot's spare phone online at least every ~14 days (or the bot gets logged out); hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
 
 ### Running things locally
 - Connector: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.
-- Phone builds (Personal Team, 7-day expiry): `ios/scripts/device.sh install|log` with `HINDSIGHT_TEAM=Y93Y9ZACWZ HINDSIGHT_BUNDLE_ID=…`. Launch args: `-resetOnboarding`, `-museConnectorBaseURL <https://host/token>`, `-whatsAppBotNumber <digits>`.
+- Phone builds (Personal Team, 7-day expiry): `ios/scripts/device.sh install|log` with `HINDSIGHT_TEAM=Y93Y9ZACWZ HINDSIGHT_BUNDLE_ID=…`. Launch args: `-resetOnboarding`, `-museConnectorBaseURL <https://host/token>`, `-whatsAppBotNumber <digits>` (normally not needed: the app asks the server's `/whatsapp`, which reads `connector/data/whatsapp_bot`; the number stays out of this public repo).
+- WhatsApp bot: runs under launchd (`whatsapp-bot/install-launchd.sh`), log in `whatsapp-bot/state/bot.log`.
 - Reut's Apple account is **Individual**, so Ariel can't sign under it. TestFlight (Reut uploads) or Xcode Cloud are the shared-build paths.
+
+### To decide with Reut (sync 2026-10-01)
+1. **Hosting** (blocking real users): connector + WhatsApp bot must run 24/7 with a persistent disk (the bot's WhatsApp login in `auth/`, its `state/`, and the saves). Today both run on Ariel's Mac behind ngrok, so everything stops when the Mac sleeps. Recommendation: one small Railway or Fly machine with a volume (see HOSTING.md). Needs: who owns the account/billing, a domain (e.g. `api.hindsight…`), and moving the token + bot number to env vars.
+2. **Accounts:** each install should get its own store. The server already has tenants; the app needs to create one on first launch (`POST /<token>/tenants`) instead of using the one URL from a launch argument. The WhatsApp connect code already uses the tenant, so the bot files each person's notes under their store.
+3. **App plumbing in Reut's area:** Info.plist document types ("Export chat → hindsight" in the share sheet), the share extension (TikTok/any link), TestFlight/Xcode Cloud, and where the Sources page lives in her UI.
+4. **Shared-group privacy:** OK with "links from anyone, text only from the owner" + the hello message?
 
 ---
 

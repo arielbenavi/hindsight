@@ -288,6 +288,15 @@ async def create_tenant(request: Request) -> JSONResponse:
     return JSONResponse({"tenant": tenant, "base_path": f"/{TOKEN}/t/{tenant}"})
 
 
+@mcp.custom_route(f"/{TOKEN}/whatsapp", methods=["GET"])
+async def whatsapp_bot(_: Request) -> JSONResponse:
+    """The WhatsApp bot's number, so the app can open a chat with it. Kept out of
+    the (public) repo: set HINDSIGHT_WHATSAPP_BOT or write it to data/whatsapp_bot."""
+    file = DATA / "whatsapp_bot"
+    number = os.environ.get("HINDSIGHT_WHATSAPP_BOT") or (file.read_text().strip() if file.exists() else "")
+    return JSONResponse({"number": "".join(c for c in number if c.isdigit()) or None})
+
+
 @mcp.custom_route("/health", methods=["GET"])
 async def health(_: Request) -> JSONResponse:
     return JSONResponse({"ok": True})

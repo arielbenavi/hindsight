@@ -115,8 +115,23 @@ struct ServerRecordsTests {
         #expect(posts[2].platform == .web && posts[2].kind == .link)
     }
 
-    @Test func botChatLink() {
-        let url = WhatsAppBot.chatURL(number: "15551234567")
+    @Test func botConnectLink() {
+        let url = WhatsAppBot.connectURL(number: "15551234567", code: "t-1a2b3c4d")
         #expect(url.absoluteString.hasPrefix("https://wa.me/15551234567?text="))
+        let text = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first?.value
+        #expect(text?.hasSuffix("connect code: t-1a2b3c4d") == true) // the bot's CONNECT_RE matches this
+    }
+
+    @Test func connectCodeComesFromTheServerURL() {
+        #expect(WhatsAppBot.connectCode(base: URL(string: "https://h.dev/tok/t/t-1a2b3c4d")) == "t-1a2b3c4d")
+        #expect(WhatsAppBot.connectCode(base: URL(string: "https://h.dev/tok")) == "main")
+        #expect(WhatsAppBot.connectCode(base: nil) == "main")
+    }
+
+    /// Same input as whatsapp-bot/exportParser.test.js, so the bot and the app give
+    /// a note the same id (no duplicates when both import the same export).
+    @Test func noteIDsMatchTheBot() {
+        #expect(WhatsAppExportParser.noteURL(date: nil, text: "call mom").absoluteString
+                == "hindsight-note:whatsapp/0-3pkzly6frbqy8")
     }
 }

@@ -4,7 +4,7 @@ import SwiftUI
 /// that steps through a flow, highlighting the next tap. Generic chat-app
 /// look (no WhatsApp branding), built from plain SwiftUI shapes.
 struct WhatsAppGuide: View {
-    enum Flow { case addBot, export }
+    enum Flow { case addBot, export, exportToBot }
 
     let flow: Flow
     @State private var step = 0
@@ -21,11 +21,17 @@ struct WhatsAppGuide: View {
              ("Scroll down, tap “Export chat”", .info(highlight: "Export chat")),
              ("Choose “Without media”", .exportOptions),
              ("Pick hindsight", .shareSheet)]
+        case .exportToBot:
+            [("Open your old notes chat, tap its name", .chat),
+             ("Scroll down, tap “Export chat”", .info(highlight: "Export chat")),
+             ("Choose “Without media”", .exportOptions),
+             ("Share to WhatsApp", .shareSheetWhatsApp),
+             ("Send it to hindsight", .contacts)]
         }
     }
 
     enum Screen: Equatable {
-        case chat, info(highlight: String), contacts, shareHistory, exportOptions, shareSheet
+        case chat, info(highlight: String), contacts, shareHistory, exportOptions, shareSheet, shareSheetWhatsApp
     }
 
     var body: some View {
@@ -72,6 +78,7 @@ struct WhatsAppGuide: View {
                 case .shareHistory: listScreen(title: "Share recent messages?", rows: ["Don't share", "Last 25", "Last 100"], highlight: "Last 100", check: true)
                 case .exportOptions: exportOptions
                 case .shareSheet: shareSheet
+                case .shareSheetWhatsApp: shareSheetWhatsApp
                 }
                 Spacer(minLength: 0)
             }
@@ -84,7 +91,7 @@ struct WhatsAppGuide: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Circle().fill(chatGreen).frame(width: 26, height: 26)
-                    .overlay(Text("📝").font(.system(size: 12)))
+                    .overlay(Image(systemName: "note.text").font(.system(size: 12)).foregroundStyle(.white))
                 Text("Notes").font(.system(size: 13, weight: .bold))
                 Spacer()
             }
@@ -151,10 +158,29 @@ struct WhatsAppGuide: View {
         }
     }
 
-    private func appIcon(_ name: String, _ color: Color, highlighted: Bool) -> some View {
+    private var shareSheetWhatsApp: some View {
+        VStack(spacing: 10) {
+            Spacer(minLength: 40)
+            HStack(spacing: 10) {
+                appIcon("Messages", Color.green, highlighted: false)
+                appIcon("Mail", Color.blue, highlighted: false)
+                appIcon("WhatsApp", chatGreen, highlighted: true, symbol: "phone.bubble.fill")
+            }
+            .padding(10)
+            .background(Color(white: 0.13), in: .rect(cornerRadius: 14))
+        }
+    }
+
+    private func appIcon(_ name: String, _ color: Color, highlighted: Bool, symbol: String? = nil) -> some View {
         VStack(spacing: 4) {
             RoundedRectangle(cornerRadius: 9).fill(color).frame(width: 36, height: 36)
-                .overlay(highlighted ? Text("h.").font(.system(size: 13, weight: .black)).foregroundStyle(.black) : nil)
+                .overlay {
+                    if let symbol {
+                        Image(systemName: symbol).font(.system(size: 16)).foregroundStyle(.white)
+                    } else if highlighted {
+                        Text("h.").font(.system(size: 13, weight: .black)).foregroundStyle(.black)
+                    }
+                }
                 .overlay(highlighted ? RoundedRectangle(cornerRadius: 11).stroke(OnboardingStyle.accent, lineWidth: 2).padding(-3) : nil)
             Text(name).font(.system(size: 9, weight: highlighted ? .bold : .regular))
         }
@@ -169,7 +195,7 @@ struct WhatsAppGuide: View {
 #Preview {
     HStack(spacing: 20) {
         WhatsAppGuide(flow: .addBot)
-        WhatsAppGuide(flow: .export)
+        WhatsAppGuide(flow: .exportToBot)
     }
     .padding()
     .background(.black)

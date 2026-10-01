@@ -22,9 +22,11 @@ enum ServerSync {
     }
 }
 
-/// The hindsight WhatsApp bot (whatsapp-bot/): users add its number to their
-/// notes chat once. Until it has a permanent number, set it with the DEBUG
-/// field or the `-whatsAppBotNumber <digits>` launch argument.
+/// The hindsight WhatsApp bot (whatsapp-bot/): users connect once by sending it a
+/// prefilled "connect code" message, then use that chat (or groups they add it to)
+/// as their notes. The number comes from the hindsight server (`/whatsapp`), so it
+/// isn't in the public repo; `-whatsAppBotNumber <digits>` overrides it.
+@MainActor
 enum WhatsAppBot {
     static let numberKey = "whatsAppBotNumber"
 
@@ -38,11 +40,36 @@ enum WhatsAppBot {
         return digits.isEmpty ? nil : digits
     }
 
-    /// Opens a 1:1 chat with the bot, message ready, so the user saves the contact
-    /// (then adds it to their notes group, or just uses this chat for notes).
-    static func chatURL(number: String) -> URL {
+    /// Asks the server for the bot's number and remembers it. Returns the number, if any.
+    @discardableResult
+    static func refreshNumber() async -> String? {
+        guard let base = MuseConnector.baseURL else { return number }
+        struct Response: Decodable { var number: String? }
+        do {
+            let (data, response) = try await URLSession.shared.data(from: base.appending(path: "whatsapp"))
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return number }
+            if let fetched = try JSONDecoder().decode(Response.self, from: data).number, !fetched.isEmpty {
+                UserDefaults.standard.set(fetched, forKey: numberKey)
+            }
+        } catch {
+            DebugLog.write("whatsapp bot number fetch failed: \(error.localizedDescription)")
+        }
+        return number
+    }
+
+    /// Which hindsight store the bot files this user's WhatsApp under: the tenant in
+    /// the server URL (`…/<token>/t/<tenant>`), or "main" for the default store.
+    nonisolated static func connectCode(base: URL?) -> String {
+        let parts = base?.pathComponents ?? []
+        if let t = parts.firstIndex(of: "t"), t + 1 < parts.count { return parts[t + 1] }
+        return "main"
+    }
+
+    /// Opens a 1:1 chat with the bot with the connect message typed in; the user
+    /// just taps send.
+    nonisolated static func connectURL(number: String, code: String) -> URL {
         var components = URLComponents(string: "https://wa.me/\(number)")!
-        components.queryItems = [URLQueryItem(name: "text", value: "Hi hindsight 👋")]
+        components.queryItems = [URLQueryItem(name: "text", value: "Hi hindsight 👋 connect code: \(code)")]
         return components.url!
     }
 }
