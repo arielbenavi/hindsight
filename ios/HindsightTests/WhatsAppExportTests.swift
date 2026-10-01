@@ -87,3 +87,26 @@ struct WhatsAppExportTests {
         #expect(throws: WhatsAppExportParser.ImportError.self) { try WhatsAppExportParser.parse(fileAt: junk) }
     }
 }
+
+struct ServerRecordsTests {
+    @Test func keepsTheServerRecordsOwnSource() {
+        let json = """
+        [{"id": "whatsapp:ABC", "platform": "whatsapp", "kind": "note", "url": "hindsight-note:whatsapp/ABC",
+          "caption": "call mom", "collections": ["Notes"], "saved_at": "2026-10-01T18:00:00Z", "source": "whatsapp_bot"},
+         {"platform": "instagram", "url": "https://www.instagram.com/p/X1/", "source": "muse"},
+         {"platform": "web", "kind": "link", "url": "https://example.com/a", "source": "something_new"}]
+        """
+        let posts = SavedPostParser.parse(json, source: .muse).posts
+        #expect(posts.count == 3)
+        #expect(posts[0].source == .whatsappBot && posts[0].kind == .note && posts[0].platform == .whatsapp)
+        #expect(posts[0].caption == "call mom" && posts[0].collections == ["Notes"])
+        #expect(posts[1].source == .muse)
+        #expect(posts[2].source == .muse) // unknown source falls back to the caller's
+        #expect(posts[2].platform == .web && posts[2].kind == .link)
+    }
+
+    @Test func botChatLink() {
+        let url = WhatsAppBot.chatURL(number: "15551234567")
+        #expect(url.absoluteString.hasPrefix("https://wa.me/15551234567?text="))
+    }
+}
