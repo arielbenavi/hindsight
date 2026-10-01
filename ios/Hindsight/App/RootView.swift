@@ -140,6 +140,7 @@ struct DevMenu: View {
             Button("Model test", systemImage: "cpu") { showsModelTest = true }
             // Back to the Connect screen, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
+                AppModel.resetMySetup()
                 UserDefaults.standard.set("", forKey: "setupSource")
                 UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
             }

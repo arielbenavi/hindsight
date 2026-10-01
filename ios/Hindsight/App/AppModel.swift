@@ -65,6 +65,10 @@ final class AppModel {
             } else if mySavesAreOutdated {
                 restartMySetup()
             }
+        } else if persist, isMySaves, setupDone, hasNewImports {
+            // Saves imported after setup: sort them in the background; they join the
+            // existing topics (or Everything else) and the tabs reload when done.
+            startSorting()
         }
     }
 
@@ -161,6 +165,21 @@ final class AppModel {
     var mySavesAreOutdated: Bool {
         guard isMySaves, !setupDone, let data else { return false }
         return Set(data.posts.map(\.id)) != Set(myPosts.map(\.id))
+    }
+
+    /// Imports the sorted file doesn't have yet (after setup).
+    var hasNewImports: Bool {
+        guard let data else { return false }
+        return !Set(myPosts.map(\.id)).isSubset(of: Set(data.posts.map(\.id)))
+    }
+
+    /// Dev reset (beta menu → Start onboarding over): forget the "my saves" setup
+    /// so the next start runs the whole chat again. Keeps the sort cache.
+    static func resetMySetup() {
+        let directory = Dataset.mine().url.deletingLastPathComponent()
+        for name in ["hindsight.json", "setup-chat.json", "layout.json", "flags.json", "proposal-chat.json"] {
+            try? FileManager.default.removeItem(at: directory.appending(path: name))
+        }
     }
 
     /// Start the setup chat over on the current imports. The sort cache stays, so
