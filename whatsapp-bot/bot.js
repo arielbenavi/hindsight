@@ -145,8 +145,21 @@ async function start() {
     await hello(sock, id, info.humans);
   });
 
+  // Shared history: when a member adds the bot and picks "share recent messages"
+  // (up to 100 / 14 days, WhatsApp 2026), those arrive as a history sync.
+  // Unverified with Baileys; handled the same way as new messages.
+  sock.ev.on('messaging-history.set', async ({ messages }) => {
+    const groupMessages = (messages || []).filter((m) => m.key?.remoteJid?.endsWith('@g.us'));
+    if (groupMessages.length) log(`history: ${groupMessages.length} shared group messages`);
+    await handle(groupMessages);
+  });
+
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return;
+    if (type !== 'notify' && type !== 'append') return;
+    await handle(messages);
+  });
+
+  async function handle(messages) {
     for (const msg of messages) {
       const chatId = msg.key.remoteJid;
       if (!msg.message || msg.key.fromMe || !chatId || chatId === 'status@broadcast') continue;
@@ -166,7 +179,7 @@ async function start() {
       }
       await deliver(posts);
     }
-  });
+  }
 }
 
 start();

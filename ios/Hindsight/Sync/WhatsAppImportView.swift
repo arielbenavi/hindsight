@@ -26,35 +26,31 @@ struct WhatsAppImportView: View {
     var body: some View {
         NavigationStack {
             OnboardingPage {
-                Text("Your WhatsApp\nnotes.")
+                Text("WhatsApp\nnotes.")
                     .font(OnboardingStyle.display(40))
 
-                Text("Bring in the links and notes you send yourself. Do it again anytime; we only add what's new.")
+                Text("Links and notes you send yourself. Connect once for everything new; bring your past notes in once.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
-                if let number = WhatsAppBot.number {
-                    automaticCard(number: number)
-                    Text("PAST NOTES: IMPORT ONCE")
-                        .font(.system(.caption, design: .rounded, weight: .heavy))
-                        .tracking(1.4)
-                        .foregroundStyle(OnboardingStyle.muted)
-                }
+                sectionLabel("1 · NEW NOTES, AUTOMATICALLY")
+                automaticCard
 
-                VStack(spacing: 10) {
-                    step(1, "Open your notes chat", "In WhatsApp, open the chat or group you write notes in, then tap its name at the top.")
-                    step(2, "Export chat", "Scroll down → Export chat → Without media.")
-                    step(3, "Save to Files", "Pick “Save to Files”, then come back here.")
-                    step(4, "Choose the file", "We pull out every link and note.")
-                }
-
-                if lastImport > 0 {
-                    Text("Last imported \(Date(timeIntervalSince1970: lastImport), format: .relative(presentation: .named)).")
+                sectionLabel("2 · PAST NOTES, ONCE")
+                VStack(alignment: .leading, spacing: 12) {
+                    WhatsAppGuide(flow: .export)
+                        .frame(maxWidth: .infinity)
+                    Text("In WhatsApp: your notes chat → tap its name → Export chat → **Without media** → Save to Files. Then tap “Choose the export file” below.")
                         .font(OnboardingStyle.caption)
                         .foregroundStyle(OnboardingStyle.muted)
+                    if lastImport > 0 {
+                        Text("Last imported \(Date(timeIntervalSince1970: lastImport), format: .relative(presentation: .named)). Import again anytime; only new notes are added.")
+                            .font(OnboardingStyle.caption)
+                            .foregroundStyle(OnboardingStyle.muted)
+                    }
+                    statusBanner
                 }
-
-                statusBanner
+                .onboardingCard()
             } actions: {
                 if case .done = status {
                     Button("Done") { dismiss() }
@@ -112,52 +108,49 @@ struct WhatsAppImportView: View {
         }
     }
 
-    /// The bot path: add hindsight's number to your notes chat once; new
-    /// messages arrive on their own (pulled from the server).
-    private func automaticCard(number: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Automatic").font(OnboardingStyle.title)
-            Text("Add hindsight to your notes group (or just write to it directly). Everything new shows up here on its own.")
-                .font(OnboardingStyle.caption)
-                .foregroundStyle(OnboardingStyle.muted)
-            Button("Add hindsight on WhatsApp") {
-                UIApplication.shared.open(WhatsAppBot.chatURL(number: number))
-            }
-            .buttonStyle(.onboardingSecondary)
-            Text("Then in your notes group: tap its name → Add members → hindsight.")
-                .font(OnboardingStyle.caption)
-                .foregroundStyle(OnboardingStyle.muted)
-            Button("Check for new notes") {
-                Task {
-                    do {
-                        let result = try await ServerSync.pull(into: store)
-                        pullMessage = result.added > 0 ? "+\(result.added) new from WhatsApp and Muse." : "Nothing new yet."
-                    } catch {
-                        pullMessage = "Couldn't reach hindsight: \(error.localizedDescription)"
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(.caption, design: .rounded, weight: .heavy))
+            .tracking(1.4)
+            .foregroundStyle(OnboardingStyle.muted)
+    }
+
+    /// The bot path: add hindsight's WhatsApp number to your notes chat once;
+    /// new messages (and, if shared, the last 100) arrive on their own.
+    @ViewBuilder
+    private var automaticCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let number = WhatsAppBot.number {
+                WhatsAppGuide(flow: .addBot)
+                    .frame(maxWidth: .infinity)
+                Text("Add hindsight to your notes group (or just write to it directly). When WhatsApp asks, share the last 100 messages too.")
+                    .font(OnboardingStyle.caption)
+                    .foregroundStyle(OnboardingStyle.muted)
+                Button("Add hindsight on WhatsApp") {
+                    UIApplication.shared.open(WhatsAppBot.chatURL(number: number))
+                }
+                .buttonStyle(.onboardingSecondary)
+                Button("Check for new notes") {
+                    Task {
+                        do {
+                            let result = try await ServerSync.pull(into: store)
+                            pullMessage = result.added > 0 ? "+\(result.added) new from WhatsApp and Muse." : "Nothing new yet."
+                        } catch {
+                            pullMessage = "Couldn't reach hindsight: \(error.localizedDescription)"
+                        }
                     }
                 }
-            }
-            .font(OnboardingStyle.caption)
-            if let pullMessage {
-                Text(pullMessage).font(OnboardingStyle.caption).foregroundStyle(OnboardingStyle.accent)
+                .font(OnboardingStyle.caption)
+                if let pullMessage {
+                    Text(pullMessage).font(OnboardingStyle.caption).foregroundStyle(OnboardingStyle.accent)
+                }
+            } else {
+                Text("Coming soon: add hindsight to your notes group once, and new notes show up here on their own.")
+                    .font(OnboardingStyle.caption)
+                    .foregroundStyle(OnboardingStyle.muted)
             }
         }
         .onboardingCard()
-    }
-
-    private func step(_ number: Int, _ title: String, _ detail: String) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Text("\(number)")
-                .font(.system(.headline, design: .rounded, weight: .black))
-                .frame(width: 32, height: 32)
-                .background(OnboardingStyle.stroke, in: .circle)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(OnboardingStyle.title)
-                Text(detail).font(OnboardingStyle.caption).foregroundStyle(OnboardingStyle.muted)
-            }
-            Spacer(minLength: 0)
-        }
-        .onboardingCard(padding: 14)
     }
 
     private func importFile(_ url: URL) async {

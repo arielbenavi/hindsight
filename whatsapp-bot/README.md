@@ -17,7 +17,7 @@ app pulls /saves
 ## Rules
 - Links anyone shares become saves. Plain text becomes a **note only from the chat's owner**: the person who added the bot, or the only other person in the group. Other people's text isn't stored, since it's their personal data.
 - First time in a chat, the bot posts one hello message. In groups with other people, the message explains what's saved. `SILENT=1` turns this off.
-- No history: the bot only sees messages sent after it joins. Use "Export chat" for the past.
+- History: when adding the bot to a group, WhatsApp (2026) offers to **share the last 25–100 messages from the past 14 days**. Pick "Last 100", and the bot imports those too (via `messaging-history.set`; not yet verified with Baileys). Anything older needs the one-time "Export chat" import.
 
 ## Run it
 
