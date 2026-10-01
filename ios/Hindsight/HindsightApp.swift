@@ -15,7 +15,7 @@ struct HindsightApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                ContentView()
+                RootView()
             } else {
                 OnboardingFlow(store: store) { hasCompletedOnboarding = true }
             }
