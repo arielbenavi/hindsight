@@ -107,3 +107,34 @@ def test_http_routes(server):
         assert client.get("/wrongtoken/saves").status_code == 404  # the secret path is the auth
         log = (Path(os.environ["HINDSIGHT_CONNECTOR_DATA"]) / "calls.log").read_text()
         assert '"event": "submit_saved_posts"' in log and '"event": "ingest"' in log
+
+
+def test_tenants_are_isolated(server):
+    client = TestClient(server.RequestLog(server.app))
+    with client:
+        created = client.post(f"/{TOKEN}/tenants").json()
+        tenant, base = created["tenant"], created["base_path"]
+        assert base == f"/{TOKEN}/t/{tenant}"
+
+        # Muse talks to the tenant's own MCP URL.
+        body = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+            "name": "submit_saved_posts", "arguments": {"posts": [{"url": "https://www.instagram.com/p/T1/"}]}}}
+        res = client.post(f"{base}/mcp", json=body, headers=MCP_HEADERS)
+        assert res.json()["result"]["structuredContent"]["accepted"] == 1
+        status = client.post(f"{base}/mcp", headers=MCP_HEADERS, json={
+            "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+            "params": {"name": "get_sync_status", "arguments": {}}}).json()["result"]["structuredContent"]
+        assert status["total_saves"] == 1
+
+        # The tenant sees it; the default store and other tenants don't.
+        assert [p["id"] for p in client.get(f"{base}/saves").json()] == ["instagram:T1"]
+        assert client.get(f"/{TOKEN}/saves").json() == []
+        other = client.post(f"/{TOKEN}/tenants").json()["base_path"]
+        assert client.get(f"{other}/saves").json() == []
+
+        # Same for /ingest, and bad tenant ids are rejected.
+        client.post(f"{other}/ingest", json={"source": "whatsapp_bot", "posts": [{"url": "https://example.com/z", "platform": "web"}]})
+        assert len(client.get(f"{other}/saves").json()) == 1
+        assert len(client.get(f"{base}/saves").json()) == 1
+        assert client.get(f"/{TOKEN}/t/ab/saves").status_code == 404  # too short
+        assert client.get(f"/{TOKEN}/t/BAD_ID!/saves").status_code == 404

@@ -16,8 +16,8 @@ struct MuseSyncView: View {
     @State private var launchedViaWhatsApp = false
     @State private var method: Method = MuseConnector.baseURL == nil ? .paste : .connector
     @State private var pollID: UUID?
-    @AppStorage(MuseConnector.baseURLKey) private var connectorBaseURL = ""
-    @AppStorage(MuseConnector.connectedKey) private var connectorConnected = false
+    @AppStorage(MuseConnector.baseURLKey) fileprivate var connectorBaseURL = ""
+    @AppStorage(MuseConnector.connectedKey) fileprivate var connectorConnected = false
 
     enum Method: String, CaseIterable, Identifiable {
         case connector = "Automatic"
@@ -337,6 +337,21 @@ struct MuseSyncView: View {
 
 #if DEBUG
 extension MuseSyncView {
+    /// Simulates a brand-new user: a fresh, empty tenant on the server (so Muse's
+    /// connector URL is new too), no local saves, and "not connected yet".
+    func startFreshTest() async {
+        guard let current = MuseConnector.normalized(connectorBaseURL) ?? MuseConnector.baseURL else { return }
+        do {
+            let tenant = try await MuseConnector.createTenant(base: current)
+            connectorBaseURL = tenant.absoluteString
+            connectorConnected = false
+            store.removeAll()
+            DebugLog.write("fresh muse test: tenant \(tenant.lastPathComponent), local store emptied")
+        } catch {
+            DebugLog.write("fresh muse test failed: \(error)")
+        }
+    }
+
     /// Dev-only: where the connector runs (`https://<tunnel>/<token>`, see connector/README.md).
     var connectorSettings: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -351,6 +366,11 @@ extension MuseSyncView {
                 .onboardingCard(padding: 12)
             Toggle("Muse already has the connector", isOn: $connectorConnected)
                 .font(OnboardingStyle.caption)
+            Button("Fresh Muse test (new user)") { Task { await startFreshTest() } }
+                .buttonStyle(.onboardingSecondary)
+            Text("New empty store on the server + empties this app's saves. The message tells Muse to replace its old hindsight connector.")
+                .font(OnboardingStyle.caption)
+                .foregroundStyle(OnboardingStyle.muted)
         }
     }
 }

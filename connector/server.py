@@ -12,8 +12,10 @@ URL path is the only auth, good enough for an experiment, not for production.
 
 from __future__ import annotations
 
+import contextvars
 import json
 import os
+import re
 import secrets
 import threading
 from datetime import datetime, timezone
@@ -22,7 +24,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import uvicorn
-from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver import Context, MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -50,8 +52,31 @@ def log_call(event: str, **details: Any) -> None:
     print(json.dumps(line, ensure_ascii=False), flush=True)
 
 
-def load_saves() -> dict[str, dict[str, Any]]:
-    return json.loads(SAVES.read_text()) if SAVES.exists() else {}
+# ── Tenants: isolated stores, one per URL ──
+# `/<token>/t/<tenant>/{mcp,saves,ingest}` uses data/tenants/<tenant>/; the plain
+# `/<token>/…` paths use the default store in data/. Each test run (and later,
+# each user) gets its own tenant, so nothing leaks between them.
+TENANT_HEADER = "x-hindsight-tenant"
+TENANT_RE = re.compile(r"^[a-z0-9-]{3,40}$")
+CURRENT_TENANT: contextvars.ContextVar[str | None] = contextvars.ContextVar("tenant", default=None)
+
+
+def saves_path(tenant: str | None) -> Path:
+    if not tenant:
+        return SAVES
+    folder = DATA / "tenants" / tenant
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / "saves.json"
+
+
+def tenant_from(headers: Any) -> str | None:
+    value = (headers or {}).get(TENANT_HEADER) if headers is not None else None
+    return value if value and TENANT_RE.match(value) else None
+
+
+def load_saves(tenant: str | None = None) -> dict[str, dict[str, Any]]:
+    path = saves_path(tenant)
+    return json.loads(path.read_text()) if path.exists() else {}
 
 
 # Same identity rule as the app's SavedPost.id: "<platform>:<shortcode>" for known
@@ -147,8 +172,9 @@ mcp = MCPServer(
         "at the first post whose url is in recent_urls."
     )
 )
-def get_sync_status() -> dict[str, Any]:
-    saves = list(load_saves().values())
+def get_sync_status(ctx: Context | None = None) -> dict[str, Any]:
+    tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
+    saves = list(load_saves(tenant).values())
     recent = sorted(saves, key=lambda p: p.get("received_at", ""), reverse=True)
     platforms: dict[str, int] = {}
     for post in saves:
@@ -161,13 +187,13 @@ def get_sync_status() -> dict[str, Any]:
         "last_received_at": recent[0].get("received_at") if recent else None,
         "recent_urls": [p.get("url") for p in recent[:30] if p.get("url")],
     }
-    log_call("get_sync_status", total=status["total_saves"])
+    log_call("get_sync_status", tenant=tenant, total=status["total_saves"])
     return status
 
 
 @mcp.tool(description="Check that the hindsight connector is reachable. Returns 'pong'.")
-def ping() -> str:
-    log_call("ping")
+def ping(ctx: Context | None = None) -> str:
+    log_call("ping", tenant=tenant_from(ctx.headers if ctx else None))
     return "pong"
 
 
@@ -187,19 +213,21 @@ def submit_saved_posts(
     posts: list[dict[str, Any]],
     sync_id: str | None = None,
     final_batch: bool = False,
+    ctx: Context | None = None,
 ) -> dict[str, Any]:
-    result = ingest(posts, source="muse")
-    log_call("submit_saved_posts", sync_id=sync_id, final_batch=final_batch, **result["log"])
+    tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
+    result = ingest(posts, source="muse", tenant=tenant)
+    log_call("submit_saved_posts", tenant=tenant, sync_id=sync_id, final_batch=final_batch, **result["log"])
     return {**result["counts"], "continue": not final_batch}
 
 
-def ingest(posts: list[dict[str, Any]], source: str) -> dict[str, Any]:
+def ingest(posts: list[dict[str, Any]], source: str, tenant: str | None = None) -> dict[str, Any]:
     """The one write path for every source (Muse, the WhatsApp bot, …): normalize to
     the contract, dedupe by id, keep the richer record on a re-send."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     accepted = duplicates = rejected = 0
     with _lock:
-        saves = load_saves()
+        saves = load_saves(tenant)
         for post in map(normalized, posts):
             post.setdefault("source", source)
             url = str(post.get("url") or "").strip()
@@ -215,7 +243,7 @@ def ingest(posts: list[dict[str, Any]], source: str) -> dict[str, Any]:
                 continue
             saves[pid] = {**post, "id": pid, "received_at": now}
             accepted += 1
-        SAVES.write_text(json.dumps(saves, ensure_ascii=False, indent=1))
+        saves_path(tenant).write_text(json.dumps(saves, ensure_ascii=False, indent=1))
     return {
         "counts": {"accepted": accepted, "duplicates": duplicates, "rejected": rejected},
         "log": {
@@ -232,8 +260,9 @@ async def ingest_route(request: Request) -> JSONResponse:
     body = await request.json()
     posts = body.get("posts", []) if isinstance(body, dict) else body
     source = (body.get("source") if isinstance(body, dict) else None) or "unknown"
-    result = ingest(posts, source=source)
-    log_call("ingest", source=source, **result["log"])
+    tenant = tenant_from(request.headers)
+    result = ingest(posts, source=source, tenant=tenant)
+    log_call("ingest", tenant=tenant, source=source, **result["log"])
     return JSONResponse(result["counts"])
 
 
@@ -241,11 +270,22 @@ async def ingest_route(request: Request) -> JSONResponse:
 async def saves_for_app(request: Request) -> JSONResponse:
     """The app pulls what Muse sent, as a contract-shaped JSON array (newest received first)."""
     since = request.query_params.get("since")
-    posts = sorted((normalized(p) for p in load_saves().values()), key=lambda p: p.get("received_at", ""), reverse=True)
+    tenant = tenant_from(request.headers)
+    posts = sorted((normalized(p) for p in load_saves(tenant).values()), key=lambda p: p.get("received_at", ""), reverse=True)
     if since:
         posts = [p for p in posts if p.get("received_at", "") > since]
-    log_call("app_pull", returned=len(posts), since=since)
+    log_call("app_pull", tenant=tenant, returned=len(posts), since=since)
     return JSONResponse(posts)
+
+
+@mcp.custom_route(f"/{TOKEN}/tenants", methods=["POST"])
+async def create_tenant(request: Request) -> JSONResponse:
+    """New isolated store, e.g. for a 'fresh user' Muse test. Returns its base path;
+    the app turns it into https://<host>/<token>/t/<tenant>."""
+    tenant = "t-" + secrets.token_hex(4)
+    saves_path(tenant)  # creates the folder
+    log_call("tenant_created", tenant=tenant)
+    return JSONResponse({"tenant": tenant, "base_path": f"/{TOKEN}/t/{tenant}"})
 
 
 @mcp.custom_route("/health", methods=["GET"])
@@ -274,8 +314,19 @@ class RequestLog:
         if scope["type"] != "http":
             await self.inner(scope, receive, send)
             return
+        # /<token>/t/<tenant>/<rest> → /<token>/<rest>, with the tenant as a header.
+        match = re.match(rf"^/{re.escape(TOKEN)}/t/([^/]+)(/.*)$", scope["path"])
+        if match:
+            tenant, rest = match.groups()
+            if not TENANT_RE.match(tenant):
+                await send({"type": "http.response.start", "status": 404, "headers": [(b"content-length", b"0")]})
+                await send({"type": "http.response.body", "body": b""})
+                return
+            scope = {**scope, "path": f"/{TOKEN}{rest}", "raw_path": f"/{TOKEN}{rest}".encode(),
+                     "headers": [h for h in scope.get("headers", []) if h[0].decode().lower() != TENANT_HEADER]
+                                + [(TENANT_HEADER.encode(), tenant.encode())]}
         headers = {k.decode(): v.decode() for k, v in scope.get("headers", [])}
-        path = scope["path"].replace(TOKEN, "<token>")
+        path = scope["path"].replace(TOKEN, "<token>") + (f" [tenant {match.group(1)}]" if match else "")
         status: dict[str, int] = {}
 
         async def send_logged(message: dict[str, Any]) -> None:

@@ -55,6 +55,7 @@ struct MuseConnectorTests {
         #expect(connect.contains("get_sync_status"))
         #expect(connect.contains("submit_saved_posts"))
         #expect(connect.contains("every day at 9am"))
+        #expect(connect.contains("remove it and use this one"))
         #expect(MuseConnector.isOurPrompt(connect))
         let sync = MuseConnector.syncPrompt()
         #expect(!sync.contains("custom connector"))
