@@ -15,7 +15,7 @@
 | Fresh-user Muse tests (connector tenants + dev button) | ✅ built, needs device test | branch `ariel/fresh-muse-test` |
 | X sign-in + bookmarks | ✅ verified (97 bookmarks) | `Sync/X` |
 | WhatsApp past notes (export import + animated guide) | ✅ built, needs device test (B) | `Import/WhatsAppExportParser.swift`, `Sync/WhatsAppImportView.swift` |
-| WhatsApp bot (add hindsight's number to your notes group) | 🟡 built, needs a phone number (C) | `whatsapp-bot/` |
+| WhatsApp bot (add hindsight's number to your notes group) | ✅ live on the Mac since 2026-10-01: linked to the Tello number (WhatsApp Business on a spare phone); a note + an IG reel from a test group landed in /saves. Next: hello message check, Reut's-message privacy check, "last 100" history, export → bot | `whatsapp-bot/` |
 | Xcode Cloud (TestFlight on every push) | 🟡 script ready, **Reut sets up the workflow** | `ios/ci_scripts`, [XCODE_CLOUD.md](XCODE_CLOUD.md) |
 | Hosting (connector + bot 24/7) | 🟡 Dockerfiles/fly.toml ready; Railway or Fly recommended (Vercel can't run the bot), **decision pending** | [HOSTING.md](HOSTING.md) |
 | TikTok | ⏸ parked: no API for US users; share extension later | DATA_FETCHING_RESEARCH.md |
@@ -29,7 +29,7 @@
   - agree on the proposed contract additions (`web`/`whatsapp`, `link`/`note`)
 - **After #4 merges:** add Info.plist document types so "Export chat → hindsight" appears in WhatsApp's share menu (removes the Save to Files step).
 - **Reut:** was sent the full request list (merge #4 + MapKit fix, Sources/🐞 hooks, Xcode Cloud, contract additions, hosting) on 2026-10-01.
-- **Ariel:** the WhatsApp bot number (Tello eSIM ~$5/mo + a spare phone for the bot's WhatsApp, see whatsapp-bot/README.md) ([whatsapp-bot/README.md](../whatsapp-bot/README.md)), hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
+- **Ariel:** keep the bot's spare phone online at least every ~14 days (or the bot gets logged out); hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
 
 ### Running things locally
 - Connector: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.

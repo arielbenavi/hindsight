@@ -44,3 +44,10 @@ test('helpers', () => {
   assert.equal(messageText({ imageMessage: { caption: 'pic note' } }), 'pic note');
   assert.equal(messageText(null), '');
 });
+
+test('share tracking params are dropped from social links', () => {
+  assert.deepEqual(
+    linksIn('https://www.instagram.com/reel/Dd91iwytG61/?stkn=MWY5 and https://x.com/a/status/1?s=20 and https://www.facebook.com/story.php?story_fbid=9'),
+    ['https://www.instagram.com/reel/Dd91iwytG61/', 'https://x.com/a/status/1', 'https://www.facebook.com/story.php?story_fbid=9'],
+  );
+});

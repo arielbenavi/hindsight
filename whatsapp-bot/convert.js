@@ -39,7 +39,18 @@ export function kindFor(url) {
 export function linksIn(text) {
   return (text.match(/https?:\/\/[^\s<>"]+/g) || [])
     .map((u) => u.replace(/[.,;:!?)\]}'"]+$/, ''))
-    .filter((u) => { try { return Boolean(new URL(u).host); } catch { return false; } });
+    .filter((u) => { try { return Boolean(new URL(u).host); } catch { return false; } })
+    .map(withoutShareTracking);
+}
+
+/** Instagram/X/TikTok share links carry tracking params (?igsh=, ?stkn=, ?s=);
+ *  the post is the path alone. Facebook keeps its query (story.php?story_fbid=…). */
+function withoutShareTracking(url) {
+  const platform = platformFor(url);
+  if (!['instagram', 'x', 'tiktok'].includes(platform)) return url;
+  const u = new URL(url);
+  u.search = ''; u.hash = '';
+  return u.toString();
 }
 
 /** Text of a Baileys message (`extractMessageContent(msg.message)` result). */
