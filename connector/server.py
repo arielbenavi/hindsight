@@ -113,6 +113,8 @@ def normalized(post: dict[str, Any]) -> dict[str, Any]:
         ]
     if isinstance(post.get("collections"), list):
         out["collections"] = [c for c in post["collections"] if str(c).strip().lower() not in DEFAULT_COLLECTIONS]
+    if post.get("kind") in ("note", "link"):
+        return out
     if not post.get("kind") or post.get("kind") == "post":
         media = str(post.get("media_type") or post.get("post_type") or "").lower()
         path = str(out.get("url") or "")
@@ -186,19 +188,27 @@ def submit_saved_posts(
     sync_id: str | None = None,
     final_batch: bool = False,
 ) -> dict[str, Any]:
+    result = ingest(posts, source="muse")
+    log_call("submit_saved_posts", sync_id=sync_id, final_batch=final_batch, **result["log"])
+    return {**result["counts"], "continue": not final_batch}
+
+
+def ingest(posts: list[dict[str, Any]], source: str) -> dict[str, Any]:
+    """The one write path for every source (Muse, the WhatsApp bot, …): normalize to
+    the contract, dedupe by id, keep the richer record on a re-send."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     accepted = duplicates = rejected = 0
     with _lock:
         saves = load_saves()
         for post in map(normalized, posts):
+            post.setdefault("source", source)
             url = str(post.get("url") or "").strip()
-            if not url.startswith("http"):
+            if not (url.startswith("http") or url.startswith("hindsight-note:")):
                 rejected += 1
                 continue
-            pid = post_id(url, post.get("platform"))
+            pid = post.get("id") if url.startswith("hindsight-note:") and post.get("id") else post_id(url, post.get("platform"))
             if pid in saves:
                 duplicates += 1
-                # Keep the richer record (e.g. a longer caption on a re-send).
                 old = saves[pid]
                 if len(post.get("caption") or "") > len(old.get("caption") or ""):
                     saves[pid] = {**old, **post, "id": pid, "received_at": old.get("received_at", now)}
@@ -206,18 +216,25 @@ def submit_saved_posts(
             saves[pid] = {**post, "id": pid, "received_at": now}
             accepted += 1
         SAVES.write_text(json.dumps(saves, ensure_ascii=False, indent=1))
-    log_call(
-        "submit_saved_posts",
-        sync_id=sync_id,
-        received=len(posts),
-        accepted=accepted,
-        duplicates=duplicates,
-        rejected=rejected,
-        final_batch=final_batch,
-        platforms=sorted({str(p.get("platform")) for p in posts}),
-        caption_chars=sum(len(p.get("caption") or "") for p in posts),
-    )
-    return {"accepted": accepted, "duplicates": duplicates, "rejected": rejected, "continue": not final_batch}
+    return {
+        "counts": {"accepted": accepted, "duplicates": duplicates, "rejected": rejected},
+        "log": {
+            "received": len(posts), "accepted": accepted, "duplicates": duplicates, "rejected": rejected,
+            "platforms": sorted({str(p.get("platform")) for p in posts}),
+            "caption_chars": sum(len(p.get("caption") or "") for p in posts),
+        },
+    }
+
+
+@mcp.custom_route(f"/{TOKEN}/ingest", methods=["POST"])
+async def ingest_route(request: Request) -> JSONResponse:
+    """Other hindsight services (the WhatsApp bot, …) post contract-shaped posts here."""
+    body = await request.json()
+    posts = body.get("posts", []) if isinstance(body, dict) else body
+    source = (body.get("source") if isinstance(body, dict) else None) or "unknown"
+    result = ingest(posts, source=source)
+    log_call("ingest", source=source, **result["log"])
+    return JSONResponse(result["counts"])
 
 
 @mcp.custom_route(f"/{TOKEN}/saves", methods=["GET"])
