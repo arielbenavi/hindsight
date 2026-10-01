@@ -138,3 +138,11 @@ def test_tenants_are_isolated(server):
         assert len(client.get(f"{base}/saves").json()) == 1
         assert client.get(f"/{TOKEN}/t/ab/saves").status_code == 404  # too short
         assert client.get(f"/{TOKEN}/t/BAD_ID!/saves").status_code == 404
+
+
+def test_whatsapp_bot_number(server, monkeypatch):
+    client = TestClient(server.RequestLog(server.app))
+    assert client.get(f"/{TOKEN}/whatsapp").json() == {"number": None}
+    monkeypatch.setenv("HINDSIGHT_WHATSAPP_BOT", "+1 555 123-4567")
+    assert client.get(f"/{TOKEN}/whatsapp").json() == {"number": "15551234567"}
+    assert client.get(f"/{TOKEN}/t/t-abc123/whatsapp").json() == {"number": "15551234567"}  # same from a tenant URL

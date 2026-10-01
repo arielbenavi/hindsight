@@ -57,12 +57,12 @@ struct SourceCards: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("WhatsApp notes").font(OnboardingStyle.title)
                 let count = store.count(for: .whatsapp)
-                Text(count > 0 ? "\(count.formatted()) notes imported." : "Links and notes you send yourself.")
+                Text(count > 0 ? "\(count.formatted()) notes saved." : "Links and notes you send yourself.")
                     .font(OnboardingStyle.caption)
                     .foregroundStyle(OnboardingStyle.muted)
             }
             Spacer()
-            Button("Import") { isWhatsAppSheetPresented = true }
+            Button("Connect") { isWhatsAppSheetPresented = true }
                 .font(.system(.subheadline, design: .rounded, weight: .heavy))
                 .foregroundStyle(OnboardingStyle.onAccent)
                 .padding(.horizontal, 14)

@@ -4,9 +4,9 @@
 
 | Part | Command | What it covers |
 |---|---|---|
-| iOS app (42 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), SavedPost contract fields + old-data loading, store merge, onboarding model, Muse prompts/links, X PKCE + bookmarks mapping, server records |
-| Connector (7 tests) | `cd connector && .venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation |
-| WhatsApp bot (4 tests) | `cd whatsapp-bot && npm test` | message → posts rules (links, owner-only notes, chat as collection) |
+| iOS app (44 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), SavedPost contract fields + old-data loading, store merge, onboarding model, Muse prompts/links, X PKCE + bookmarks mapping, server records |
+| Connector (8 tests) | `cd connector && .venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation, bot number route |
+| WhatsApp bot (11 tests) | `cd whatsapp-bot && npm test` | message → posts rules (links, owner-only notes, chat as collection, share-tracking params), chat-export parsing (iOS/Android formats, zip, note ids identical to the app's) |
 
 No test calls a real API (X, Muse, Gemini, WhatsApp).
 
@@ -30,10 +30,19 @@ Use the **logo** Hindsight app (Reut's app + our work, installed from the Mac) u
 3. Expected: "+N new saves · X links and Y notes". **Re-import the same file:** "Nothing new since last time".
 4. Time it (the reason we're testing this path).
 
-### C. WhatsApp bot (once there's a bot number, see whatsapp-bot/README.md)
-1. Claude starts the bot; you link it with the pairing code on the bot phone.
-2. In WhatsApp: add **hindsight** to your notes group, and when asked, **share the last 100 messages**.
-3. Expected: a "✅ Connected to hindsight" message in the group. Write a note and paste a link; in the app (WhatsApp notes → **Check for new notes**) they appear within seconds. The last-100 history appears too, if Baileys receives it (unverified).
+### C. WhatsApp: connect + new notes (bot is live on the Mac)
+1. App → Plug in your apps → **WhatsApp notes → Connect** → **Open the hindsight chat** → tap send.
+   Expected: the bot replies "✅ Connected to hindsight…" (bot.log: `linked <number> → <tenant or main>`).
+2. **Save hindsight to my contacts** → the New Contact card has the name, number and logo → save.
+3. **Chat with myself:** send a note and a link in the hindsight chat. **A group:** add hindsight to a notes group (if offered, share the **Last 100** messages; tell Claude, since this is unverified).
+4. Back in the app: **Check for new notes** → they appear within seconds.
+5. Privacy: someone else in a group sends a note and a link → their link is saved, their note isn't.
+
+### F. WhatsApp: old notes → send the export to hindsight
+1. In WhatsApp: your old notes chat → its name → **Export chat** → **Without media** → in the share sheet pick **WhatsApp** → **hindsight** → send.
+   (Unverified: whether WhatsApp offers itself in that share sheet. If not, Save to Files and attach the file in the hindsight chat with **+ → Document**, or use the app's "Or choose an export saved in Files".)
+2. Expected: the bot replies "✅ Imported N links and M notes"; **Check for new notes** shows them. Sending the same file again adds nothing new.
+3. Time it.
 
 ### D. X
 App → Plug in your apps → **X → Connect** → authorize. Expected: "N bookmarks synced".

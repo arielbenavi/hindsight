@@ -156,6 +156,15 @@ DATA_FETCHING_RESEARCH.md.)
   `group-participants.update`, so "who added the bot" is unknown. Fall back to the
   group creator (`meta.owner` / `meta.ownerPn`). Owners show up as `@lid` ids, so
   compare against both the LID and the phone number. (2026-10-01)
+- WhatsApp's "message yourself" chat can't take a third member, so the bot can't
+  join it. Those users switch to a 1:1 chat with the bot as their notes chat, and
+  bring the old self-chat in via Export chat. (2026-10-01)
+- The repo is **public**: keep the bot's phone number out of it. The app fetches
+  it from the server (`/<token>/whatsapp`, from `data/whatsapp_bot` or env). (2026-10-01)
+- `CNContactViewController(forNewContact:)` needs no Contacts permission, and
+  `ImageRenderer` can draw the contact photo (the app icon isn't loadable at runtime). (2026-10-01)
+- Under launchd with `KeepAlive`, exit cleanly (0) on WhatsApp logout, or launchd
+  restarts the bot in a loop. (2026-10-01)
 - Instagram share links carry `?stkn=` / `?igsh=`; strip the query for IG/X/TikTok. (2026-10-01)
 
 ## Testing loop
