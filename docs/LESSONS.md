@@ -167,6 +167,11 @@ DATA_FETCHING_RESEARCH.md.)
   restarts the bot in a loop. (2026-10-01)
 - Instagram share links carry `?stkn=` / `?igsh=`; strip the query for IG/X/TikTok. (2026-10-01)
 
+- A reinstall on the phone can drop the app's saved server URL; with no server the
+  WhatsApp screen fell back to export-only, which looked like missing features.
+  `device.sh install` now always launches with `-museConnectorBaseURL` (from
+  `connector/data/token`), and the screen says when it can't reach the server. (2026-10-01)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.

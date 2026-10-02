@@ -16,6 +16,7 @@ struct WhatsAppImportView: View {
     @AppStorage("whatsAppLastImport") private var lastImport: Double = 0
     @AppStorage("whatsAppNotesPlace") private var notesPlace: NotesPlace = .myself
     @State private var botNumber: String? = WhatsAppBot.number
+    @State private var isLoadingNumber = WhatsAppBot.number == nil
     @State private var isSavingContact = false
     @State private var pullMessage: String?
 
@@ -43,7 +44,9 @@ struct WhatsAppImportView: View {
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
-                if let botNumber {
+                if botNumber == nil && isLoadingNumber {
+                    ProgressView().frame(maxWidth: .infinity).padding(.vertical, 40)
+                } else if let botNumber {
                     sectionLabel("1 · SAY HI TO HINDSIGHT")
                     connectCard(botNumber)
 
@@ -53,6 +56,9 @@ struct WhatsAppImportView: View {
                     sectionLabel("3 · BRING YOUR OLD NOTES")
                     pastNotesCard(sendToBot: true)
                 } else {
+                    Label("Can't reach hindsight right now, so new notes can't be connected yet. You can still bring in old notes from a file.", systemImage: "wifi.exclamationmark")
+                        .font(OnboardingStyle.caption)
+                        .foregroundStyle(.orange)
                     sectionLabel("PAST NOTES")
                     pastNotesCard(sendToBot: false)
                 }
@@ -66,9 +72,11 @@ struct WhatsAppImportView: View {
                 } else if case .done = status {
                     Button("Done") { dismiss() }
                         .buttonStyle(.onboardingPrimary)
-                } else {
-                    Button("Choose the export file") { isPicking = true }
+                } else if !isLoadingNumber {
+                    Button("Open WhatsApp") { UIApplication.shared.open(MuseLauncher.whatsAppURL) }
                         .buttonStyle(.onboardingPrimary)
+                    Button("Choose the export file") { isPicking = true }
+                        .buttonStyle(.onboardingSecondary)
                         .disabled(status == .importing)
                 }
             }
@@ -80,7 +88,10 @@ struct WhatsAppImportView: View {
         }
         .preferredColorScheme(.dark)
         .tint(OnboardingStyle.accent)
-        .task { botNumber = await WhatsAppBot.refreshNumber() }
+        .task {
+            botNumber = await WhatsAppBot.refreshNumber()
+            isLoadingNumber = false
+        }
         .sheet(isPresented: $isSavingContact) {
             if let botNumber { NewContactSheet(number: botNumber) }
         }
@@ -96,15 +107,15 @@ struct WhatsAppImportView: View {
 
     private func connectCard(_ number: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Opens a chat with hindsight on WhatsApp with a hello already typed. **Just tap send.** It replies “Connected to hindsight”.")
+            Text("Opens your chat with hindsight with a hello already typed. **Just tap send.** It replies “Connected to hindsight”.")
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.muted)
-            Button("Open the hindsight chat") {
+            Button("Open WhatsApp") {
                 let code = WhatsAppBot.connectCode(base: MuseConnector.baseURL)
                 DebugLog.write("whatsapp connect: code \(code)")
                 UIApplication.shared.open(WhatsAppBot.connectURL(number: number, code: code))
             }
-            .buttonStyle(.onboardingSecondary)
+            .buttonStyle(.onboardingPrimary)
             Button {
                 isSavingContact = true
             } label: {
