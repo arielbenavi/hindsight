@@ -15,7 +15,7 @@ app pulls /saves
 ```
 
 ## How a user connects (the app's WhatsApp screen)
-1. **Open the hindsight chat:** the app opens `wa.me/<bot>` with "Hi hindsight 👋 connect code: <tenant>" typed in; the user taps send. The bot links that phone number to the app's store (`state/links.json`) and replies with what to do next.
+1. **Open WhatsApp:** the app opens `wa.me/<bot>` with "Hi hindsight 👋 connect code: <tenant>" typed in; the user taps send. The bot links that phone number to the app's store (`state/links.json`) and replies with what to do next.
 2. **Save hindsight to contacts** (iOS New Contact card, prefilled), so it shows up in "Add members".
 3. Where they write notes:
    - **Chat with myself:** WhatsApp's self-chat can't take a third member, so the hindsight chat *becomes* their notes chat (pin it).

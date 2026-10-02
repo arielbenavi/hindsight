@@ -31,7 +31,7 @@ Use the **logo** Hindsight app (Reut's app + our work, installed from the Mac) u
 4. Time it (the reason we're testing this path).
 
 ### C. WhatsApp: connect + new notes (bot is live on the Mac)
-1. App → Plug in your apps → **WhatsApp notes → Connect** → **Open the hindsight chat** → tap send.
+1. App → Plug in your apps → **WhatsApp notes → Connect** → **Open WhatsApp** → tap send.
    Expected: the bot replies "✅ Connected to hindsight…" (bot.log: `linked <number> → <tenant or main>`).
 2. **Save hindsight to my contacts** → the New Contact card has the name, number and logo → save.
 3. **Chat with myself:** send a note and a link in the hindsight chat. **A group:** add hindsight to a notes group (if offered, share the **Last 100** messages; tell Claude, since this is unverified).
