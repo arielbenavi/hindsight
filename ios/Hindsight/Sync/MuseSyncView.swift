@@ -72,6 +72,12 @@ struct MuseSyncView: View {
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
+                if case .ready = phase {
+                    MuseGuide(flow: method == .connector ? .connector : .paste)
+                        .frame(maxWidth: .infinity)
+                        .id(method)
+                }
+
                 VStack(spacing: 10) {
                     switch method {
                     case .connector:
