@@ -31,7 +31,7 @@ struct WhatsAppImportView: View {
     /// take a third member, so those users switch to their hindsight chat instead.
     enum NotesPlace: String, CaseIterable {
         case myself, group
-        var label: String { self == .myself ? "Chat with myself" : "A group" }
+        var label: String { self == .myself ? "Chat with myself" : "A group with myself" }
     }
 
     var body: some View {
@@ -122,7 +122,7 @@ struct WhatsAppImportView: View {
                 Label("Save hindsight to my contacts", systemImage: "person.crop.circle.badge.plus")
             }
             .font(OnboardingStyle.caption)
-            Text("So it shows up when you add it to a group.")
+            Text("So it shows up when you add it to your group.")
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.muted)
         }
@@ -143,8 +143,8 @@ struct WhatsAppImportView: View {
             case .group:
                 WhatsAppGuide(flow: .addBot)
                     .frame(maxWidth: .infinity)
-                tip("person.badge.plus", "In your notes group: tap its name → **Add members** → **hindsight**. If WhatsApp offers to share recent messages, pick **Last 100**.")
-                tip("lock", "Links anyone shares are saved. Plain text only from you; other people's messages aren't stored.")
+                tip("person.badge.plus", "In your group with yourself: tap its name → **Add members** → **hindsight**. If WhatsApp offers to share recent messages, pick **Last 100**.")
+                tip("lock", "Other people in the group? Only links they share are saved, never their messages.")
             }
         }
         .onboardingCard()
