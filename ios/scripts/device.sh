@@ -31,7 +31,7 @@ case "${1:-install}" in
     xcodebuild build -project Hindsight.xcodeproj -scheme Hindsight -destination "id=$UDID" \
       -allowProvisioningUpdates -derivedDataPath "$DERIVED" -quiet "${OVERRIDES[@]}"
     xcrun devicectl device install app --device "$DEVICE" "$DERIVED/Build/Products/Debug-iphoneos/Hindsight.app" >/dev/null
-    xcrun devicectl device process launch --device "$DEVICE" --terminate-existing "$BUNDLE_ID" "${LAUNCH_ARGS[@]}" >/dev/null
+    xcrun devicectl device process launch --device "$DEVICE" --terminate-existing -- "$BUNDLE_ID" "${LAUNCH_ARGS[@]}" >/dev/null
     echo "Installed and launched $BUNDLE_ID$( (( ${#LAUNCH_ARGS} )) && echo " (with the connector URL)")"
     ;;
   log)
