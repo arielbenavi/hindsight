@@ -17,9 +17,10 @@ OVERRIDES=()
 [[ -n "${HINDSIGHT_TEAM:-}" ]] && OVERRIDES+=(DEVELOPMENT_TEAM=$HINDSIGHT_TEAM)
 [[ -n "${HINDSIGHT_BUNDLE_ID:-}" ]] && OVERRIDES+=(PRODUCT_BUNDLE_IDENTIFIER=$HINDSIGHT_BUNDLE_ID)
 DERIVED=${TMPDIR:-/tmp}/hindsight-device-build
-TOKEN_FILE=../connector/data/token
+# The token lives in the main checkout (connector/data is gitignored), also when run from a worktree.
+TOKEN_FILE="$(cd "$(git rev-parse --git-common-dir)/.." && pwd)/connector/data/token"
 CONNECTOR_URL=${HINDSIGHT_CONNECTOR_URL:-}
-[[ -z "$CONNECTOR_URL" && -f $TOKEN_FILE ]] && CONNECTOR_URL="https://supermom-depose-retail.ngrok-free.dev/$(cat $TOKEN_FILE)"
+[[ -z "$CONNECTOR_URL" && -f "$TOKEN_FILE" ]] && CONNECTOR_URL="https://supermom-depose-retail.ngrok-free.dev/$(cat "$TOKEN_FILE")"
 LAUNCH_ARGS=()
 [[ -n "$CONNECTOR_URL" && "$CONNECTOR_URL" != none ]] && LAUNCH_ARGS+=(-museConnectorBaseURL "$CONNECTOR_URL")
 
@@ -31,7 +32,7 @@ case "${1:-install}" in
       -allowProvisioningUpdates -derivedDataPath "$DERIVED" -quiet "${OVERRIDES[@]}"
     xcrun devicectl device install app --device "$DEVICE" "$DERIVED/Build/Products/Debug-iphoneos/Hindsight.app" >/dev/null
     xcrun devicectl device process launch --device "$DEVICE" --terminate-existing "$BUNDLE_ID" "${LAUNCH_ARGS[@]}" >/dev/null
-    echo "Installed and launched $BUNDLE_ID${LAUNCH_ARGS:+ (with the connector URL)}"
+    echo "Installed and launched $BUNDLE_ID$( (( ${#LAUNCH_ARGS} )) && echo " (with the connector URL)")"
     ;;
   log)
     xcrun devicectl device copy from --device "$DEVICE" --domain-type appDataContainer \
