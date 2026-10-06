@@ -1,0 +1,4698 @@
+[
+ {
+  "post_id": "instagram:DdUAb1TkXSA",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DdUI1WhJNAt",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:Da5sy2JvVqx",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Pookie Bakery",
+    "handle": "pookiebakerynyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "3lb cookie tin",
+    "evidence": "📍 @pookiebakerynyc",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Db8dkhFz4G-",
+  "lego_screen": "none",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars"
+ },
+ {
+  "post_id": "instagram:DdKKtQ9n5Vp",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Librae Bakery",
+    "handle": "libraebakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "espresso chocolate cookie",
+    "evidence": "@libraebakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Kokē",
+    "handle": "koke.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "black sesame mochi cookie",
+    "evidence": "@koke.nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Somedays Bakery",
+    "handle": "somedaysbakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "triple chocolate chunk cookie",
+    "evidence": "@somedaysbakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Little Maven",
+    "handle": "littlemavenrestaurant",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": "miso chocolate chip cookie",
+    "evidence": "@littlemavenrestaurant",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Red Gate Bakery",
+    "handle": "redgatebakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "choco toffee cookie",
+    "evidence": "@redgatebakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Levain Bakery",
+    "handle": "levainbakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "raspberry pistachio cookie",
+    "evidence": "@levainbakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Culture Espresso",
+    "handle": "cultureespresso",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "chocolate chip cookie",
+    "evidence": "@cultureespresso",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Last Crumb",
+    "handle": "lastcrumb",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "the Madonna peanut butter cookie",
+    "evidence": "@lastcrumb",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Pura Vida",
+    "handle": "puravidamiami",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "tahini chocolate cookie",
+    "evidence": "@puravidamiami",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Bakeri",
+    "handle": "bakeribrooklyn",
+    "area_hint": "Brooklyn, New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "chocolate tahini sesame cookie",
+    "evidence": "@bakeribrooklyn",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Tall Poppy",
+    "handle": "tallpoppynyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "brown butter chocolate chip cookie",
+    "evidence": "@tallpoppynyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "The Hungry Gnome",
+    "handle": "thehungrygnome",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "sea salt chocolate chip cookie",
+    "evidence": "@thehungrygnome",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Funny Face Bakery",
+    "handle": "funnyfacebakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "deluxe chocolate chip cookie",
+    "evidence": "@funnyfacebakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Db88_EzIPj4",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DbA-5sZxjHw",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Driftaway Coffee",
+    "handle": "driftawaycoffee",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@driftawaycoffee",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Rule 257",
+    "handle": "rule257.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@rule257.nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Maru Coffee",
+    "handle": "marucoffee",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@marucoffee",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Moon Coffee Lab",
+    "handle": "mooncoffeelab",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@mooncoffeelab",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "King",
+    "handle": "king.newyork",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@king.newyork",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Street Blends",
+    "handle": "streetblends.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@streetblends.nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Taikii Cafe",
+    "handle": "taikii__cafe_les",
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@taikii__cafe_les",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DZgLsqtp_OA",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Elbow Bread",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "bakery",
+    "reason": null,
+    "evidence": "Elbow bread",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Dimes Market",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "DIMES MARKET",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Dimes Deli",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "DIMES DELI",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Zaidi's",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Zaidi's",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Little Canal",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "Little canal",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kiki's",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Kiki’s",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mixed Ingredients",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Mixed ingredients",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   },
+   {
+    "name": "Coming Soon",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Coming soon",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   },
+   {
+    "name": "Beverly 1975",
+    "handle": null,
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Beverly 1975",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DZyA4LnvQVt",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "HI:EN",
+    "handle": null,
+    "area_hint": "Chinatown, New York",
+    "address": "121 Mott St",
+    "type": "cafe",
+    "reason": "strong and sweet iced coffee",
+    "evidence": "📍HI:EN from Vietnam",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DYauvN8u5TH",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "George Bang Bang Cafe",
+    "handle": "gbbcafe",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "secret-door work hideout",
+    "evidence": "📍George Bang Bang Cafe, behind Okdongsik NYC (@gbbcafe)",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DX2E2afztU9",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Happy Medium",
+    "handle": null,
+    "area_hint": "Greenpoint, Brooklyn",
+    "address": "224 Franklin St.",
+    "type": "cafe",
+    "reason": "garden art cafe & figure drawing",
+    "evidence": "📍224 Franklin St. in Greenpoint",
+    "evidence_kind": "address",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DXHscLPFwMN",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Pantry",
+    "handle": "pantrypantrypantry",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@pantrypantrypantry",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Apartment Rael",
+    "handle": "apartmentrael.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@apartmentrael.nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Smiley",
+    "handle": "smiley",
+    "area_hint": "Lower East Side, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@smiley",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Fast Times Coffee",
+    "handle": "fasttimescoffee",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@fasttimescoffee",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Caffe Paradiso",
+    "handle": "caffeparadiso.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@caffeparadiso.nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Chyelle",
+    "handle": "chyelle",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@chyelle",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Silence Please",
+    "handle": "silenceplease",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@silenceplease",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "12 Matcha",
+    "handle": "12.matcha",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@12.matcha",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Rhythm Zero",
+    "handle": "rhythmzeronyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@rhythmzeronyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "BuddyBuddy",
+    "handle": "buddybuddy",
+    "area_hint": "Noho, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@buddybuddy",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Cafe Ambrosia",
+    "handle": "cafeambrosianewyork",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@cafeambrosianewyork",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Manjul Coffee",
+    "handle": "manjulcoffee",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@manjulcoffee",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DXMlht1joeB",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Le Dive",
+    "handle": "ledivenyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@ledivenyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Cervo's",
+    "handle": "cervosnyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@cervosnyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Bar Pisellino",
+    "handle": "barpisellino",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@barpisellino",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Fanelli's",
+    "handle": "fanellis",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@fanellis",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Soso's",
+    "handle": "sososnyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@sososnyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Reception Bar",
+    "handle": "receptionbar.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@receptionbar.nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Dante",
+    "handle": "dantenewyorkcity",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@dantenewyorkcity",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Bar Oliver",
+    "handle": "barolivernyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@barolivernyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Casetta",
+    "handle": "casetta.ny",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@casetta.ny",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Kiki's",
+    "handle": "kikis__nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@kikis__nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "St. Jardim",
+    "handle": "stjardimnyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@stjardimnyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Time Again",
+    "handle": "timeagainbar",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@timeagainbar",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Elvis",
+    "handle": "elvisgreatjones",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@elvisgreatjones",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DXKvIhVDvX0",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DWd94oSjhUG",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Tuck Shop",
+    "handle": "tuckshop_nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🥪 @tuckshop_nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Café Sabarsky",
+    "handle": "cafesabarsky",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🍰 @cafesabarsky",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Greenburg Cafe",
+    "handle": "greenburgcafe",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🍫 @greenburgcafe",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Birley Bakery",
+    "handle": "birleybakery",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": null,
+    "evidence": "🥐 @birleybakery",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Cafe Lyria",
+    "handle": "cafelyria",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "☕️ @cafelyria",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Café Le Gaz",
+    "handle": "cafelegaz",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🍵 @cafelegaz",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Loaf on Paper",
+    "handle": "loafonpaperny",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "📚 @loafonpaperny",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Remi",
+    "handle": "remi.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "💐 @remi.nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Cafe Habibti",
+    "handle": "cafehabibti",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🫖 @cafehabibti",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "BuddyBuddy",
+    "handle": "buddybuddy",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "🥜 @buddybuddy",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DWEgNO3DhZA",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Canyon Coffee",
+    "handle": null,
+    "area_hint": "Prospect Heights, Brooklyn",
+    "address": "601 Vanderbilt Ave",
+    "type": "cafe",
+    "reason": "Canyon’s first café outside LA",
+    "evidence": "Introducing Canyon Brooklyn",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DQF8n3KjUCW",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Sullaluna",
+    "handle": null,
+    "area_hint": "West Village, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "outdoor coffee and amazing pasta",
+    "evidence": "📍 Sullaluna, West Village",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DVltjQzE0Kz",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Public Records",
+    "handle": "publicrecordsnyc",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "@publicrecordsnyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Still Life",
+    "handle": "stilllifebrooklyn",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@stilllifebrooklyn",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Horseman Antiques",
+    "handle": "horseman.antiques",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@horseman.antiques",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Foyer Vintage",
+    "handle": "foyervintage",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@foyervintage",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Porta",
+    "handle": "porta_nyc",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@porta_nyc",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Humble House",
+    "handle": "humblehousebrooklyn",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@humblehousebrooklyn",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Michele Varian",
+    "handle": "michelevarian",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@michelevarian",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Rice & Miso",
+    "handle": "riceandmisoeveryday",
+    "area_hint": "Gowanus / Boerum Hill, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@riceandmisoeveryday",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DUlcGosDmPT",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes & jokes"
+ },
+ {
+  "post_id": "instagram:DVEQjwRkXd7",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DUeuO5yDoKr",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DU5lS1ADQDw",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "C&B",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "the breakfast sandwiches",
+    "evidence": "C&B",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DToOV0pDpDo",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DUVtcVxktRb",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DUJZH7CEfwc",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Birdie's",
+    "handle": "birdiesnyc",
+    "area_hint": "West Village, New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "peanut butter + coffee froyo twist",
+    "evidence": "@birdiesnyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DUE5HXDjZeD",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DR-FjvLDV_t",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": []
+ },
+ {
+  "post_id": "instagram:C8xdimkOVoh",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Jefferson Market Library",
+    "handle": "jefferson_market_library",
+    "area_hint": "West Village, New York",
+    "address": "425 Avenue of the Americas",
+    "type": "other",
+    "reason": "historic library to work from",
+    "evidence": "Jefferson Market Library (@jefferson_market_library)",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DTViOPojDqx",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "ENLY",
+    "handle": "enly_nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@enly_nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Rhythm Zero",
+    "handle": "rhythmzeronyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@rhythmzeronyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Fellini Coffee",
+    "handle": "fellinicoffee",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "@fellinicoffee",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DQ9VCx9kZVy",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Park at Kim's",
+    "handle": "parkatkims",
+    "area_hint": "Chinatown, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "new Chinatown spot",
+    "evidence": "@parkatkims",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DQW0tCXgrLe",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Fast Times",
+    "handle": null,
+    "area_hint": "SoHo, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "בית קפה בתוך חנות Buck Mason",
+    "evidence": "FAST TIME",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "La Cabra",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "בית קפה דני, מאפים קלאסיים",
+    "evidence": "LA CABRA",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "PPL",
+    "handle": null,
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "cafe",
+    "reason": "קולד ברו מצטיין",
+    "evidence": "PPL",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   },
+   {
+    "name": "Edith's Sandwich Counter",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": "ברד קולדו עם טחינה",
+    "evidence": "Edith’s Sandwich Counter",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Maru Coffee",
+    "handle": null,
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "cafe",
+    "reason": "קפה ספיישלטי",
+    "evidence": "maru coffe",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Manjul",
+    "handle": null,
+    "area_hint": "SoHo, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "קפה חמצמץ ומאפים",
+    "evidence": "MANJUL",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "% Arabica",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "הקפה שהכי מזכיר את הארץ",
+    "evidence": "% Arabica",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Partners Coffee",
+    "handle": null,
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "cafe",
+    "reason": "בית קפה של מקומיים",
+    "evidence": "Partners Coffee",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Rhythm Zero",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "בראון שוגר לאטה",
+    "evidence": "Rhythm Zero",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "The Grey Dog",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "בית קפה של מקומיים",
+    "evidence": "The Grey Dog",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "WatchHouse",
+    "handle": null,
+    "area_hint": "5th Ave, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "קפה מעולה ומאפים",
+    "evidence": "WatchHouse 5th Ave.",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Coffee Project New York",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "Coffee Project New York",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Seven Grams Caffe",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "עוגיות שוקולד צ׳יפס",
+    "evidence": "Seven Grams Caffe",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Hungry Ghost Coffee",
+    "handle": null,
+    "area_hint": "West Village, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "Hungry ghost coffe",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Blue Dove Coffee",
+    "handle": null,
+    "area_hint": "Canal St, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "blue dove coffee",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DLk2JpJxYVp",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DMqnEYhh4Y9",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Fast Times",
+    "handle": null,
+    "area_hint": "SoHo, New York",
+    "address": "486 Broadway, New York, NY 10013",
+    "type": "cafe",
+    "reason": "the espresso tonic",
+    "evidence": "📍 Fast Times (inside Buck Mason SoHo): 486 Broadway, New York, NY 10013",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DNWY17HOYkl",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Round K",
+    "handle": "roundk_for_everyone",
+    "area_hint": "New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "corn coffee",
+    "evidence": "@roundk_for_everyone",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Kopitiam",
+    "handle": "kopitiamnyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": "kaya toast",
+    "evidence": "@kopitiamnyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Colbo",
+    "handle": "colbo.nyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "other",
+    "reason": "hoodies",
+    "evidence": "@colbo.nyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Okonomi / Yuji Ramen",
+    "handle": "okonomi_yujiramen",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": "ramen",
+    "evidence": "@okonomi_yujiramen",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Spencer's Spa",
+    "handle": "spencers.spa",
+    "area_hint": "New York",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "@spencers.spa",
+    "evidence_kind": "mention",
+    "confidence": "low"
+   },
+   {
+    "name": "Evelina",
+    "handle": "evelinarestaurant",
+    "area_hint": "New York",
+    "address": null,
+    "type": "food",
+    "reason": "dinner",
+    "evidence": "@evelinarestaurant",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Lisbonata",
+    "handle": "lisbonatanyc",
+    "area_hint": "New York",
+    "address": null,
+    "type": "bakery",
+    "reason": "egg tarts",
+    "evidence": "@lisbonatanyc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DG1hq6Hv4ta",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": [
+   {
+    "name": "Cafe Ambrosia",
+    "handle": null,
+    "area_hint": "Chelsea, New York",
+    "address": "465 W 23rd St, New York, NY 10011",
+    "type": "cafe",
+    "reason": "WFH cafe, $7 tiramisu latte",
+    "evidence": "📍Cafe Ambrosia New York, 465 W 23rd St, New York, NY 10011",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DE2jMFbtyiu",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DM_ZtKAhItg",
+  "lego_screen": "map",
+  "topic_hint": "nyc-food",
+  "topic_label": "NYC food, desserts & bars",
+  "places": [
+   {
+    "name": "Abuqir",
+    "handle": "abuqir",
+    "area_hint": "Astoria, Queens",
+    "address": "24-19 Steinway St, Astoria, Queens",
+    "type": "food",
+    "reason": "affordable Egyptian seafood",
+    "evidence": "📍Abuqir, 24-19 Steinway St, Astoria, Queens",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Dd2Jy7ypSFP",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Los Burritos Juarez",
+    "handle": null,
+    "area_hint": "Brooklyn, New York",
+    "address": "354 Myrtle Ave, Brooklyn",
+    "type": "food",
+    "reason": "fresh burritos, handmade tortillas",
+    "evidence": "📍Los Burritos Juarez - 354 Myrtle Ave, Brooklyn",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DdZEOI9EcD_",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DcJwdyZhWQE",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Hyunah Coffee Club",
+    "handle": "hyunahcoffeeclub",
+    "area_hint": "Brooklyn, New York",
+    "address": null,
+    "type": "cafe",
+    "reason": "probar gear de café sin comprarlo",
+    "evidence": "@hyunahcoffeeclub",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DbT5jf4oBg6",
+  "lego_screen": "none",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots"
+ },
+ {
+  "post_id": "instagram:DZA5DbzEaMz",
+  "lego_screen": "none",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots"
+ },
+ {
+  "post_id": "instagram:Ddr6He2AkFk",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DdEl8hnDCdF",
+  "lego_screen": "map",
+  "topic_hint": "nyc-cafes",
+  "topic_label": "NYC cafés & work spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DdB2u_OpZfS",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Sey Coffee",
+    "handle": null,
+    "area_hint": "Bushwick, Brooklyn",
+    "address": null,
+    "type": "cafe",
+    "reason": null,
+    "evidence": "📍sey coffee, bushwick nyc",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Dc9lgV-J1zl",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Le Crocodile",
+    "handle": "lecrocodilebk",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": "80 Wythe Ave, Brooklyn",
+    "type": "food",
+    "reason": "brunch",
+    "evidence": "Le Crocodile (@lecrocodilebk )",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Dc04wanIB-5",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Chyelle",
+    "handle": null,
+    "area_hint": "Brooklyn, New York",
+    "address": "199 Cook St 103, Brooklyn",
+    "type": "cafe",
+    "reason": "cafe + vintage furniture shop, laptop friendly",
+    "evidence": "📍Chyelle",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:Db6CTMKxkfO",
+  "lego_screen": "none",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots"
+ },
+ {
+  "post_id": "instagram:DaSqCi-xL2H",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DXhiNMbjn8Z",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DWmxL_8CajE",
+  "lego_screen": "none",
+  "topic_hint": "travel-spots",
+  "topic_label": "Travel spots"
+ },
+ {
+  "post_id": "instagram:DV6SfRUjUg7",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Misi",
+    "handle": "misinewyork",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @misinewyork",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "L'Industrie Pizzeria",
+    "handle": "lindustriebk",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @lindustriebk",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Baby Blues",
+    "handle": "babybluesny",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @babybluesny",
+    "evidence_kind": "pin_emoji",
+    "confidence": "low"
+   },
+   {
+    "name": "I Cavallini",
+    "handle": "icavallinibk",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @icavallinibk",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Birria-Landia",
+    "handle": "birria_landia",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @birria_landia",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Apollo Bagels",
+    "handle": "apollobagels",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @apollobagels",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Ceremonia Bakeshop",
+    "handle": "ceremoniabakeshop",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "bakery",
+    "reason": null,
+    "evidence": "📍 @ceremoniabakeshop",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Fish Cheeks",
+    "handle": "fishcheeksnyc",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @fishcheeksnyc",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Fedoroff's Roast Pork",
+    "handle": "fedoroffsroastpork",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "📍 @fedoroffsroastpork",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "The Four Horsemen",
+    "handle": "fourhorsemenbk",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@fourhorsemenbk",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "St. Anselm",
+    "handle": "stanselmbk",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@stanselmbk",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Bonnie's",
+    "handle": "bonniesbrooklyn",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@bonniesbrooklyn",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Leo",
+    "handle": "leosourdough",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@leosourdough",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Ace's Pizza",
+    "handle": "acespizzaspot",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "@acespizzaspot",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DVGZejGlfQ4",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DRulp47DHZp",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Urban Jungle",
+    "handle": null,
+    "area_hint": "Brooklyn, New York",
+    "address": null,
+    "type": "other",
+    "reason": "וינטג׳ במחירים מטורפים",
+    "evidence": "urban jungle",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Other People's Clothes",
+    "handle": null,
+    "area_hint": "Brooklyn, New York",
+    "address": null,
+    "type": "other",
+    "reason": "חנות וינטג׳",
+    "evidence": "Other People’s Clothes",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DRhkuvEDsrI",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Radio Bakery",
+    "handle": null,
+    "area_hint": "Greenpoint, Brooklyn",
+    "address": null,
+    "type": "bakery",
+    "reason": null,
+    "evidence": "Radio Bakery",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DKSEEHnx1nY",
+  "lego_screen": "map",
+  "topic_hint": "brooklyn-spots",
+  "topic_label": "Brooklyn spots",
+  "places": [
+   {
+    "name": "Fandi Mata",
+    "handle": "fandimatabklyn",
+    "area_hint": "Williamsburg, Brooklyn",
+    "address": null,
+    "type": "food",
+    "reason": "interiors, cocktails, mezcaleria",
+    "evidence": "🍸 @fandimatabklyn",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DaitnkRP5k3",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DaazOIZqP6r",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Prassa Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "white sand, shallow turquoise water",
+    "evidence": "Prassa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Bonatsa Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "close to the port",
+    "evidence": "Bonatsa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Goupa-Kara",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "quiet cove for snorkeling",
+    "evidence": "Goupa-Kara",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Ellinika Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sunken ancient city ruins",
+    "evidence": "Ellinika",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Chorio",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "hilltop village with castle views",
+    "evidence": "Chorio the main hilltop village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Panagia Odigitria",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "traditional church architecture",
+    "evidence": "Panagia Odigitria church",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Postali",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fresh fish by the port",
+    "evidence": "Postali",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kalamitsi",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "seafood with a sea view",
+    "evidence": "Kalamitsi",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kali Kardia",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "traditional dishes, locals’ pick",
+    "evidence": "Kali Kardia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DY5RaklIL7n",
+  "lego_screen": "learn",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "tip": {
+   "title": "Milos summer panigiri festivals",
+   "gist": "Each Milos village holds a panigiri on its saint’s feast day, June–September: live music, souvlaki, dancing.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZA7qW9O5Sk",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Rema Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "favorite beach on the island",
+    "evidence": "Rema Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Prassa Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Prassa Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Aliki Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Aliki Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Bonatsa Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Bonatsa Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kalamitsi Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Kalamitsi Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mavrospilia Beach",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Mavrospilia Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Parisitl",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Parisitl",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   },
+   {
+    "name": "To Kyma",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "To Kyma",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Stavento",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Stavento",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Meltemi",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Meltemi",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Agora Cocktail Bar & Restaurant",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": null,
+    "evidence": "Agora Cocktail Bar & Restaurant",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sardis",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": null,
+    "evidence": "Sardis",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Chorio",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Chorio",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Psathi Harbour",
+    "handle": null,
+    "area_hint": "Kimolos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Psathi Harbour",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DYVhjbDztdO",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DY2SIqHsEvQ",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Astakas",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fresh fish, sunset dinner",
+    "evidence": "Astakas",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "swordfish souvlaki & grilled octopus",
+    "evidence": "Medusa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Avli",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "slow-baked goat with Graviera",
+    "evidence": "Avli",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Empourios",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "braised rooster, rabbit or goat",
+    "evidence": "Empourios",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Archontoula",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "kritamokeftedes",
+    "evidence": "Archontoula",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Ergina",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "skordolazana garlic pasta",
+    "evidence": "Ergina",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "O! Hamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "“married” chickpeas & cheese pies",
+    "evidence": "O! Hamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sirocco",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "seafood cooked with volcanic heat",
+    "evidence": "Sirocco",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Iliovasilema",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "classic Greek taverna",
+    "evidence": "Iliovasilema",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Alevromilos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "Greek food with Italian influence",
+    "evidence": "Alevromilos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Barriello",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fine dining",
+    "evidence": "Barriello",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DVZCfeaCAAw",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Methismeni Politia",
+    "handle": null,
+    "area_hint": "Tripiti, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "slow-cooked lamb and pitarakia",
+    "evidence": "Methismeni Politia (Tripiti Village)",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Ergina",
+    "handle": null,
+    "area_hint": "Tripiti, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "handmade garlic pasta, sunset views",
+    "evidence": "Ergina (Tripiti Village)",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Empourios Taverna",
+    "handle": null,
+    "area_hint": "Empourios, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "goat in the wood oven, on the water",
+    "evidence": "Empourios Taverna (Empourios Fishing Village)",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DVeXn9wiDkR",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DW6UqLBjJCx",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Sarakiniko Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "white volcanic rock, sunrise, cliff jumps",
+    "evidence": "Sarakiniko Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko Caves",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "old pirate hideout caves",
+    "evidence": "Kleftiko Caves",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firiplaka Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "golden sand, red clay cliffs",
+    "evidence": "Firiplaka Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "climb down a ladder",
+    "evidence": "Tsigrado Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "whitewashed alleys at sunset",
+    "evidence": "Wander Plaka at Sunset",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "boathouses carved into rock",
+    "evidence": "Mandrakia Village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Mandrakia, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "cliffside dinner at sunset",
+    "evidence": "Dinner at Medusa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Gyros of Milos",
+    "handle": null,
+    "area_hint": "Adamantas, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "cheap perfect gyros",
+    "evidence": "Gyros of Milos in Adamantas",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Archontoula",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "the fried appetizer balls",
+    "evidence": "Dinner at Archontoula",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "pastel fishermen’s houses",
+    "evidence": "Klima Village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Papafragas Caves",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "hidden sea gorge swimming spot",
+    "evidence": "Papafragas Caves",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Pollonia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fresh-off-the-boat seafood",
+    "evidence": "Pollonia for Seafood",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Trypiti",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "quieter sunset than Plaka",
+    "evidence": "Sunset from Trypiti",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DY6s-41PCWz",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Firopotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "turquoise cove, boathouses",
+    "evidence": "Firopotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sunset from the church or castle",
+    "evidence": "head up to Plaka for sunset",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Verina Bar",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "Verina Bar",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Avli",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "the prawn dolmades",
+    "evidence": "dinner at Avli",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "boat day",
+    "evidence": "book a Kleftiko tour",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "O! Hamos!",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "lamb wrapped in baking paper",
+    "evidence": "O! Hamos!",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach hopping",
+    "evidence": "start at Tsigrado",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firiplaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach hopping",
+    "evidence": "Firiplaka",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Mandrakia, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "sun-dried grilled octopus",
+    "evidence": "lunch at Medusa in Mandrakia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "wandering through Klima",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Astakas",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "sunset dinner",
+    "evidence": "Astakas by the water",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Utopia Cafe",
+    "handle": null,
+    "area_hint": "Plaka, Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "sunset drinks",
+    "evidence": "Utopia Cafe",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sarakiniko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "early swim on white volcanic rock",
+    "evidence": "set an alarm for Sarakiniko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DYm3qEsC-uN",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Hydra",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": "no cars, stone streets, swimming spots",
+    "evidence": "Hydra felt calm",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Spetses",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach coves, bikes, great food",
+    "evidence": "Spetses had this quiet old-money energy",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DQkOjDTDA9X",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DKr5yuvsGmv",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "The Cove Beach House",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to stay",
+    "evidence": "The Cove Beach House",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Hilltop Suites",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to stay",
+    "evidence": "Hilltop Suites",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Skinopi Lodge",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to stay",
+    "evidence": "Skinopi Lodge",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "White Pebbles Suites",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to stay",
+    "evidence": "White Pebbles Suites",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "where to eat",
+    "evidence": "Medusa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "O! Hamos!",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "where to eat",
+    "evidence": "O! Hamos!",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Domes White Coast",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "cocktails",
+    "evidence": "Cocktails at Domes White Coast",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Fyriplaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to swim",
+    "evidence": "Fyriplaka",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to swim",
+    "evidence": "Tsigrado",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sarakiniko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to swim",
+    "evidence": "Sarakiniko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firopotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "where to swim",
+    "evidence": "Firopotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sunset",
+    "evidence": "Plaka at sunset",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kostantakis Cave Winery",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Kostantakis Cave Winery",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Polco Sailing",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sailing trip",
+    "evidence": "Polco Sailing",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DKhIpZCpghy",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DK4xE_VIvyr",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C_dl-ibNNeP",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "one of the best on the island",
+    "evidence": "only one restaurant there called Medusa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C_knatItqay",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Utopia Cafe",
+    "handle": null,
+    "area_hint": "Plaka, Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "sunset terrace, opens 6pm",
+    "evidence": "📍Utopia Cafe, Milos",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C7j8V_DNc41",
+  "lego_screen": "none",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel"
+ },
+ {
+  "post_id": "instagram:DI4cmqgMEXQ",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Panagia Sikiniotisa Church (Castle of Plaka)",
+    "handle": null,
+    "area_hint": "Plaka, Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "best easy sunset spot",
+    "evidence": "Panagia Sikiniotisa Church",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Archontoula",
+    "handle": null,
+    "area_hint": "Plaka, Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "dinner after sunset",
+    "evidence": "archodoulas traditional restaurant",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DJUiIeMOKUm",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Sarakiniko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "moon-like landscape",
+    "evidence": "Explore the moon-like landscape at Sarakiniko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fisherman village",
+    "evidence": "Klima, Mandrakia & Firopotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fisherman village",
+    "evidence": "Mandrakia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firopotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fishing village beach",
+    "evidence": "Firopotamos: fishing village background",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sunset from the castle",
+    "evidence": "Watch the sunset from the castle or church in Plaka",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "by boat",
+    "evidence": "Boat around the island to see Kleftiko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Polco Sailing",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fun group boat trip",
+    "evidence": "Polco Sailing",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kostantakis Winery",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "wine in a cave",
+    "evidence": "Kostantakis Winery",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firiplaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "kayak rentals, sun beds",
+    "evidence": "Firiplaka: kayak rentals",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kalamos Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "boat-only beach",
+    "evidence": "Kalamos: accessible by boat only",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Paleochori",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "colorful cliffs",
+    "evidence": "Paleochori: colorful cliffs",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "ladder access, coves",
+    "evidence": "Tsigrado: access by ladder",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Achinos by the Sea",
+    "handle": "achinosbythesea",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "“Sirma” fishing village home",
+    "evidence": "@achinosbythesea",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Domes White Coast",
+    "handle": "domeswhitecoast",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "a honeymoon hotel",
+    "evidence": "@domeswhitecoast",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Psaravolada Resort",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "isolated w/ a dramatic view",
+    "evidence": "Psaravolada Resort",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Salt Milos",
+    "handle": "saltmilosisland",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "affordable resort-like stay",
+    "evidence": "@SaltMilosIsland",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "White Pebbles Suites",
+    "handle": "whitepebblesuites",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "great choice in town",
+    "evidence": "@whitepebblesuites",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Artopeemata ... kai alla!",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bakery",
+    "reason": "best pastries in Milos",
+    "evidence": "Artopeemata ... kai alla!",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Cactus Café",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "beautiful setting",
+    "evidence": "Cactus Café",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Katrami Coffee Shop",
+    "handle": "katrami_coffeeshop",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "best coffee",
+    "evidence": "@katrami_coffeeshop",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Kivotos ton Gefseon",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "Greek yogurt w/ honey",
+    "evidence": "Kivotos ton Gefseon",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kyra",
+    "handle": "kyra.milos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "charming all day cafe",
+    "evidence": "@kyra.milos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Ψητοπωλείο οι Μυλωνάδες",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "souvlaki gyros",
+    "evidence": "Ψητοπωλείο οι Μυλωνάδες",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Astana Café",
+    "handle": null,
+    "area_hint": "Klima, Milos, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "sea view in Klima",
+    "evidence": "Astana Café",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kokkino Podilato",
+    "handle": "kokkinopodilatomilos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "pizza, crepes & spritzes",
+    "evidence": "@kokkinopodilatomilos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": "medusamilos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "sun-dried octopus",
+    "evidence": "@medusamilos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Mezze",
+    "handle": "mezzemilos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "outstanding local food",
+    "evidence": "@Mezzemilos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "O! Hamos",
+    "handle": "milosohamos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "loved by locals",
+    "evidence": "@milosohamos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Akrotiri Restaurant",
+    "handle": "akrotiri_restaurant.milos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "on the beach",
+    "evidence": "@akrotiri_restaurant.milos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Bakalikon Galanis",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "tapas hole-in-the-wall",
+    "evidence": "Bakalikon Galanis",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Enalion",
+    "handle": "enalion_milos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fresh fish",
+    "evidence": "@enalion_milos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Glaronisia Restaurant",
+    "handle": "glaronisia__restaurant",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "live music",
+    "evidence": "@glaronisia__restaurant",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Methismeni Politia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "traditional tavern",
+    "evidence": "Methismeni Politia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Psaravolada Restaurant",
+    "handle": "psaravolada_restaurant",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "breathtaking view",
+    "evidence": "@psaravolada_restaurant",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Yialos",
+    "handle": "yialos.milos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "upscale seaside spot",
+    "evidence": "@Yialos.milos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Oryhio",
+    "handle": "oryhio.the.mine",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "@Oryhio.the.mine",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Utopia Cafe",
+    "handle": "utopiacaffemilos",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "@utopiacaffemilos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Verina Cocktail & Food Bar",
+    "handle": "verina_cocktail_food_bar",
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "@verina_cocktail_food_bar",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DLVIOlNMhFX",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fishing village with a famous taverna",
+    "evidence": "Mandrakia , Klima , Fyropotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "traditional fishing village",
+    "evidence": "Klima",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Fyropotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "traditional fishing village",
+    "evidence": "Fyropotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DLFCF4bIwz8",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Fusilli & Mandilli",
+    "handle": null,
+    "area_hint": "Aliki, Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "handmade gnocchi and tiramisu",
+    "evidence": "Fusilli & Mandilli in Aliki",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C_KZVzJoQIH",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Taverna Platanos",
+    "handle": null,
+    "area_hint": "Naxos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "authentic Greek food, try the meat dishes",
+    "evidence": "the Platanos taverna",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C7D23uCot6l",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Panermos Beach",
+    "handle": null,
+    "area_hint": "Naxos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "Beautiful beach southeast of Naxos",
+    "evidence": "Una finestra su Panermos📍",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DH33hwPs79o",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "traditional panigiri feast",
+    "evidence": "The traditional Feast at Mandrakia village!",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DDr_IThuWJT",
+  "lego_screen": "none",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel"
+ },
+ {
+  "post_id": "instagram:C97fRamMdDD",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DKhP2rpIkgB",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Adamas",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "central base to stay",
+    "evidence": "Where to stay : Adamas",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sarakiniko Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Sarakiniko beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Mandrakia fishing village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firopotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Firapotamus",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Kleftiko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Klima",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Papafragas Caves",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Papafragos caves",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Plaka",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DFLAPBpouxg",
+  "lego_screen": "none",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel"
+ },
+ {
+  "post_id": "instagram:DG9OTXPsayu",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C-S2trho7qE",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Monastiri",
+    "handle": "monastiri.paros",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach club",
+    "evidence": "@monastiri.paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Cabana Paros",
+    "handle": "cabanaparos",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach club",
+    "evidence": "@cabanaparos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Barbarossa",
+    "handle": "barbarossa_paros",
+    "area_hint": "Naousa, Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "vibey dinner",
+    "evidence": "@barbarossa_paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Kargas",
+    "handle": null,
+    "area_hint": "Naousa, Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "casual Greek lunch",
+    "evidence": "Kargas for a casual Greek lunch",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Fotis All Day Bar",
+    "handle": "fotisalldaybar",
+    "area_hint": "Naousa, Paros, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "sunset drinks",
+    "evidence": "@fotisalldaybar",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Methystra Cocktail Bar",
+    "handle": "methystracoktailbar",
+    "area_hint": "Naousa, Paros, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "sunset drinks",
+    "evidence": "@methystracoktailbar",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Kolympethres",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "best beach",
+    "evidence": "Kolympethres",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kaminia",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "best beach",
+    "evidence": "Kaminia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Parikia",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "cute streets & shops",
+    "evidence": "Parikia & Lefkes",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Lefkes",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "cute streets & shops",
+    "evidence": "Lefkes",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Antiparos",
+    "handle": null,
+    "area_hint": "Antiparos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "7 min ferry, beach day",
+    "evidence": "getting the ferry to Antiparos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Loco Cocktail Bar",
+    "handle": null,
+    "area_hint": "Antiparos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "Loco cocktail bar",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Bougainvilles",
+    "handle": null,
+    "area_hint": "Antiparos, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "drinks",
+    "evidence": "Bougainvilles",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Pipinios",
+    "handle": null,
+    "area_hint": "Antiparos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "dinner",
+    "evidence": "dinner at Pipinios",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Bountaraki",
+    "handle": "bountaraki",
+    "area_hint": "Parikia, Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "best Greek spot",
+    "evidence": "@bountaraki",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C9remDoIueH",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Siparos",
+    "handle": "siparos",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "best meal in Paros",
+    "evidence": "@siparos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Captain Pipinos",
+    "handle": "captain_pipinos",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "seafood lunch, boat access only",
+    "evidence": "@captain_pipinos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Arodo",
+    "handle": "arodo.paros",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "insane sunset drinks",
+    "evidence": "@arodo.paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Roussos Grill",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "quick gyros",
+    "evidence": "roussos grill",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Barbarossa",
+    "handle": "barbarossa_paros",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "bar",
+    "reason": "worth it for the vibes",
+    "evidence": "@barbarossa_paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Alia Villa",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "Airbnb stay",
+    "evidence": "@airbnb Alia Villa",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DJemPtmMyqL",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Sarakiniko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Sarakiniko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Mandrakia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Gerakas",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Gerakas",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Fyropotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Fyropotamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Plaka",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Tsigrado",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Klima",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sykia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Sykia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Old Sulfur Mines",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Old Sulfur Mines",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Kleftiko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DEnBSEfsS1s",
+  "lego_screen": "learn",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "tip": {
+   "title": "Free Milos island ebook",
+   "gist": "Comment “2025” to get a free ebook guide for planning a trip to Milos.",
+   "try_prompt": "Comment 2025 on the post to get the free Milos ebook.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "2025",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C1og__xvGhv",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "only accessible via boat",
+    "evidence": "Kleftiko",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sarakiniko Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "the famous moon cliffs",
+    "evidence": "Sarakiniko beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Mandrakia port",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tourkothalassa Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Tourkothalassa beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plaka Castle",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sunset",
+    "evidence": "Plaka castle",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Firopotamos Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Firopotamos Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Tsigrado Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "the beach with the famous ladder",
+    "evidence": "Tsigrado beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Plathiena Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Plathiena beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Papafragas Caves",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Papafragas caves",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DIZMrJxNGM4",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Sarakiniko Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "limestone seascape like the moon",
+    "evidence": "Sarakiniko Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kleftiko",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "turquoise waters, limestone caves",
+    "evidence": "Kleftiko (Bandits’ Lair)",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sykia Sea Cave",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "bring a wide-angle lens",
+    "evidence": "Sykia Sea Cave",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beautiful at sunset",
+    "evidence": "Klima - a fishing village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Paliochori Beach",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "clear water, colorful sand",
+    "evidence": "Paliochori Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DFoLfGvSPL0",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Naoussa",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "fishing village, restaurants, nightlife",
+    "evidence": "Naoussa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Parikia",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "capital, historic charm",
+    "evidence": "Parikia",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Petra Paros",
+    "handle": "petra_paros",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "sustainable farming & local wine",
+    "evidence": "@petra_paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Almond",
+    "handle": "almond_paros",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "cafe",
+    "reason": "best breakfast, get the pancakes",
+    "evidence": "@almond_paros",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   },
+   {
+    "name": "Siparos",
+    "handle": "siparos",
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "best restaurant on the island per locals",
+    "evidence": "@siparos",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DDNI7GkMzW3",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Fyropotamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "old fishing village beach",
+    "evidence": "Fyropotamos Fisherman village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Mandrakia",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "tiny north-coast fishing village",
+    "evidence": "Mandrakia Fisherman village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Klima",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "tiny village, must for visitors",
+    "evidence": "Klima Fisherman village",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DJDzzQuoCKT",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Astakas",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "sunset dinner, good fish",
+    "evidence": "Astakas",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Medusa",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "swordfish souvlaki & grilled octopus",
+    "evidence": "Medusa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Avli",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "slow-baked goat with Graviera",
+    "evidence": "Avli",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Empourios",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "braised rooster, rabbit or goat",
+    "evidence": "Empourios",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Archontoula",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "kritamokeftedes",
+    "evidence": "Archontoula",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Ergina",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "skordolazana",
+    "evidence": "Ergina",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "O! Hamos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "“married” chickpeas & cheese pies",
+    "evidence": "O!Hamos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Sirocco",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fish straight from the volcano",
+    "evidence": "Sirocco",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Iliovasilema",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "typical Greek taverna",
+    "evidence": "Iliovasilema",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Alevromilos",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "Greek with Italian influence",
+    "evidence": "Alevromilos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Barriello",
+    "handle": null,
+    "area_hint": "Milos, Greece",
+    "address": null,
+    "type": "food",
+    "reason": "fine dining",
+    "evidence": "Barriello",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DFIkeJ4SSbz",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DExFZmVPppC",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DJEkcGqo-8k",
+  "lego_screen": "learn",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "tip": {
+   "title": "21-day Cyclades island-hopping itinerary",
+   "gist": "Island-hopping plan built for minimal ferry time and low-stress travel across the Cyclades.",
+   "try_prompt": "Comment GUIDE on the post to get the free island Google Maps lists.",
+   "tip_type": "list",
+   "key_points": [
+    "Direct ferry routes",
+    "Rides under 90 mins",
+    "A mix of landscapes, food, culture, and chill"
+   ],
+   "cta_keyword": "GUIDE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DIUCQB_sZxX",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Naousa",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "day 1",
+    "evidence": "Explore Naousa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Kolimbithres Beach",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Kolimbithres beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Santa Maria Beach",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "beach bars",
+    "evidence": "Santa Maria beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Lefkes",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "most charming village",
+    "evidence": "Lefkes",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Marpissa",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "lunch",
+    "evidence": "Marpissa",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Prodromos",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Prodromos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Golden Beach",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "water sports",
+    "evidence": "Golden Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Parikia",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "shopping, alleyways",
+    "evidence": "Parikia old town",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Livadia Beach",
+    "handle": null,
+    "area_hint": "Paros, Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "Livadia Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Antiparos",
+    "handle": null,
+    "area_hint": "Antiparos, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "explore and dinner",
+    "evidence": "ferry boat to Antiparos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C6WLG8guOsV",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Naxos",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "📍Naxos",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Paros",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "📍Paros",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Milos",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "📍Milos",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Koufonisia",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "📍Koufonisia",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Zakynthos",
+    "handle": null,
+    "area_hint": "Greece",
+    "address": null,
+    "type": "other",
+    "reason": null,
+    "evidence": "📍Zakynthos",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:ChNPeiMozxv",
+  "lego_screen": "learn",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "tip": {
+   "title": "Visit Greek islands in low season",
+   "gist": "Go to Karpathos and other Greek islands in low season: May, June, July, September, October.",
+   "try_prompt": "Pick May, June, July, September or October for your Greek island trip.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:CmwiTSZIjgC",
+  "lego_screen": "none",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel"
+ },
+ {
+  "post_id": "instagram:DIk8UdGKrmo",
+  "lego_screen": "map",
+  "topic_hint": "travel-greece",
+  "topic_label": "Greek islands travel",
+  "places": [
+   {
+    "name": "Assos",
+    "handle": null,
+    "area_hint": "Kefalonia, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "colorful village, ideal base",
+    "evidence": "Stay in Assos",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Myrtos Beach",
+    "handle": null,
+    "area_hint": "Kefalonia, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "the bluest water",
+    "evidence": "Myrtos Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Melissani Cave",
+    "handle": null,
+    "area_hint": "Kefalonia, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "underground lake by boat",
+    "evidence": "Melissani Cave",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   },
+   {
+    "name": "Fteri Beach",
+    "handle": null,
+    "area_hint": "Kefalonia, Greece",
+    "address": null,
+    "type": "other",
+    "reason": "only accessible by boat",
+    "evidence": "Fteri Beach",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C-u1Avnq3in",
+  "lego_screen": "map",
+  "topic_hint": "travel-spots",
+  "topic_label": "Travel spots",
+  "places": [
+   {
+    "name": "Lençóis Maranhenses National Park",
+    "handle": null,
+    "area_hint": "Brazil",
+    "address": null,
+    "type": "other",
+    "reason": "sand dunes and turquoise lagoons",
+    "evidence": "📍 Lençóis Maranhenses National Park, Brazil",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ }
+]

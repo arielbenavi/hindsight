@@ -25,15 +25,31 @@ targets:
       # real saved-post data to build against.
       - path: ../data/ig-saved-posts-seed.md
         buildPhase: resources
+      # Data-contract fixtures, one per tester (data/fixtures/README.md).
+      - path: ../data/fixtures
+        buildPhase: resources
+        includes:
+          - "*.hindsight.json"
+          - "*.matches.json"
+    info:
+      # Merged with the generated Info.plist keys below. Dark launch screen,
+      # so the app doesn't flash white before the first frame.
+      path: Hindsight/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: Hindsight
+        UILaunchScreen:
+          UIColorName: LaunchBackground
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reutrabin.hindsight
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_CFBundleDisplayName: Hindsight
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hindsight shows the places you saved near where you are."
 
   HindsightTests:
     type: bundle.unit-test
