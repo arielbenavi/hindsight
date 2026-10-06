@@ -9,10 +9,7 @@ struct ConnectStep: View {
             Text("Plug in\nyour apps.")
                 .font(OnboardingStyle.display())
 
-            museCard
-
-            XConnectRow(store: store)
-            comingSoonRow(.tiktok, detail: "Waiting on TikTok's data API approval.")
+            SourceCards(store: store)
         } actions: {
             Button("Continue", action: model.next)
                 .buttonStyle(.onboardingPrimary)
@@ -20,55 +17,5 @@ struct ConnectStep: View {
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.muted)
         }
-        .sheet(isPresented: $model.isMuseSheetPresented) {
-            MuseSyncView(store: store)
-        }
-    }
-
-    private var museCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                HStack(spacing: 10) {
-                    PlatformBadge(platform: .instagram)
-                    PlatformBadge(platform: .facebook)
-                }
-                Spacer()
-                let count = store.count(for: .instagram) + store.count(for: .facebook)
-                if count > 0 {
-                    Label("\(count.formatted()) saves", systemImage: "checkmark.circle.fill")
-                        .font(OnboardingStyle.caption)
-                        .foregroundStyle(OnboardingStyle.accent)
-                }
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Instagram + Facebook").font(OnboardingStyle.title)
-                Text("Through Muse, Meta's AI. It can already see your saves. One tap, no passwords.")
-                    .font(OnboardingStyle.body)
-                    .foregroundStyle(OnboardingStyle.muted)
-            }
-            Button("Sync with Muse") { model.isMuseSheetPresented = true }
-                .buttonStyle(.onboardingSecondary)
-        }
-        .onboardingCard()
-    }
-
-    private func comingSoonRow(_ platform: Platform, detail: String) -> some View {
-        HStack(spacing: 14) {
-            PlatformBadge(platform: platform)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(platform.displayName).font(OnboardingStyle.title)
-                Text(detail)
-                    .font(OnboardingStyle.caption)
-                    .foregroundStyle(OnboardingStyle.muted)
-            }
-            Spacer()
-            Text("soon")
-                .font(.system(.caption, design: .rounded, weight: .heavy))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(OnboardingStyle.stroke, in: .capsule)
-        }
-        .onboardingCard(padding: 16)
-        .opacity(0.7)
     }
 }

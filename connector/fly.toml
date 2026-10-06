@@ -1,0 +1,21 @@
+# Fly.io config for the connector. Not deployed yet (hosting decision pending, see docs/HOSTING.md).
+# First time:  fly launch --no-deploy --copy-config && fly volumes create hindsight_data --size 1
+#              fly secrets set HINDSIGHT_CONNECTOR_TOKEN=<random>   then   fly deploy
+app = "hindsight-connector"
+primary_region = "ewr"
+
+[build]
+
+[env]
+  HINDSIGHT_CONNECTOR_DATA = "/data"
+  PORT = "8765"
+
+[[mounts]]
+  source = "hindsight_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8765
+  force_https = true
+  auto_stop_machines = "off"   # Muse's daily routine and the WhatsApp bot need it always on
+  min_machines_running = 1

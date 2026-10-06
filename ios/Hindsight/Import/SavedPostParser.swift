@@ -3,8 +3,12 @@ import Foundation
 /// Turns exported text (Muse replies, the bundled seed) into `SavedPost`s.
 ///
 /// Accepts two formats:
-/// - JSON: an array of `{platform, author, kind, date, caption, url}` objects,
-///   bare or inside a ```json fence. This is what `MusePrompt` asks Muse for.
+/// - JSON: an array of post objects, bare or inside a ```json fence. Keys follow
+///   docs/data-contract.md (`url`, `platform`, `kind`, `author` as a string or
+///   `{username, display_name}`, `author_display_name`, `caption`, `hashtags`,
+///   `mentions`, `collections`, `saved_at`, `posted_at`, `thumbnail_url`,
+///   `location_tag`). This is what `MusePrompt` asks Muse for. The pre-contract
+///   `date` key is read as `saved_at`.
 /// - Markdown (the seed / older Muse output):
 ///   ```
 ///   12. **@username** · reel · 2026-09-16
@@ -19,44 +23,64 @@ enum SavedPostParser {
         var skipped: Int
     }
 
-    static func parse(_ text: String) -> Result {
-        if let json = parseJSON(text) { return json }
-        return parseMarkdown(text)
+    /// `source` is recorded on every post (`.muse` for pasted replies, `.seedMD` for the seed).
+    static func parse(_ text: String, source: SavedPost.Source = .muse) -> Result {
+        if let json = parseJSON(text, source: source) { return json }
+        return parseMarkdown(text, source: source)
     }
 
     // MARK: - JSON
 
-    private struct Entry: Decodable {
-        var platform: String?
-        var author: String?
-        var kind: String?
-        var date: String?
-        var caption: String?
-        var url: String?
-    }
-
-    static func parseJSON(_ text: String) -> Result? {
+    static func parseJSON(_ text: String, source: SavedPost.Source = .muse) -> Result? {
         guard let start = text.firstIndex(of: "["), let end = text.lastIndex(of: "]"), start < end,
               let data = String(text[start...end]).data(using: .utf8),
-              let entries = try? JSONDecoder().decode([Entry].self, from: data)
+              let entries = (try? JSONSerialization.jsonObject(with: data)) as? [Any]
         else { return nil }
 
         var result = Result(posts: [], skipped: 0)
-        for entry in entries {
-            guard let url = entry.url.flatMap(cleanURL) else {
+        for case let entry as [String: Any] in entries {
+            guard let url = string(entry["url"]).flatMap(cleanURL) else {
                 result.skipped += 1
                 continue
             }
+            let authorObject = entry["author"] as? [String: Any]
+            let author = string(authorObject?["username"]) ?? string(entry["author"]) ?? ""
             result.posts.append(SavedPost(
-                platform: entry.platform.flatMap(Platform.init(label:)),
-                author: (entry.author ?? "").trimmingPrefix("@").trimmingCharacters(in: .whitespaces),
-                kind: SavedPost.Kind(label: entry.kind ?? ""),
-                date: entry.date.flatMap(parseDate),
-                caption: entry.caption?.trimmingCharacters(in: .whitespacesAndNewlines),
-                url: url
+                platform: string(entry["platform"]).flatMap(Platform.init(label:)),
+                url: url,
+                kind: SavedPost.Kind(label: string(entry["kind"]) ?? ""),
+                author: String(author.trimmingPrefix("@")).trimmingCharacters(in: .whitespaces),
+                authorDisplayName: string(authorObject?["display_name"]) ?? string(entry["author_display_name"]),
+                caption: string(entry["caption"])?.trimmingCharacters(in: .whitespacesAndNewlines),
+                hashtags: (entry["hashtags"] as? [String]).map { $0.map { $0.trimmingPrefix("#").lowercased() } },
+                mentions: (entry["mentions"] as? [[String: Any]]).map { list in
+                    list.compactMap { m in
+                        string(m["username"]).map {
+                            SavedPost.Mention(username: String($0.trimmingPrefix("@")), displayName: string(m["display_name"]))
+                        }
+                    }
+                },
+                collections: (entry["collections"] as? [String]) ?? [],
+                savedAt: string(entry["saved_at"] ?? entry["date"]).flatMap(parseDate),
+                postedAt: string(entry["posted_at"]).flatMap(parseDate),
+                thumbnailURL: string(entry["thumbnail_url"]).flatMap(cleanURL),
+                locationTag: (entry["location_tag"] as? [String: Any]).map {
+                    SavedPost.LocationTag(
+                        name: string($0["name"]), address: string($0["address"]),
+                        lat: ($0["lat"] as? NSNumber)?.doubleValue, lng: ($0["lng"] as? NSNumber)?.doubleValue
+                    )
+                },
+                // The connector's /saves keeps each record's own source (muse, whatsapp_bot…).
+                source: string(entry["source"]).flatMap(SavedPost.Source.init(rawValue:)) ?? source
             ))
         }
         return result
+    }
+
+    /// Non-empty string, or nil (the contract never uses "" for unknown).
+    private static func string(_ value: Any?) -> String? {
+        guard let string = value as? String, !string.isEmpty else { return nil }
+        return string
     }
 
     // MARK: - Markdown
@@ -67,7 +91,7 @@ enum SavedPostParser {
     }
     private static var urlPattern: Regex<Substring> { /https?:\/\/[^\s)\]>]+/ }
 
-    static func parseMarkdown(_ text: String) -> Result {
+    static func parseMarkdown(_ text: String, source: SavedPost.Source = .muse) -> Result {
         let header = header, urlPattern = urlPattern
         var result = Result(posts: [], skipped: 0)
         var current: (author: String, kind: String, date: String)?
@@ -92,11 +116,13 @@ enum SavedPostParser {
                 return
             }
             result.posts.append(SavedPost(
-                author: head.author,
+                url: url,
                 kind: SavedPost.Kind(label: head.kind),
-                date: parseDate(head.date),
+                author: head.author,
                 caption: caption.joined(separator: " "),
-                url: url
+                // Muse was asked for saved posts newest-saved-first; treat its date as saved.
+                savedAt: parseDate(head.date),
+                source: source
             ))
         }
 
@@ -116,14 +142,17 @@ enum SavedPostParser {
 
     private static func cleanURL(_ raw: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(.init(charactersIn: ".,;")))
-        guard let url = URL(string: trimmed), url.scheme?.hasPrefix("http") == true, url.host() != nil else {
-            return nil
-        }
+        guard let url = URL(string: trimmed) else { return nil }
+        // Notes (WhatsApp) have no permalink; they carry a stable hindsight-note: id instead.
+        if url.scheme == "hindsight-note" { return url }
+        guard url.scheme?.hasPrefix("http") == true, url.host() != nil else { return nil }
         return url
     }
 
-    /// `YYYY-MM-DD` as local midnight, so the calendar day shown matches the source.
+    /// A full ISO 8601 timestamp, or `YYYY-MM-DD` as local midnight so the
+    /// calendar day shown matches the source.
     static func parseDate(_ raw: String) -> Date? {
+        if raw.count > 10, let date = try? Date(raw, strategy: .iso8601) { return date }
         let parts = raw.prefix(10).split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
         return Calendar.current.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))

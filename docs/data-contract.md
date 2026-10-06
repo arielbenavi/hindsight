@@ -313,11 +313,21 @@ For completeness; these never come from the pipeline:
 What's different from the code on `master` today:
 
 1. **Muse prompt** (`ios/Hindsight/Sync/MusePrompt.swift`): ask for the **full caption** (drop "the first 160 characters"), plus `collections`, `hashtags`, `mentions` (with display names), `saved_at` separately from `posted_at`, `thumbnail_url`, `location_tag`, and `author.display_name`. Each only if Muse can provide it; otherwise `null` / `[]`.
-2. **Instagram export parser** (`ios/Hindsight/Import/DataExportParser.swift`): Instagram's current export is a top-level array with `label_values`, plus `saved_collections.json` for collection names. Today's parser expects the older `saved_saved_media` format, so Reut's export parses to nothing. Also fix the text encoding. Reut's export in `data/ig-reut-export/` is the test file.
-3. **`SavedPost`** (`ios/Hindsight/Models/SavedPost.swift`): add the new post fields as optional values with defaults, in **one** commit, so existing parsers and tests keep working. Its single `date` becomes `saved_at` + `posted_at`. Agree who makes this commit (it's a merge-conflict hotspot for both of us).
+2. ✅ *(done 2026-09-30: Reut's export parses to 324 posts, 252 with collections)* **Instagram export parser** (`ios/Hindsight/Import/DataExportParser.swift`): Instagram's current export is a top-level array with `label_values`, plus `saved_collections.json` for collection names. Today's parser expects the older `saved_saved_media` format, so Reut's export parses to nothing. Also fix the text encoding. Reut's export in `data/ig-reut-export/` is the test file.
+3. ✅ *(done 2026-09-30 by Ariel; Swift names are the contract keys in camelCase, `date` kept as computed `savedAt ?? postedAt`)* **`SavedPost`** (`ios/Hindsight/Models/SavedPost.swift`): add the new post fields as optional values with defaults, in **one** commit, so existing parsers and tests keep working. Its single `date` becomes `saved_at` + `posted_at`. Agree who makes this commit (it's a merge-conflict hotspot for both of us).
 4. **Sorting** (replaces `TopicSuggester`'s keyword counts): output `topics[]` with a `lego_screen` for each, following the rules above, plus up to 2 `ambiguity` questions.
 5. **Extraction:** output `items[]` in the shapes above: places, tips, routines. Never invent content; write in the caption's language.
 6. **Delivery:** for the MVP, a file in this format (the one we generate this week is the reference). Later, the backend returns the same JSON.
+
+## Proposed additions (Ariel, 2026-09-30; not yet agreed)
+
+Additive only, so v1 readers keep working (Reut's decoder falls back to `instagram` / `unknown`):
+- `platform`: `web` (any other site: articles, YouTube…) and `whatsapp` (notes with no post behind them).
+- `kind`: `link` (a web page) and `note` (text the user wrote to themselves).
+- `source`: `whatsapp_export` (a WhatsApp "Export chat" import).
+- A `note` has no permalink, so its `url` is a stable made-up `hindsight-note:whatsapp/<time>-<hash>`. Don't open it; show the caption.
+
+If agreed, bump `contract_version` to 2 and decide where notes and links appear in the screens.
 
 ## Changelog
 

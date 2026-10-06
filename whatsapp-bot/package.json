@@ -1,0 +1,16 @@
+{
+  "name": "hindsight-whatsapp-bot",
+  "private": true,
+  "type": "module",
+  "description": "Experiment: a dedicated WhatsApp account users add to their notes chats; new messages flow into hindsight.",
+  "scripts": {
+    "start": "node bot.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "baileys": "7.0.0-rc14",
+    "fflate": "^0.8.3",
+    "pino": "^9.0.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

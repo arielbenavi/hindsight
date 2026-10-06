@@ -4,13 +4,19 @@ import Testing
 
 @MainActor
 struct MuseSyncTests {
-    @Test func promptPinsTheJSONSchema() throws {
-        let prompt = MusePrompt.text(since: SavedPostParser.parseDate("2026-09-27"))
-        #expect(prompt.contains("Instagram and Facebook"))
-        #expect(prompt.contains("saved after 2026-09-27"))
-        for key in ["\"platform\"", "\"author\"", "\"kind\"", "\"date\"", "\"caption\"", "\"url\""] {
-            #expect(prompt.contains(key))
+    @Test func promptAsksForTheContractFields() throws {
+        let day = try #require(SavedPostParser.parseDate("2026-09-27"))
+        let newer = MusePrompt.text(window: .after(day))
+        #expect(newer.contains("Instagram and Facebook"))
+        #expect(newer.contains("saved after 2026-09-27"))
+        #expect(newer.contains("full caption"))
+        #expect(!newer.contains("160"))
+        for key in ["\"platform\"", "\"url\"", "\"author\"", "\"author_display_name\"", "\"caption\"",
+                    "\"mentions\"", "\"collections\"", "\"saved_at\"", "\"posted_at\"", "\"location_tag\""] {
+            #expect(newer.contains(key))
         }
+        #expect(MusePrompt.text(window: .before(day)).contains("saved before 2026-09-27"))
+        #expect(!MusePrompt.text().contains("saved after"))
     }
 
     @Test func deepLinkCarriesThePrompt() throws {
@@ -30,5 +36,32 @@ struct MuseSyncTests {
         #expect(store.merge(result.posts) == 4)
         #expect(store.merge(result.posts) == 0)
         #expect(store.count(for: .facebook) == 2)
+    }
+}
+
+struct MuseConnectorTests {
+    @Test func normalizesPastedURLs() {
+        let base = "https://x.trycloudflare.com/tok123"
+        for pasted in [base, base + "/", base + "/mcp", base + "/saves", " \(base)/mcp "] {
+            #expect(MuseConnector.normalized(pasted)?.absoluteString == base)
+        }
+        #expect(MuseConnector.normalized("not a url") == nil)
+    }
+
+    @Test func connectPromptAddsConnectorSyncsAndSchedules() throws {
+        let base = try #require(MuseConnector.normalized("https://x.trycloudflare.com/tok123"))
+        let connect = MuseConnector.connectPrompt(mcpURL: MuseConnector.mcpURL(base: base))
+        #expect(connect.contains("https://x.trycloudflare.com/tok123/mcp"))
+        #expect(connect.contains("get_sync_status"))
+        #expect(connect.contains("submit_saved_posts"))
+        #expect(connect.contains("every day at 9am"))
+        #expect(connect.contains("remove it and use this one"))
+        #expect(MuseConnector.isOurPrompt(connect))
+        let sync = MuseConnector.syncPrompt()
+        #expect(!sync.contains("custom connector"))
+        #expect(sync.contains("get_sync_status"))
+        #expect(MuseConnector.isOurPrompt(sync))
+        #expect(MuseConnector.isOurPrompt(MusePrompt.text()))
+        #expect(!MuseConnector.isOurPrompt("```json\n[]\n```"))
     }
 }

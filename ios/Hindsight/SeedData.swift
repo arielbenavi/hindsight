@@ -10,7 +10,7 @@ enum SeedData {
     }
 
     static func posts(in bundle: Bundle = .main) -> [SavedPost] {
-        markdown(in: bundle).map { SavedPostParser.parse($0).posts } ?? []
+        markdown(in: bundle).map { SavedPostParser.parse($0, source: .seedMD).posts } ?? []
     }
 
     static func savedPostCount(in bundle: Bundle = .main) -> Int {

@@ -1,4 +1,4 @@
-import MapKit
+@preconcurrency import MapKit
 import SwiftUI
 
 // MARK: - M1a Nearby list

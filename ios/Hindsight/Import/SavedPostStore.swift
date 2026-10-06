@@ -24,16 +24,33 @@ final class SavedPostStore {
         }
     }
 
-    /// Adds posts not already in the store, ahead of existing ones.
-    /// Returns how many were new.
+    /// Adds posts not already in the store, ahead of existing ones, and fills
+    /// gaps in known ones (e.g. an export's full caption over the seed's
+    /// truncated one). Returns how many were new.
     @discardableResult
     func merge(_ incoming: [SavedPost]) -> Int {
-        let known = Set(posts.map(\.id))
-        let fresh = Self.deduplicated(incoming.filter { !known.contains($0.id) })
-        guard !fresh.isEmpty else { return 0 }
-        posts = fresh + posts
-        persist()
+        let index = Dictionary(uniqueKeysWithValues: posts.enumerated().map { ($1.id, $0) })
+        var fresh: [SavedPost] = []
+        var changed = false
+        for post in incoming {
+            if let i = index[post.id] {
+                let filled = posts[i].filling(from: post)
+                if filled != posts[i] { posts[i] = filled; changed = true }
+            } else if let j = fresh.firstIndex(where: { $0.id == post.id }) {
+                fresh[j] = fresh[j].filling(from: post)
+            } else {
+                fresh.append(post)
+            }
+        }
+        if !fresh.isEmpty { posts = fresh + posts }
+        if changed || !fresh.isEmpty { persist() }
         return fresh.count
+    }
+
+    /// Empties the store (dev: "Fresh Muse test" simulates a brand-new user).
+    func removeAll() {
+        posts = []
+        persist()
     }
 
     func count(for platform: Platform) -> Int {
@@ -59,6 +76,6 @@ final class SavedPostStore {
         .appending(path: "saved-posts.json")
 
     nonisolated static func seedPosts() -> [SavedPost] {
-        SeedData.markdown().map { SavedPostParser.parse($0).posts } ?? []
+        SeedData.posts()
     }
 }
