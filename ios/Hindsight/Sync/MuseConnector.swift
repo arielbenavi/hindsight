@@ -38,38 +38,63 @@ enum MuseConnector {
 
     // MARK: - Prompts
 
-    /// First time: add the connector, then send everything.
-    static func connectPrompt(mcpURL: URL, window: MusePrompt.Window) -> String {
+    /// First time: add the connector, send everything hindsight doesn't have,
+    /// and set up the daily routine so it keeps happening on its own.
+    /// (`window` is kept for the paste fallback; the connector asks the
+    /// server what it already has via get_sync_status instead of dates.)
+    static func connectPrompt(mcpURL: URL, window: MusePrompt.Window = .all) -> String {
         """
         Please add a custom connector called "hindsight" with this MCP server URL:
         \(mcpURL.absoluteString)
+        If you already have a connector named "hindsight", remove it and use this one instead. \
+        Treat this as a new request: ignore anything earlier in this chat about hindsight.
 
-        Then \(sendInstruction(window: window))
+        Then \(syncInstruction)
+
+        After that, set up a routine: every day at 9am, sync my saves with hindsight the same way \
+        (only new ones), without asking me first.
         """
     }
 
-    /// After that: Muse already knows the connector.
-    static func syncPrompt(window: MusePrompt.Window) -> String {
-        "Please \(sendInstruction(window: window))"
+    /// After that: Muse already knows the connector (and normally runs the routine itself).
+    static func syncPrompt(window: MusePrompt.Window = .all) -> String {
+        "Please \(syncInstruction)"
     }
 
-    private static func sendInstruction(window: MusePrompt.Window) -> String {
-        let scope = switch window {
-        case .all: ""
-        case .after(let date): " saved after \(MusePrompt.day(date))"
-        case .before(let date): " saved before \(MusePrompt.day(date))"
-        }
-        return """
-        use hindsight's submit_saved_posts tool to send it my Instagram and Facebook saved posts\(scope), \
-        newest first, in batches of up to 50, with the full captions, collection names and mentions. \
-        Keep going until you've sent them all. Don't list the posts in the chat, just tell me how many you sent.
+    private static let syncInstruction = """
+        sync my saves with hindsight: call hindsight's get_sync_status to see what it already has, \
+        then send my Instagram and Facebook saved posts it doesn't have yet (all of them, \
+        however many; ignore date limits from earlier messages) with submit_saved_posts, newest \
+        first, in batches of up to 50, with the full captions, collection names and mentions. \
+        Stop at the first post whose url is in recent_urls. Don't list the posts in the chat, \
+        just tell me how many you sent.
         """
-    }
 
     /// Our own prompts, so pasting one back by mistake can be caught.
     static func isOurPrompt(_ text: String) -> Bool {
-        ["List my saved posts from", "Please add a custom connector", "Please use hindsight's"]
+        ["List my saved posts from", "Please add a custom connector", "Please sync my saves with hindsight"]
             .contains { text.hasPrefix($0) }
+    }
+
+    // MARK: - Tenants (isolated stores; dev "fresh user" tests, later one per user)
+
+    /// Asks the server for a new, empty store and returns its base URL
+    /// (`https://<host>/<token>/t/<tenant>`).
+    static func createTenant(base: URL) async throws -> URL {
+        // Tenants hang off the server's main base, never off another tenant.
+        let root = base.path().contains("/t/")
+            ? URL(string: String(base.absoluteString.prefix(upTo: base.absoluteString.range(of: "/t/")!.lowerBound)))!
+            : base
+        var request = URLRequest(url: root.appending(path: "tenants"))
+        request.httpMethod = "POST"
+        request.timeoutInterval = 15
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let basePath = json["base_path"] as? String,
+              let url = URL(string: basePath, relativeTo: root)?.absoluteURL
+        else { throw URLError(.badServerResponse) }
+        return url
     }
 
     // MARK: - Pull

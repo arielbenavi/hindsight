@@ -47,6 +47,12 @@ final class SavedPostStore {
         return fresh.count
     }
 
+    /// Empties the store (dev: "Fresh Muse test" simulates a brand-new user).
+    func removeAll() {
+        posts = []
+        persist()
+    }
+
     func count(for platform: Platform) -> Int {
         posts.count { $0.platform == platform }
     }

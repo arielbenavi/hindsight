@@ -83,7 +83,12 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
     // MARK: - Nested types
 
     enum Kind: String, Codable, Sendable, CaseIterable {
-        case reel, post, carousel, video, tweet, unknown
+        case reel, post, carousel, video, tweet
+        /// A web page (article, YouTube…) saved as a link.
+        case link
+        /// Plain text the user wrote to themselves (e.g. a WhatsApp notes chat).
+        case note
+        case unknown
 
         /// Lenient mapping from whatever label a source uses.
         init(label: String) {
@@ -93,6 +98,8 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
             case "carousel", "album", "sidecar": self = .carousel
             case "video", "tv", "igtv", "watch": self = .video
             case "tweet", "x": self = .tweet
+            case "link", "web", "article": self = .link
+            case "note", "text": self = .note
             default: self = .unknown
             }
         }
@@ -117,6 +124,8 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
         case tiktokExport = "tiktok_export"
         case xAPI = "x_api"
         case seedMD = "seed_md"
+        case whatsappExport = "whatsapp_export"
+        case whatsappBot = "whatsapp_bot"
     }
 
     // MARK: - Merging
@@ -216,6 +225,13 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
 
 enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
     case instagram, facebook, x, tiktok
+    /// Any other site (articles, YouTube…), e.g. links from a WhatsApp notes chat.
+    case web
+    /// Notes written in WhatsApp (no post behind them).
+    case whatsapp
+
+    /// The social platforms we sync saves from.
+    static let social: [Platform] = [.instagram, .facebook, .x, .tiktok]
 
     var id: String { rawValue }
 
@@ -225,6 +241,8 @@ enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
         case .facebook: "Facebook"
         case .x: "X"
         case .tiktok: "TikTok"
+        case .web: "Web"
+        case .whatsapp: "WhatsApp"
         }
     }
 
@@ -235,6 +253,8 @@ enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
         case .facebook: "person.2.fill"
         case .x: "xmark"
         case .tiktok: "music.note"
+        case .web: "link"
+        case .whatsapp: "message.fill"
         }
     }
 
@@ -253,6 +273,8 @@ enum Platform: String, Codable, Sendable, CaseIterable, Identifiable {
         case "facebook", "fb": self = .facebook
         case "x", "twitter": self = .x
         case "tiktok": self = .tiktok
+        case "web": self = .web
+        case "whatsapp": self = .whatsapp
         default: return nil
         }
     }

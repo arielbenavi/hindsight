@@ -2,6 +2,9 @@
 # Build + install on a connected iPhone, or pull the app's debug log.
 #   scripts/device.sh install      build, install, launch
 #   scripts/device.sh log          copy debug-log.txt off the phone and print it
+# Server: if ../connector/data/token exists, the app is launched pointing at the
+# connector (HINDSIGHT_CONNECTOR_URL, default the ngrok domain + that token), so a
+# reinstall never leaves it without a server. Skip with HINDSIGHT_CONNECTOR_URL=none.
 # Signing: uses project.yml's team unless you override for your own free team:
 #   HINDSIGHT_TEAM=XXXXXXXXXX HINDSIGHT_BUNDLE_ID=com.you.hindsight scripts/device.sh install
 set -euo pipefail
@@ -16,6 +19,12 @@ OVERRIDES=()
 [[ -n "${HINDSIGHT_TEAM:-}" ]] && OVERRIDES+=(DEVELOPMENT_TEAM=$HINDSIGHT_TEAM CODE_SIGN_ENTITLEMENTS=)
 [[ -n "${HINDSIGHT_BUNDLE_ID:-}" ]] && OVERRIDES+=(PRODUCT_BUNDLE_IDENTIFIER=$HINDSIGHT_BUNDLE_ID)
 DERIVED=${TMPDIR:-/tmp}/hindsight-device-build
+# The token lives in the main checkout (connector/data is gitignored), also when run from a worktree.
+TOKEN_FILE="$(cd "$(git rev-parse --git-common-dir)/.." && pwd)/connector/data/token"
+CONNECTOR_URL=${HINDSIGHT_CONNECTOR_URL:-}
+[[ -z "$CONNECTOR_URL" && -f "$TOKEN_FILE" ]] && CONNECTOR_URL="https://supermom-depose-retail.ngrok-free.dev/$(cat "$TOKEN_FILE")"
+LAUNCH_ARGS=()
+[[ -n "$CONNECTOR_URL" && "$CONNECTOR_URL" != none ]] && LAUNCH_ARGS+=(-museConnectorBaseURL "$CONNECTOR_URL")
 
 case "${1:-install}" in
   install)
@@ -24,8 +33,8 @@ case "${1:-install}" in
     xcodebuild build -project Hindsight.xcodeproj -scheme Hindsight -destination "id=$UDID" \
       -allowProvisioningUpdates -derivedDataPath "$DERIVED" -quiet "${OVERRIDES[@]}"
     xcrun devicectl device install app --device "$DEVICE" "$DERIVED/Build/Products/Debug-iphoneos/Hindsight.app" >/dev/null
-    xcrun devicectl device process launch --device "$DEVICE" --terminate-existing "$BUNDLE_ID" >/dev/null
-    echo "Installed and launched $BUNDLE_ID"
+    xcrun devicectl device process launch --device "$DEVICE" --terminate-existing -- "$BUNDLE_ID" "${LAUNCH_ARGS[@]}" >/dev/null
+    echo "Installed and launched $BUNDLE_ID$( (( ${#LAUNCH_ARGS} )) && echo " (with the connector URL)")"
     ;;
   log)
     xcrun devicectl device copy from --device "$DEVICE" --domain-type appDataContainer \

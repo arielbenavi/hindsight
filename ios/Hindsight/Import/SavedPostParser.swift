@@ -70,7 +70,8 @@ enum SavedPostParser {
                         lat: ($0["lat"] as? NSNumber)?.doubleValue, lng: ($0["lng"] as? NSNumber)?.doubleValue
                     )
                 },
-                source: source
+                // The connector's /saves keeps each record's own source (muse, whatsapp_bot…).
+                source: string(entry["source"]).flatMap(SavedPost.Source.init(rawValue:)) ?? source
             ))
         }
         return result
@@ -141,9 +142,10 @@ enum SavedPostParser {
 
     private static func cleanURL(_ raw: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(.init(charactersIn: ".,;")))
-        guard let url = URL(string: trimmed), url.scheme?.hasPrefix("http") == true, url.host() != nil else {
-            return nil
-        }
+        guard let url = URL(string: trimmed) else { return nil }
+        // Notes (WhatsApp) have no permalink; they carry a stable hindsight-note: id instead.
+        if url.scheme == "hindsight-note" { return url }
+        guard url.scheme?.hasPrefix("http") == true, url.host() != nil else { return nil }
         return url
     }
 

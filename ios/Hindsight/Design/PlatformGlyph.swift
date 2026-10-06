@@ -23,6 +23,8 @@ struct PlatformGlyph: View {
                            startPoint: .bottomLeading, endPoint: .topTrailing)
         case .facebook: Color(red: 0.09, green: 0.47, blue: 0.95)
         case .x, .tiktok: Color.black
+        case .web: Color(red: 0.40, green: 0.43, blue: 0.50)
+        case .whatsapp: Color(red: 0.15, green: 0.83, blue: 0.40)
         }
     }
 
@@ -46,6 +48,10 @@ struct PlatformGlyph: View {
             Image(systemName: "music.note").font(.system(size: size * 0.42, weight: .bold)).foregroundStyle(.white)
                 .shadow(color: Color(red: 0.15, green: 0.96, blue: 0.93), radius: 0, x: -line * 0.6, y: -line * 0.4)
                 .shadow(color: Color(red: 1.0, green: 0.17, blue: 0.33), radius: 0, x: line * 0.6, y: line * 0.4)
+        case .web:
+            Image(systemName: "globe").font(.system(size: size * 0.46, weight: .bold)).foregroundStyle(.white)
+        case .whatsapp:
+            Image(systemName: "message.fill").font(.system(size: size * 0.42, weight: .bold)).foregroundStyle(.white)
         }
     }
 }

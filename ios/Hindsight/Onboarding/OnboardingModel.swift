@@ -21,7 +21,6 @@ final class OnboardingModel {
 
     private(set) var step: Step = .connect
     private(set) var isMovingForward = true
-    var isMuseSheetPresented = false
 
     init() {}
 

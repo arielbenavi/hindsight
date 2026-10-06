@@ -41,8 +41,12 @@ Hindsight/          app source
   Import/           SavedPostParser (Muse JSON + seed markdown), SavedPostStore,
                     DataExportParser + ZipReader (IG/FB/TikTok "download your data")
   Onboarding/       first-run flow; OnboardingStyle.swift holds all its styling
-  Sync/             Muse sync sheet (MusePrompt, MuseLauncher)
+  Sync/             syncing sources: SourceCards (shared by onboarding + SourcesView),
+                    Muse (MuseSyncView, MuseConnector, MusePrompt, MuseLauncher),
+                    WhatsApp (WhatsAppImportView, WhatsAppGuide animation),
+                    ServerSync (pull from the connector), WhatsAppBot
     X/              Connect X: PKCE sign-in, Keychain tokens, bookmarks client
+ci_scripts/         Xcode Cloud: generates the project with xcodegen (docs/XCODE_CLOUD.md)
   DebugLog.swift    DEBUG-only event log for device testing
   Resources/        asset catalog
 scripts/device.sh   install on / pull logs from a connected iPhone

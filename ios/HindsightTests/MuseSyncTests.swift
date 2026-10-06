@@ -48,16 +48,18 @@ struct MuseConnectorTests {
         #expect(MuseConnector.normalized("not a url") == nil)
     }
 
-    @Test func connectPromptAddsConnectorThenSends() throws {
+    @Test func connectPromptAddsConnectorSyncsAndSchedules() throws {
         let base = try #require(MuseConnector.normalized("https://x.trycloudflare.com/tok123"))
-        let day = try #require(SavedPostParser.parseDate("2026-09-27"))
-        let connect = MuseConnector.connectPrompt(mcpURL: MuseConnector.mcpURL(base: base), window: .after(day))
+        let connect = MuseConnector.connectPrompt(mcpURL: MuseConnector.mcpURL(base: base))
         #expect(connect.contains("https://x.trycloudflare.com/tok123/mcp"))
+        #expect(connect.contains("get_sync_status"))
         #expect(connect.contains("submit_saved_posts"))
-        #expect(connect.contains("saved after 2026-09-27"))
+        #expect(connect.contains("every day at 9am"))
+        #expect(connect.contains("remove it and use this one"))
         #expect(MuseConnector.isOurPrompt(connect))
-        let sync = MuseConnector.syncPrompt(window: .all)
+        let sync = MuseConnector.syncPrompt()
         #expect(!sync.contains("custom connector"))
+        #expect(sync.contains("get_sync_status"))
         #expect(MuseConnector.isOurPrompt(sync))
         #expect(MuseConnector.isOurPrompt(MusePrompt.text()))
         #expect(!MuseConnector.isOurPrompt("```json\n[]\n```"))

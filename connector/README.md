@@ -10,12 +10,14 @@ Not production: single user, stored in local files, and a random secret in the U
 cd connector
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # once
 .venv/bin/python server.py                                           # prints the secret paths
-cloudflared tunnel --url http://127.0.0.1:8765                       # prints https://<random>.trycloudflare.com
+ngrok http 8765                                                      # prints https://<your-domain>.ngrok-free.dev
 ```
+
+**Use ngrok, not Cloudflare quick tunnels:** trycloudflare.com blocks AI agents with 403 at the edge, so Muse's calls never arrive (see docs/LESSONS.md). ngrok's free plan gives each account one fixed domain and doesn't block agents. One-time setup: `brew install ngrok`, then `ngrok config add-authtoken <token>` (the token stays in ngrok's local config; never commit it).
 
 - **MCP URL for Muse:** `https://<tunnel>/<token>/mcp`
 - **Pull URL for the app** (Sync with Muse → Muse connector (dev)): `https://<tunnel>/<token>/saves`
-- The token is in `data/token`, and stays the same across restarts. **The quick-tunnel hostname changes every time cloudflared restarts,** and the server only runs while the Mac is awake. A routine test needs both to stay up; a stable URL needs a named Cloudflare tunnel or a hosted server.
+- The token is in `data/token`, and stays the same across restarts. The ngrok domain is fixed per account. Both only work while the Mac is awake and both processes run. A 24/7 routine test needs real hosting.
 
 ## Tools Muse sees
 - `ping()` returns `"pong"`.
