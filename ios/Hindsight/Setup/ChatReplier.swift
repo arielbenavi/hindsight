@@ -107,7 +107,45 @@ enum ChatReplierPrompt {
     - You can rename, remove, add or reorder the proposed tabs, and leave a topic out. Nothing else.
     - You can't import saves. More saves come from the Connect screen: Instagram and Facebook through Muse, Connect X, or Import a file (a data download).
     - Posts that fit no tab (memes, news, ads) stay in Everything else, reachable from every tab.
+
+    If something seems wrong, explain it plainly and say what to do next:
+    - Saves that didn't get sorted: short captions and X posts are the hardest to place. They aren't lost; they're in Everything else, or in one list when there are no tabs.
+    - No tabs, or very few: there aren't enough saves of one kind yet. Bringing in more and running setup again (bug menu → Start onboarding over) helps.
+    - Muse or WhatsApp not connecting: those need hindsight's server; importing a file always works.
     """
+}
+
+/// Which of Apple's models the app can use right now.
+enum ModelStatus: String, Sendable {
+    case cloud = "Private Cloud Compute"
+    case onDevice = "On-device"
+    case none = "None"
+
+    static var current: ModelStatus {
+        if #available(iOS 27, *), PrivateCloudComputeLanguageModel().isAvailable { return .cloud }
+        return SystemLanguageModel.default.isAvailable ? .onDevice : .none
+    }
+}
+
+/// Fixed answers to common problems, for when no model can answer.
+enum ChatHelp {
+    static func answer(to message: String) -> String? {
+        let said = TextMatch.fold(message)
+        let words = Set(said.split { !$0.isLetter && !$0.isNumber }.map(String.init))
+        func mentions(_ options: String...) -> Bool { options.contains { $0.contains(" ") ? said.contains($0) : words.contains($0) } }
+        if mentions("sort", "sorted", "random", "everything else", "no tabs", "nothing", "empty", "missing", "twitter", "x", "bookmarks", "tweets") {
+            return "Saves I can't place aren't lost: they're in Everything else, or in one list when there are no tabs. Short captions and X posts are the hardest to sort. Bringing in more saves and running setup again (bug menu → Start onboarding over) usually helps."
+        }
+        if mentions("import", "more", "add", "connect", "muse", "whatsapp", "tiktok", "instagram", "facebook", "file") {
+            return "To bring in more, start onboarding over from the bug menu and use Plug in your apps: Muse or a Meta data file for Instagram and Facebook, Connect X, or WhatsApp notes. Muse and WhatsApp need hindsight's server; importing a file always works."
+        }
+        if mentions("model", "ai", "cloud", "intelligence", "broken", "error", "working", "wrong", "help") {
+            return ModelStatus.current == .none
+                ? "Apple Intelligence isn't available on this phone or in this build, so I sort with simple rules and can only follow the buttons and a few phrases like \"rename Map to Eats\"."
+                : "I'm using Apple's \(ModelStatus.current.rawValue.lowercased()) model. If an answer looks off, the buttons always work: tap a tab to change it, or Looks good."
+        }
+        return nil
+    }
 }
 
 /// Private Cloud Compute, falling back to the on-device model.

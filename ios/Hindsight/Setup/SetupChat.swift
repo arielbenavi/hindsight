@@ -41,7 +41,7 @@ struct SetupChatView: View {
                 app.startSorting()
                 model = SetupChatModel(data: app.data, receipt: app.myPosts, datasetID: Dataset.mineID,
                                        places: { app.places }, progress: { app.sortProgress() },
-                                       load: { await app.buildMySaves() })
+                                       load: { await app.buildMySaves() }, sortsOnPhone: true)
             } else if let data = app.data {
                 model = SetupChatModel(data: data, receipt: data.posts, datasetID: app.dataset?.id ?? "default",
                                        places: { app.places }, progress: { SimulatedSort.progress(for: data) },
@@ -84,6 +84,10 @@ final class SetupChatModel {
     private(set) var isPlaceCheckOpen = false
     /// "Open hindsight" tapped on the last screen.
     private(set) var isFinished = false
+    /// Reading ended without sorted saves: the chat offers the plain list instead.
+    private(set) var readingFailed = false
+    /// The user's own saves, sorted here with Apple's models (not the pre-sorted sample).
+    private let sortsOnPhone: Bool
 
     /// The sorted saves. Empty until the end of reading for the user's own saves.
     private(set) var data: HindsightData
@@ -112,8 +116,9 @@ final class SetupChatModel {
 
     init(data: HindsightData?, receipt: [ContractPost], datasetID: String, places: @escaping () -> PlaceStore,
          progress: @escaping () -> AsyncStream<SortProgress>, load: @escaping () async -> HindsightData?,
-         replier: ChatReplying = AppleChatReplier()) {
+         sortsOnPhone: Bool = false, replier: ChatReplying = AppleChatReplier()) {
         self.replier = replier
+        self.sortsOnPhone = sortsOnPhone
         let data = data ?? .empty
         self.data = data
         receiptPosts = receipt
@@ -166,9 +171,13 @@ final class SetupChatModel {
     // R3
     private func start() async {
         stage = .receipt
+        if sortsOnPhone, ModelStatus.current == .none {
+            await say("Heads up: Apple Intelligence isn't available on this phone or in this build, so I'm sorting with simple rules only. Fewer of your saves will land in tabs.")
+        }
         await read()
         guard let loaded = await loadData(), !loaded.posts.isEmpty else {
-            await say("Hmm, I couldn't finish reading your saves. Close the app and open it again, and I'll pick up where I stopped.")
+            readingFailed = true
+            await say("Hmm, I couldn't finish reading your saves. You can open them as one list now, or close the app and open it again and I'll pick up where I stopped.")
             return
         }
         use(loaded)
@@ -258,8 +267,11 @@ final class SetupChatModel {
         if proposal.situation == .oneTab, let tab = draft.tabs.first {
             let what = tab.legoScreen == .map ? "one big map" : "one big \(tab.title.lowercased()) list"
             await say("Your saves are basically \(what). Here's your app:")
+        } else if hasNothingToPropose {
+            await say("I couldn't sort these into tabs yet, so I'll show them as one list you can search. Bring in more saves and run setup again, and I'll build tabs.")
+            return
         } else if draft.tabs.isEmpty {
-            await say("I couldn't build tabs from these yet. You can add one below, or keep everything in Everything else.")
+            await say("I couldn't build tabs from these yet. You can add one below, or keep everything in one list.")
         } else {
             await say("Here's your app:")
         }
@@ -269,6 +281,16 @@ final class SetupChatModel {
             await say("Also add a \(offer.defaultTitle.lowercased())? \(count) spots.", delay: .milliseconds(400))
         }
         await say("Want to change anything?", delay: .milliseconds(400))
+    }
+
+    /// No tab can be built or added: the app opens as one list (`AllSavesScreen`).
+    var hasNothingToPropose: Bool { draft.tabs.isEmpty && LayoutEdit.addable(draft, data).isEmpty }
+
+    /// Reading failed: skip the proposal and open the raw imports as one list.
+    func openAsList() {
+        userSays("Open my saves as a list")
+        approvedConfig = LayoutRules.Draft(tabs: [], excludedTopicIDs: []).config()
+        Task { await finishLine() }
     }
 
     // B4
@@ -334,7 +356,7 @@ final class SetupChatModel {
             }
         case .question, .other:
             // Never show an answer that claims a change that didn't happen.
-            await say(reply.claimsAChange ? plainAnswer : reply.text, delay: .milliseconds(200))
+            await say(reply.claimsAChange ? (ChatHelp.answer(to: typed) ?? plainAnswer) : reply.text, delay: .milliseconds(200))
         }
     }
 
@@ -353,6 +375,8 @@ final class SetupChatModel {
         if let edit = TypedEditParser.parse(text, draft: draft, data: data, lastTouched: lastTouched) {
             if stage != .editing { stage = .editing }
             apply(edit)
+        } else if let help = ChatHelp.answer(to: text) {
+            await say(help, delay: .milliseconds(400))
         } else {
             await say("I didn't catch that. Try \"rename Map to Eats\", \"drop cooking\" or \"put Learn first\", or tap a tab.", delay: .milliseconds(400))
         }
@@ -386,13 +410,15 @@ final class SetupChatModel {
     // B5
     private(set) var approvedConfig: LayoutConfig?
 
-    func approveNow() {
-        if messages.last?.kind != .user { userSays("Looks good") }
+    func approveNow(saying words: String = "Looks good") {
+        if messages.last?.kind != .user { userSays(words) }
         stage = .approved
         save()
         Task {
-            await say("Building it… 🔨", delay: .milliseconds(350))
-            try? await Task.sleep(for: .milliseconds(700))
+            if !draft.tabs.isEmpty {
+                await say("Building it… 🔨", delay: .milliseconds(350))
+                try? await Task.sleep(for: .milliseconds(700))
+            }
             approvedConfig = draft.config()
             await afterApproval()
         }
@@ -566,6 +592,10 @@ private struct ChatContent: View {
                             }
                         }
                     }
+                case .proposal where model.hasNothingToPropose:
+                    Button("Show my saves") { model.approveNow(saying: "Show my saves") }.buttonStyle(.pill)
+                case .reading where model.readingFailed:
+                    Button("Open my saves as a list") { model.openAsList() }.buttonStyle(.pill)
                 case .proposal:
                     HStack(spacing: 10) {
                         Button("Change something") { model.startEditing() }.buttonStyle(.pillSecondary)

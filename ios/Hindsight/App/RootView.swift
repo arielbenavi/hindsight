@@ -19,7 +19,15 @@ struct RootView: View {
                 // My saves: the chat starts before the file exists (it's written at the end of reading).
                 SetupChatView(app: app)
             } else if app.data == nil {
-                ContentUnavailableView("No saves yet", systemImage: "tray", description: Text("No data file is bundled."))
+                if app.isMySaves && app.setupDone {
+                    // Reading never finished: the raw imports, as one list.
+                    AllSavesScreen(app: app)
+                } else {
+                    ContentUnavailableView("No saves yet", systemImage: "tray", description: Text("No data file is bundled."))
+                }
+            } else if app.layout?.tabs.isEmpty ?? true {
+                // Nothing could be sorted into a tab: one list instead of an empty tab bar.
+                AllSavesScreen(app: app)
             } else {
                 MainTabView(app: app)
             }
@@ -137,7 +145,9 @@ struct DevMenu: View {
                     }
                 }
             }
-            Button("Model test", systemImage: "cpu") { showsModelTest = true }
+            Section("Model: \(ModelStatus.current.rawValue)") {
+                Button("Model test", systemImage: "cpu") { showsModelTest = true }
+            }
             // Back to the Connect screen, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
                 AppModel.resetMySetup()

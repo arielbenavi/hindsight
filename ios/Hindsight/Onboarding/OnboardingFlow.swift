@@ -79,6 +79,7 @@ struct OnboardingFlow: View {
             .accessibilityElement()
             .accessibilityLabel("Step \(model.step.rawValue + 1) of \(OnboardingModel.Step.allCases.count)")
 
+            betaMenu
             #if DEBUG
             // Dev shortcut: straight to the app with the bundled seed data.
             Button("Skip") { onFinish(.sample) }
@@ -86,12 +87,35 @@ struct OnboardingFlow: View {
                 .foregroundStyle(OnboardingStyle.muted)
                 .frame(minWidth: 36, minHeight: 36)
                 .accessibilityLabel("Skip onboarding (dev)")
-            #else
-            Color.clear.frame(width: 36, height: 36)
             #endif
         }
         .padding(.horizontal, OnboardingStyle.horizontalPadding - 8)
         .padding(.vertical, 8)
+    }
+
+    /// Beta menu, in every build while we're on TestFlight (temporary).
+    private var betaMenu: some View {
+        Menu {
+            Button("Load seed saves", systemImage: "tray.and.arrow.down", action: loadSeed)
+        } label: {
+            Image(systemName: "ladybug").font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(OnboardingStyle.muted)
+                .frame(width: 36, height: 36)
+        }
+        .accessibilityLabel("Beta menu")
+    }
+
+    /// Brings the bundled seed in as the user's own imports (the sort engine
+    /// skips `.seedMD` records), then shows Connect with them counted.
+    private func loadSeed() {
+        let posts = SeedData.posts().map { post in
+            var post = post
+            post.source = .igExport
+            return post
+        }
+        let added = store.merge(posts)
+        DebugLog.write("beta menu: loaded seed → \(posts.count) posts, +\(added) new")
+        while model.step != .connect { model.next() }
     }
 }
 

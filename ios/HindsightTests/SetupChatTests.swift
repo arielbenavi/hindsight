@@ -4,6 +4,13 @@ import Testing
 
 @MainActor
 struct SetupChatTests {
+    @Test func helpAnswersCommonProblemsWithoutAModel() {
+        #expect(ChatHelp.answer(to: "why didn't my X bookmarks get sorted?")?.contains("Everything else") == true)
+        #expect(ChatHelp.answer(to: "how do I import more")?.contains("Plug in your apps") == true)
+        #expect(ChatHelp.answer(to: "is the AI broken?") != nil)
+        #expect(ChatHelp.answer(to: "purple monkey dishwasher") == nil)
+    }
+
     @Test func simulatedSortGrowsToCompleteAndHandsOff() throws {
         let data = try Fixtures.load("reut")
         let snapshots = SimulatedSort.snapshots(for: data, steps: 24)
