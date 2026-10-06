@@ -123,7 +123,7 @@ struct EverythingElseSheet: View {
     }
 }
 
-/// Beta menu: switch testers' data and redo the layout. In every build while
+/// Beta menu: switch testers' data and start the first-run flow over. In every build while
 /// we're on TestFlight with bundled data.
 struct DevMenu: View {
     let app: AppModel
@@ -137,7 +137,12 @@ struct DevMenu: View {
                     }
                 }
             }
-            Button("Redo layout & reset \(app.dataset?.displayName ?? "")", role: .destructive) { app.resetCurrentDataset() }
+            // One reset for the whole first-run flow: onboarding → layout chat → place
+            // confirmation. Saved posts are kept.
+            Button("Start over (setup + layout)", role: .destructive) {
+                app.resetCurrentDataset()
+                UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
+            }
         } label: {
             Image(systemName: "ladybug").font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Theme.muted)
