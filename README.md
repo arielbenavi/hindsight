@@ -4,6 +4,11 @@ Your saved posts, finally usable. People save hundreds of Instagram and Facebook
 
 The product is an **iOS app**. The original web prototype is kept in [`web/`](web) for reference but is deprecated.
 
+> [!IMPORTANT]
+> **Hindsight's AI only works when the iPhone's system language is one Apple Intelligence supports (e.g. English). Hebrew is not supported, even in iOS 27.**
+> Sorting and extraction run on Apple's models (on-device, and Private Cloud Compute), which need Apple Intelligence turned on. Apple Intelligence only turns on when **Settings → General → Language & Region → iPhone Language** and the **Siri language** are the same supported language. A phone set to Hebrew gets **no AI at all**, not even for English posts, and Hebrew captions are rejected by the model (`unsupportedLanguageOrLocale`).
+> It also needs an **iPhone 15 Pro or newer** with Apple Intelligence on. Testers so far (Reut, Ariel, Reut's girlfriend): iPhone 16 or later, English. ✅ Details: [docs/merge-plan.md](docs/merge-plan.md#ai-requirements-read-this).
+
 ## Repo layout
 
 ```
@@ -42,6 +47,7 @@ Next (planned): a hosted **ingestion backend**, ported from `web/backend/`, that
 
 - [docs/HANDOFF.md](docs/HANDOFF.md): current status, open decisions, and the web prototype's handoff notes
 - [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md): how the iOS app gets saves from each platform, what's verified, what's open
+- [docs/mvp-sprint.md](docs/mvp-sprint.md) and [docs/mvp-frontend-build-plan.md](docs/mvp-frontend-build-plan.md): the MVP sprint and the frontend (iOS screens) build checklist
 - [docs/LESSONS.md](docs/LESSONS.md): gotchas and dead ends. **Read before starting a session; add to it when something surprises you.**
 - [docs/TESTING.md](docs/TESTING.md): automated test commands + the manual test checklist
 - [docs/HOSTING.md](docs/HOSTING.md): what has to run 24/7 and the hosting options

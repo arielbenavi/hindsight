@@ -4,29 +4,19 @@ import Testing
 
 @MainActor
 struct OnboardingTests {
-    @Test func stepsMoveForwardAndBackWithinBounds() {
-        let model = OnboardingModel(posts: [], preferences: OnboardingPreferences())
-        model.back()
+    /// Welcome → How it works → Connect, then the setup chat takes it from there
+    /// (docs/specs/onboarding-chat.md).
+    @Test func threeStepsEndingAtConnect() {
+        #expect(OnboardingModel.Step.allCases == [.welcome, .howItWorks, .connect])
+        let model = OnboardingModel()
         #expect(model.step == .welcome)
-        for _ in 0..<10 { model.next() }
-        #expect(model.step == .done)
+        #expect(!model.canGoBack)
+        model.next()
+        model.next()
+        #expect(model.step == .connect)
+        model.next()
+        #expect(model.step == .connect)
         model.back()
-        #expect(model.step == .preferences)
-    }
-
-    @Test func preferencesRoundTrip() throws {
-        let defaults = try #require(UserDefaults(suiteName: "OnboardingTests-\(UUID())"))
-        var prefs = OnboardingPreferences()
-        prefs.grouping = .creator
-        prefs.topics = ["music", "quant"]
-        prefs.save(to: defaults)
-        #expect(OnboardingPreferences.load(from: defaults) == prefs)
-    }
-
-    @Test func topicSuggestionsComeFromSeedCaptions() {
-        let counts = TopicSuggester.counts(for: SeedData.posts())
-        #expect(!counts.isEmpty)
-        #expect(counts.map(\.count) == counts.map(\.count).sorted(by: >))
-        #expect(counts.contains { $0.topic == "music" })
+        #expect(model.step == .howItWorks)
     }
 }

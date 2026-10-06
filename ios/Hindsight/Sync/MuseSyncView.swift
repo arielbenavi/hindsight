@@ -16,6 +16,8 @@ struct MuseSyncView: View {
     @State private var launchedViaWhatsApp = false
     @State private var method: Method = MuseConnector.baseURL == nil ? .paste : .connector
     @State private var pollID: UUID?
+    /// Set by "Get older saves": the next prompt asks for saves before this date.
+    @State private var olderThan: Date?
     @AppStorage(MuseConnector.baseURLKey) fileprivate var connectorBaseURL = ""
     @AppStorage(MuseConnector.connectedKey) fileprivate var connectorConnected = false
 
@@ -50,16 +52,23 @@ struct MuseSyncView: View {
     }
 
     /// Decided from what we already have, so the user never has to choose:
-    /// first connector sync → everything (duplicates are dropped on both
-    /// sides, so a full re-send is harmless); after that → only what's newer
-    /// than the newest Instagram/Facebook save we have.
+    /// nothing of theirs yet → **all** their saves (the first pull is the whole
+    /// history); asked for older ones → before the oldest we have; otherwise →
+    /// only what's newer than the newest Instagram/Facebook save we have.
+    /// Only the user's own imports count: the bundled seed is someone else's
+    /// saves, and its newest date (2026-09-27) used to turn the very first
+    /// prompt into "saved after 2026-09-27".
     private var window: MusePrompt.Window {
         if method == .connector && !connectorConnected { return .all }
-        let newest = store.posts.lazy
-            .filter { $0.platform == .instagram || $0.platform == .facebook }
+        if let olderThan { return .before(olderThan) }
+        return userSavedDates.max().map(MusePrompt.Window.after) ?? .all
+    }
+
+    /// `savedAt` of the Instagram/Facebook saves the user imported themselves.
+    private var userSavedDates: [Date] {
+        store.posts
+            .filter { ($0.platform == .instagram || $0.platform == .facebook) && $0.source != .seedMD }
             .compactMap(\.savedAt)
-            .max()
-        return newest.map(MusePrompt.Window.after) ?? .all
     }
 
     var body: some View {
@@ -165,9 +174,19 @@ struct MuseSyncView: View {
     @ViewBuilder
     private var actions: some View {
         switch phase {
-        case .imported:
+        case .imported(let added, _):
             Button("Done") { dismiss() }
                 .buttonStyle(.onboardingPrimary)
+            // Muse replies with up to 50 saves at a time, so the first pull
+            // pages back through the whole history, one reply at a time.
+            if added > 0, let oldest = userSavedDates.min() {
+                Button("Get older saves") {
+                    olderThan = oldest
+                    launchOutcome = nil
+                    phase = .ready
+                }
+                .buttonStyle(.onboardingSecondary)
+            }
         case .receiving:
             Button("Done") { dismiss() }
                 .buttonStyle(.onboardingPrimary)

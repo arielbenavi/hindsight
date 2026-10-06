@@ -5,6 +5,33 @@ starting a session; add to it when something surprises you. Newest first.
 (Platform-by-platform fetching history lives in BACKFILL_STATUS.md and
 DATA_FETCHING_RESEARCH.md.)
 
+## Apple Intelligence / on-device AI
+
+- **On a real iPhone (17 Pro, iOS 27.0), both Apple models beat the Mac test by a lot** (115 fixture posts, 2026-09-30):
+  on-device 82% buckets, 45/70 place names, 1.2 s/post; **Private Cloud Compute 86%, 57/70, 1.0 s/post**, quota still "below the limit" after ~150 requests.
+  **Hebrew captions worked on both** (PCC 15/15 answered, 14 correct), **even though `supportsLocale(he_IL)` says no.** Trust a real run over the language list.
+  The Mac numbers below are from the older macOS 26.6 model; don't plan from them. (2026-09-30)
+- ⚠️ **The iPhone's system language must be an Apple Intelligence language (e.g. English), or the app gets no AI at all.**
+  Apple Intelligence only turns on when the iPhone language and Siri language are the same *supported* language.
+  **Hebrew isn't one, even in iOS 27.** No Apple Intelligence means no on-device model *and* no Private Cloud Compute, even for English posts.
+  Check the phone's language first when AI "doesn't work" on a tester's phone. (2026-09-30)
+- **Hebrew captions are refused by the on-device model** (`unsupportedLanguageOrLocale`), even with English instructions. Hebrew is 7% of Reut's saves and 13% of Ariel's. Hebrew posts need the rules/collections/questions path. (2026-09-30)
+- The on-device model (macOS 26.6 = 26.4 generation, 4K context) scored **62–70%** on bucket sorting vs the fixtures, and got **~41%** of place names. It also fills `places` on posts that have none and translates names. Don't trust it for extraction without checks. (2026-09-30)
+- **Private Cloud Compute:** free only under the App Store Small Business Program with < 2M downloads. Needs the managed entitlement `com.apple.developer.private-cloud-compute` (granted to Reut's account 2026-09-30). The quota is per iCloud account and opaque (only below / approaching / reached + reset date). No paid tier. (2026-09-30)
+- `.permissiveContentTransformations` guardrails only work for plain `String` output, not `@Generable`, so structured sorting always runs with default guardrails. 2–5% of benign English posts got `guardrailViolation` / `refusal`. (2026-09-30)
+
+## Meta data download (Instagram/Facebook export)
+
+- **It's the dependable Instagram/Facebook path while Muse fails** (2026-09-30). The app's guided sheet:
+  Connect → Instagram + Facebook → *Get your saves from Meta*. Meta's page is
+  `https://accountscenter.instagram.com/info_and_permissions/dyi/` (asks you to sign in first).
+- **Saves are split across two files:** in Reut's export, `saved_posts.json` has 113 posts (with saved dates) and
+  `saved_collections.json` has 252 (with collection names); together 324. **Import the whole .zip**, not one file.
+  `DataExportParser` reads a zip as-is (0.2 s) and only opens the saved files. (2026-09-30)
+- **A full download is mostly sensitive data we must never read**: synced contacts, login activity and
+  locations, ads history (33 of 35 files in Reut's). Tell users to request only **Saved** (JSON, All time).
+- `data/ig-reut-export/` is byte-identical to the saved files in the raw zip; it just leaves the rest out.
+
 ## Muse
 
 - **`muse://new?text=` isn't real.** It only appears in a feature request for an
@@ -126,6 +153,14 @@ DATA_FETCHING_RESEARCH.md.)
   (2026-09-29)
 
 ## Signing / devices
+
+- **An App ID (developer account) is not an app record (App Store Connect).** Registering
+  `com.reutrabin.hindsight` with Private Cloud Compute made signing work, but TestFlight uploads also need
+  an app in App Store Connect using that bundle ID. Without it, `xcodebuild -exportArchive` (upload) fails
+  with "Error Downloading App Information" (`missingApp` in the distribution log). Created 2026-09-30;
+  first TestFlight build 0.1.0 (2) uploaded the same day. (2026-09-30)
+- TestFlight upload from the command line: archive (Release, `generic/platform=iOS`), then
+  `xcodebuild -exportArchive` with `method app-store-connect`, `destination upload`, `-allowProvisioningUpdates`.
 
 - **Being on a team as "App Manager" isn't enough to run on a device.** Xcode lists
   the team, but builds fail with `No Account for Team`. (2026-09-29)
