@@ -4,15 +4,19 @@ import Testing
 
 @MainActor
 struct OnboardingTests {
-    /// Connect is the first and only onboarding screen; the setup chat takes it
-    /// from there (docs/specs/onboarding-chat.md).
-    @Test func connectIsTheOnlyStep() {
-        #expect(OnboardingModel.Step.allCases == [.connect])
+    /// Welcome → How it works → Connect, then the setup chat takes it from there
+    /// (docs/specs/onboarding-chat.md).
+    @Test func threeStepsEndingAtConnect() {
+        #expect(OnboardingModel.Step.allCases == [.welcome, .howItWorks, .connect])
         let model = OnboardingModel()
-        #expect(model.step == .connect)
+        #expect(model.step == .welcome)
         #expect(!model.canGoBack)
         model.next()
-        model.back()
+        model.next()
         #expect(model.step == .connect)
+        model.next()
+        #expect(model.step == .connect)
+        model.back()
+        #expect(model.step == .howItWorks)
     }
 }

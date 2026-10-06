@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// The setup chat (docs/specs/onboarding-chat.md): one transcript from "got your
-/// saves" to "You're in". R1 receipt → R2 a taste → R3 reading & grouping (live)
-/// → B1–B5 the layout proposal (layout-proposal.md) → C the place check
-/// (confirm.md, opened from the chat) → done. Fixed wording with real numbers;
+/// The setup chat (docs/specs/onboarding-chat.md): one transcript from reading
+/// the saves to the finished layout. R3 reading & grouping (live) → B1–B5 the
+/// layout proposal (layout-proposal.md) → C the place check (confirm.md, opened
+/// from the chat) → the "You're in" screen (`DoneStep`). Fixed wording with real numbers;
 /// Apple's models do the sorting, not the talking.
 struct SetupChatView: View {
     let app: AppModel
@@ -11,7 +11,17 @@ struct SetupChatView: View {
 
     var body: some View {
         Group {
-            if let model {
+            if let model, model.stage == .done {
+                DoneStep(posts: model.receiptPosts) { model.finish() }
+                    .foregroundStyle(OnboardingStyle.text)
+                    .background(OnboardingStyle.background.ignoresSafeArea())
+                    .preferredColorScheme(.dark)
+                    .tint(OnboardingStyle.accent)
+                    .onChange(of: model.isFinished) { _, finished in
+                        if finished { app.finishSetup() }
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            } else if let model {
                 ChatContent(model: model, data: model.data, isSample: app.isSampleData)
                     .onChange(of: model.approvedConfig) { _, config in
                         if let config { app.approve(config) }
@@ -19,13 +29,11 @@ struct SetupChatView: View {
                     .fullScreenCover(isPresented: Binding(get: { model.isPlaceCheckOpen }, set: { if !$0 { model.placeCheckClosed() } })) {
                         ConfirmationFlow(app: app, mode: .fromChat) { model.placeCheckClosed() }
                     }
-                    .onChange(of: model.isFinished) { _, finished in
-                        if finished { app.finishSetup() }
-                    }
             } else {
                 Color.clear
             }
         }
+        .animation(.snappy(duration: 0.35), value: model?.stage == .done)
         .onAppear {
             guard model == nil else { return }
             if app.isMySaves {
@@ -50,13 +58,13 @@ struct SetupChatView: View {
 @MainActor
 final class SetupChatModel {
     enum Stage: String, Codable {
-        case receipt, reading                                   // R1–R3
+        case receipt, reading                                   // R3 (receipt: not started yet)
         case found, questions, proposal, editing, approved      // B1–B5
         case placeCheck, done                                   // C, end
     }
 
     struct Message: Identifiable, Codable, Equatable {
-        enum Kind: String, Codable { case bot, user, topics, question, preview, receipt, samples, progress }
+        enum Kind: String, Codable { case bot, user, topics, question, preview, progress }
         var id = UUID()
         var kind: Kind
         var text: String = ""
@@ -74,12 +82,12 @@ final class SetupChatModel {
     private(set) var progress: SortProgress?
     /// The place check deck is open (it's presented by the view).
     private(set) var isPlaceCheckOpen = false
-    /// "Open my app" tapped.
+    /// "Open hindsight" tapped on the last screen.
     private(set) var isFinished = false
 
     /// The sorted saves. Empty until the end of reading for the user's own saves.
     private(set) var data: HindsightData
-    /// What arrived (R1, R2): the user's imports, or the sample's posts.
+    /// What arrived: the user's imports, or the sample's posts.
     let receiptPosts: [ContractPost]
     private let placesStore: () -> PlaceStore
     private var places: PlaceStore { placesStore() }
@@ -155,13 +163,9 @@ final class SetupChatModel {
         save()
     }
 
-    // R1–R3
+    // R3
     private func start() async {
         stage = .receipt
-        await say(Self.receiptLine(receiptPosts), delay: .milliseconds(500))
-        await say("", kind: .receipt, delay: .milliseconds(250))
-        await say("Here's a taste of what's in there:", delay: .milliseconds(700))
-        await say("", kind: .samples, delay: .milliseconds(300))
         await read()
         guard let loaded = await loadData(), !loaded.posts.isEmpty else {
             await say("Hmm, I couldn't finish reading your saves. Close the app and open it again, and I'll pick up where I stopped.")
@@ -177,16 +181,6 @@ final class SetupChatModel {
         proposal = LayoutRules.propose(loaded)
         draft = proposal.draft
         assignment = LayoutRules.naturalAssignment(loaded)
-    }
-
-    /// "Got them. 412 saves: 324 from Instagram and 88 from X."
-    static func receiptLine(_ posts: [ContractPost]) -> String {
-        let counts = Platform.allCases.map { p in (p, posts.count { $0.platform == p }) }.filter { $0.1 > 0 }
-        let total = posts.count.formatted()
-        guard !counts.isEmpty else { return "Got them." }
-        if counts.count == 1 { return "Got them. \(total) saves from \(counts[0].0.displayName)." }
-        let parts = counts.map { "\($0.1.formatted()) from \($0.0.displayName)" }.formatted(.list(type: .and))
-        return "Got them. \(total) saves: \(parts)."
     }
 
     /// R3: one message that updates in place while the saves are sorted. Moves on
@@ -458,9 +452,11 @@ final class SetupChatModel {
         }
     }
 
+    /// The chat is over: after a beat to read the last line, the "You're in" screen takes its place.
     private func finishLine() async {
+        try? await Task.sleep(for: .milliseconds(1200))
         stage = .done
-        await say("You're in. 🎉", delay: .milliseconds(600))
+        save()
     }
 
     func finish() {
@@ -536,10 +532,6 @@ private struct ChatContent: View {
                     .padding(.horizontal, 14).padding(.vertical, 10)
                     .background(Theme.lime, in: .rect(cornerRadius: 18))
             }
-        case .receipt:
-            ReceiptCard(posts: model.receiptPosts)
-        case .samples:
-            TasteCards(posts: SetupChatModel.tastePosts(model.receiptPosts), data: data)
         case .progress:
             if let progress = model.progress {
                 ReadingBubble(progress: progress)
@@ -588,11 +580,7 @@ private struct ChatContent: View {
                             Button("Check them") { model.checkPlaces() }.buttonStyle(.pill)
                         }
                     }
-                case .done:
-                    if model.messages.last?.kind == .bot {
-                        Button("Open my app") { model.finish() }.buttonStyle(.pill)
-                    }
-                case .receipt, .reading, .found, .approved:
+                case .receipt, .reading, .found, .approved, .done:
                     EmptyView()
                 }
             }
@@ -622,70 +610,6 @@ private struct ChatContent: View {
         let text = typed
         typed = ""
         model.handleTyped(text)
-    }
-}
-
-extension SetupChatModel {
-    /// R2: the 3 newest saves, one per platform first, then the next newest.
-    static func tastePosts(_ posts: [ContractPost], count: Int = 3) -> [ContractPost] {
-        var picked: [ContractPost] = []
-        var platforms = Set<Platform>()
-        for post in posts where picked.count < count && platforms.insert(post.platform).inserted { picked.append(post) }
-        for post in posts where picked.count < count && !picked.contains(post) { picked.append(post) }
-        return picked
-    }
-}
-
-/// R1: one tile per platform with its count (Ariel's "You're in" numbers).
-private struct ReceiptCard: View {
-    let posts: [ContractPost]
-
-    var body: some View {
-        HStack(spacing: 8) {
-            ForEach(Platform.allCases) { platform in
-                let count = posts.count { $0.platform == platform }
-                VStack(spacing: 6) {
-                    PlatformGlyph(platform: platform, size: 30).clipShape(.rect(cornerRadius: 8))
-                    Text(count.formatted()).font(Theme.body(15, weight: .bold))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Theme.surface, in: .rect(cornerRadius: 16))
-                .opacity(count > 0 ? 1 : 0.35)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(platform.displayName): \(count)")
-            }
-        }
-    }
-}
-
-/// R2: a few real posts; tapping one opens it.
-private struct TasteCards: View {
-    let posts: [ContractPost]
-    let data: HindsightData
-    @Environment(\.openURL) private var openURL
-
-    var body: some View {
-        VStack(spacing: 8) {
-            ForEach(posts) { post in
-                Button { PostOpener.open(post, openURL: openURL) } label: {
-                    HStack(alignment: .top, spacing: 12) {
-                        PostLinkThumbnail(post: post, size: 48)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("@\(post.author.username)").font(Theme.body(14, weight: .bold))
-                            Text(post.caption ?? "No caption")
-                                .font(Theme.body(14))
-                                .foregroundStyle(post.caption == nil ? Theme.muted : Theme.secondary)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.leading)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .card(padding: 12)
-                }
-                .buttonStyle(.plain)
-            }
-        }
     }
 }
 

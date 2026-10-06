@@ -2,6 +2,13 @@
 
 Status: **accepted** (2026-09-30). Decisions 1–4 below were made by Reut, all as recommended. Owners: Reut (the chat), Ariel (the Connect screen and the data behind it). Part of [ADR-001](../merge-plan.md), where it replaces workstream O1.
 
+> **Revised 2026-10-06 (Reut + Ariel, after merging PR 16).** The flow is now: Ariel's **Welcome → How it works → Plug in your apps**, then **the chat**, then Ariel's **"You're in"** screen (`DoneStep`), then the tabs. What changed from the text below:
+> - Welcome and How it works are separate screens again; Connect keeps Ariel's "Plug in your apps." heading, with three step dots. The Preferences step stays removed.
+> - Connect keeps the Meta data-file import, "Start with N saves" (disabled at zero) and the sample-saves link (a testing aid for the beta; remove before the App Store release).
+> - The chat no longer shows the receipt (R1) or the taste cards (R2), and no longer ends with its own "You're in": it starts at reading (R3) and hands over to `DoneStep`, which shows the counts and the taste. No dots or back button there.
+> - Restarting onboarding (bug menu, Sources → "Run setup again") starts from Welcome.
+> - New installs still start with no seed; the bundled datasets are reachable from the bug menu's Data section.
+
 ## The problem
 
 Onboarding today is two flows glued together. Ariel's steps (welcome → how it works → connect) end, and then a second experience starts: "Whose saves are these?", then the proposal chat. Nothing carries over between them. The chat doesn't know what you just connected, and the moment your saves arrive (the payoff of all of Ariel's data work) goes by with no acknowledgement.

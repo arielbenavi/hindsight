@@ -17,6 +17,8 @@ struct OnboardingFlow: View {
             header
             Group {
                 switch model.step {
+                case .welcome: WelcomeStep(model: model)
+                case .howItWorks: HowItWorksStep(model: model)
                 case .connect: ConnectStep(model: model, store: store, onFinish: onFinish)
                 }
             }

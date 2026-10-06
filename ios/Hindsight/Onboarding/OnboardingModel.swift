@@ -10,16 +10,15 @@ enum OnboardingChoice: String, Sendable {
 @Observable
 @MainActor
 final class OnboardingModel {
-    /// Onboarding is one screen now: Connect. Everything after it happens in the
-    /// setup chat (docs/specs/onboarding-chat.md). Kept as a step list so more
-    /// screens can come back without touching the flow.
+    /// The screens before the setup chat (docs/specs/onboarding-chat.md). The chat
+    /// takes over after Connect and ends on `DoneStep`.
     enum Step: Int, CaseIterable {
-        case connect
+        case welcome, howItWorks, connect
     }
 
     static let completedKey = "hasCompletedOnboarding"
 
-    private(set) var step: Step = .connect
+    private(set) var step: Step = .welcome
     private(set) var isMovingForward = true
 
     init() {}

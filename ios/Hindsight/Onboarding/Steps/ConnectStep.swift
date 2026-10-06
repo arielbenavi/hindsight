@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The first screen of the app: bring your saves in. Once the user says they're
-/// done, the setup chat takes over (docs/specs/onboarding-chat.md).
+/// Bring your saves in. Once the user says they're done, the setup chat takes
+/// over (docs/specs/onboarding-chat.md).
 struct ConnectStep: View {
     let model: OnboardingModel
     let store: SavedPostStore
@@ -10,13 +10,8 @@ struct ConnectStep: View {
 
     var body: some View {
         OnboardingPage {
-            // Folded in from the old Welcome and How it works screens.
-            Text("Your saves,\nin \(Text("hindsight.").foregroundStyle(OnboardingStyle.accent))")
+            Text("Plug in\nyour apps.")
                 .font(OnboardingStyle.display())
-                .minimumScaleFactor(0.7)
-            Text("You've saved thousands of posts “for later”. This is later. Connect where you save things, and I'll build your app around them.")
-                .font(OnboardingStyle.body)
-                .foregroundStyle(OnboardingStyle.muted)
 
             SourceCards(store: store)
         } actions: {
@@ -24,6 +19,7 @@ struct ConnectStep: View {
                 .buttonStyle(.onboardingPrimary)
                 .disabled(importedCount == 0)
                 .opacity(importedCount == 0 ? 0.5 : 1)
+            // For testing during the beta; remove before the App Store release.
             Button("Just looking? Try it with sample saves") { onFinish(.sample) }
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.accent)
