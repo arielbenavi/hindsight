@@ -149,6 +149,9 @@ struct SavedPost: Identifiable, Codable, Hashable, Sendable {
         merged.language = language ?? other.language
         merged.onScreenText = onScreenText ?? other.onScreenText
         merged.transcript = transcript ?? other.transcript
+        // The bundled seed is someone else's saves: once the user imports the same
+        // post themselves, it's theirs (the sort engine skips seed records).
+        if source == .seedMD && other.source != .seedMD { merged.source = other.source }
         return merged
     }
 

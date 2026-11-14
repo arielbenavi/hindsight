@@ -1,0 +1,1411 @@
+[
+ {
+  "post_id": "instagram:DdWprhqRYoW",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Sparks by Coldplay: acoustic guitar tutorial",
+   "gist": "Beginner-friendly acoustic tutorial with tabs for Coldplay's Sparks.",
+   "try_prompt": "Learn the first riff of Sparks.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DdrSCzLxC1o",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Like a Tattoo by Sade: guitar tutorial",
+   "gist": "Guitar tutorial for Sade's Like a Tattoo.",
+   "try_prompt": "Learn the first riff of Like a Tattoo.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DcZMcfbpG7z",
+  "lego_screen": "fitness",
+  "topic_hint": "mobility-stretching",
+  "topic_label": "Mobility & stretching",
+  "routine": {
+   "title": "Top mobility moves",
+   "body_areas": [
+    "full_body"
+   ],
+   "goal": "mobility",
+   "exercises": [],
+   "est_minutes": null,
+   "equipment": [],
+   "do_prompt": null,
+   "is_thin": true,
+   "is_pain_related": false
+  },
+  "tip": {
+   "title": "Top mobility moves",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DdAO_iBMw_D",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DMDoKR-oEfi",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Shepherd's pie, a British classic",
+   "gist": "Rich shepherd's pie with a red-wine filling and buttery mash; full recipe on Substack.",
+   "try_prompt": "Open the Substack link in bio for the full shepherd's pie recipe.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:Dan0XonRrZ9",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Weeknight dinner recipe (link in comments)",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DbeL0vmxL6M",
+  "lego_screen": "none",
+  "topic_hint": "markets-finance",
+  "topic_label": "Markets & finance"
+ },
+ {
+  "post_id": "instagram:DaAGFPFACmk",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DXjclPgiV4D",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Andalusian cadence in D minor with open strings",
+   "gist": "A basic Andalusian cadence in D minor; letting open strings ring changes its color.",
+   "try_prompt": "Play an Andalusian cadence in D minor, letting open strings ring.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DZ3Sqzeh-0e",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Bossa nova chord progressions",
+   "gist": null,
+   "try_prompt": "Learn one of the bossa nova chord progressions.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DWAHKMFkb14",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DXfejbNiorD",
+  "lego_screen": "none",
+  "topic_hint": "markets-finance",
+  "topic_label": "Markets & finance"
+ },
+ {
+  "post_id": "instagram:DYnKKskBBp5",
+  "lego_screen": "none",
+  "topic_hint": "markets-finance",
+  "topic_label": "Markets & finance"
+ },
+ {
+  "post_id": "instagram:C-S2J5SIzC4",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "חומוס ביתי",
+   "gist": "מתכון לחומוס ביתי מגרגירים יבשים או משימורים, עם טחינה, לימון, שום וכמון.",
+   "try_prompt": "טחנו חומוס, טחינה, לימון, שום, כמון ומלח במעבד מזון.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "נשרה את הגרגירים ל-12 שעות עם סודה לשתיה ונבשל כשעה וחצי",
+    "אפשר להשתמש בשתי קופסאות שימורים",
+    "נטחן את כל המצרכים במעבד מזון עד למרקם שאוהבים",
+    "נעביר למקרר לחצי שעה להתייצבות"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DXUVfOdjH5J",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "פיתות וחומוס ביתי",
+   "gist": "מתכון ל-8 פיתות גדולות במחבת או בתנור, ולחומוס ביתי משימורים עם טחינה.",
+   "try_prompt": "טחנו חומוס משימורים עם טחינה, לימון, מים קרים, מלח וכמון.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "לשים את הבצק כ-15 דקות ומתפיחים שעה-שעה וחצי",
+    "מחלקים לכדורים של 100 גרם ונותנים לנוח 15 דק׳",
+    "במחבת: הופכים כל חצי דקה, סך הכל 2 דקות",
+    "בתנור: 270 מעלות, 3-4 דקות"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C8wXxiuIdrp",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "חומוס ביתי ב-3 דקות עבודה",
+   "gist": "חומוס משימורים עם טחינה, שום, לימון, מלח, פלפל וכמון, טחון בבלנדר.",
+   "try_prompt": "טחנו פחית חומוס עם חצי כוס טחינה, לימון, שום וכמון בבלנדר.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "טוחנים הכל ביחד בבלנדר עד מרקם חלק",
+    "אל תוותרו על הכמון",
+    "מספיק ל-2 מנות, שומרים במקרר עד 3 ימים"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C5nNxTfutnO",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "חומוס ביתי של המטבח של נורה",
+   "gist": "מתכון מפורט לחומוס ביתי חלק, מהמטבח הדרוזי של נורה בדאלית אל כרמל.",
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DVbyCrjgdcy",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Cucumber salad",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DTiPMImDDUx",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "פיתות כוסמין מלא במחבת",
+   "gist": "מתכון ל-20 פיתות מקמח כוסמין מלא במחבת, כולל הקפאה וחימום.",
+   "try_prompt": "לושו קמח כוסמין מלא, מים, מלח, סוכר ושמרים 3–5 דקות.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "לא ללוש יותר מ-5 דקות",
+    "מרדדים לעובי ½ ס״מ ומתפיחים עוד 30 דקות",
+    "מחבת נון סטיק על אש בינונית גבוהה, הופכים כל חצי דקה",
+    "מתאים לקמח כוסמין מלא בלבד"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DWJv8RxDCBU",
+  "lego_screen": "none",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes"
+ },
+ {
+  "post_id": "instagram:DXMOiyijFtS",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "אוניגירי דג מרוקאי",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DW_AZAYjIUY",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "פיתות במחבת (10 פיתות)",
+   "gist": "מתכון ל-10 פיתות במחבת, עם טיפים למה לא נוצר כיס בפיתה.",
+   "try_prompt": "רדדו כדור בצק לדיסקית אחידה בעובי ½ ס״מ.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "רידוד אחיד, בלי חורים או חריצים",
+    "הופכים את הפיתה כל כ-30 שניות",
+    "עוטפים מיד במגבת כדי לשמור על רכות",
+    "למה אין כיס: המחבת לא חמה מספיק או רידוד לא אחיד"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVgjsafDOyZ",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "גבעות מבצק ללא לישה",
+   "gist": "בצק ללא לישה, קל להכנה; המתכון נשלח בהודעה פרטית.",
+   "try_prompt": "כתבו מתכון בתגובות כדי לקבל את הלינק למתכון.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "מתכון",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:CzyEREBIGT2",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "ג׳חנון ביתי פשוט",
+   "gist": "ג׳חנון ביתי מ-500 גרם קמח, עם דבש/סילאן וחמאה, נאפה בלילה על 100 מעלות.",
+   "try_prompt": "לושו את חומרי הבצק עד שהוא מתנתק מדפנות הקערה.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "מחלקים ל-6 כדורים של 100 גרם ומכסים בשמן",
+    "נותנים לנוח לפחות שעה (מומלץ שעתיים-שלוש)",
+    "מותחים דק, מורחים חמאה, מקפלים ומגלגלים",
+    "אופים 10-15 שעות על 100 מעלות"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:CynJPqdsj4K",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "ג׳חנון רך",
+   "gist": "ג׳חנון מ-1 ק״ג קמח עם סילאן ודבש, 14-16 יחידות, אפייה לילה על 100 מעלות.",
+   "try_prompt": "לושו את המצרכים במהירות איטית כ-5-7 דקות.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "מחלקים ל-14-16 כדורים ומכסים בשמן לשעתיים",
+    "פותחים לעלה דקיק ומורחים מזולה/חמאה",
+    "אופים על 100 מעלות לילה שלם, לא טורבו"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVtarDEjcvW",
+  "lego_screen": "map",
+  "topic_hint": "travel-athens",
+  "topic_label": "Athens travel",
+  "places": [
+   {
+    "name": "Minu",
+    "handle": "minu.athens",
+    "area_hint": "Athens",
+    "address": null,
+    "type": "cafe",
+    "reason": "A very cool cafe in Athens",
+    "evidence": "@minu.athens",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DYcbCoiIKK1",
+  "lego_screen": "learn",
+  "topic_hint": "ui-ux-design",
+  "topic_label": "UI/UX design",
+  "tip": {
+   "title": "When to use which loading experience",
+   "gist": "Part 3 of a UX series: the different loading experiences and when to use each.",
+   "try_prompt": "Pick the right loading pattern for one screen in your app.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DYKHL5jFIfK",
+  "lego_screen": "learn",
+  "topic_hint": "travel-athens",
+  "topic_label": "Athens travel",
+  "tip": {
+   "title": "Athens travel guide",
+   "gist": "A guide to Athens; comment ATHENS to get the link by DM.",
+   "try_prompt": "Comment ATHENS on the post to get the guide.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": "ATHENS",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DX-I_Lgsxfx",
+  "lego_screen": "none",
+  "topic_hint": "misc",
+  "topic_label": "Misc"
+ },
+ {
+  "post_id": "instagram:DWbW2V5jHLY",
+  "lego_screen": "map",
+  "topic_hint": "travel-athens",
+  "topic_label": "Athens travel",
+  "places": [
+   {
+    "name": "Bar Ideal",
+    "handle": null,
+    "area_hint": "Athens",
+    "address": null,
+    "type": "bar",
+    "reason": "Athens icon since 1900: cocktails, food, retro vibe",
+    "evidence": "Bar Ideal is an Athens icon and has been here since 1900.",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DXGcOlgsXSr",
+  "lego_screen": "map",
+  "topic_hint": "travel-athens",
+  "topic_label": "Athens travel",
+  "places": [
+   {
+    "name": "Baba au Rum",
+    "handle": null,
+    "area_hint": "Athens",
+    "address": null,
+    "type": "bar",
+    "reason": "The retro bars are right across from it",
+    "evidence": "right across from Baba au Rum",
+    "evidence_kind": "plain_text",
+    "confidence": "low"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DWm5QRLkRLh",
+  "lego_screen": "fitness",
+  "topic_hint": "mobility-stretching",
+  "topic_label": "Mobility & stretching",
+  "routine": {
+   "title": "Upper back stretch",
+   "body_areas": [
+    "upper_back"
+   ],
+   "goal": "mobility",
+   "exercises": [],
+   "est_minutes": null,
+   "equipment": [],
+   "do_prompt": null,
+   "is_thin": true,
+   "is_pain_related": false
+  },
+  "tip": {
+   "title": "Upper back stretch",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DXEjAODCKjE",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DWnH7YKD4mW",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Japanese soy-mirin sauce",
+   "gist": "Sugar, mirin, soy sauce and water brought to a boil (ginger and garlic optional).",
+   "try_prompt": "Mix 1 tbsp sugar, 2 tbsp mirin, 4 tbsp soy, 3 tbsp water; bring to a boil.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "Sugar - 1tbsp",
+    "Mirin - 2tbsp",
+    "Soy sauce - 4tbsp",
+    "Water - 3tbsp"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DWTrR7XDNYJ",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "סינימיניז ביתיים",
+   "gist": "גרסה ביתית לסינימיניז: בצק חמאה, ציפוי סוכר קינמון, אפייה על 170 מעלות.",
+   "try_prompt": "ערבבו במעבד מזון את היבשים עם החמאה הקרה לבצק אחיד.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "מקררים את הבצק חצי שעה",
+    "מרדדים דק בין שני ניירות אפיה",
+    "מברישים חמאה ומפזרים סוכר קינמון משני הצדדים",
+    "אופים על 170 מעלות כ-20-25 דקות"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVCtWYmj-Vl",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "The perfect steak",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DWD-k--DBjR",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "חמאה ביתית",
+   "gist": "מקציפים שמנת 38% עד שמתפרקת, שוטפים במי קרח ומוסיפים מלח.",
+   "try_prompt": "הקציפו שמנת מתוקה במיקסר עד שהיא מתפרקת לחמאה.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "ליטר שמנת 38%",
+    "לכסות את המיקסר בניילון נצמד כשהשמנת מתפרקת",
+    "לשטוף את החמאה במי קרח ולסחוט",
+    "לשמור את הריוויון לפנקייקים או אפיה"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DWFNhGDj05N",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "5 marinadas simples para frango",
+   "gist": "Cinco marinadas simples para mudar o sabor do frango do dia a dia.",
+   "try_prompt": "Escolha uma das 5 marinadas e deixe o frango marinando 1 hora.",
+   "tip_type": "list",
+   "key_points": [
+    "Marinada tailandesa",
+    "Marinada cremosa de ervas",
+    "Marinada agridoce",
+    "Marinada oriental",
+    "Marinada refrescante"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DWBukqaDszK",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Bacon & avocado breakfast bagel",
+   "gist": "Bagel toasted in butter with eggs cooked around it, chili aioli, bacon and avocado.",
+   "try_prompt": "Toast a bagel face down in butter, then crack 2 eggs around it.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "Toast bagel halves face down in butter",
+    "Crack 2 eggs over and around the bagel",
+    "Flip everything in one piece and fold egg edges over",
+    "Add chili aioli, crispy bacon and avocado"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DUJilVJEZOB",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Dumpling lasagna",
+   "gist": "The viral trend: dumplings layered like lasagna.",
+   "try_prompt": "Layer dumplings like a lasagna.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DUqfSTDjCdh",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Braised beef cheeks",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DVd_GKyDNY8",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Steak frites with peppercorn sauce",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DT-sBxQjTrH",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "שניצל ופסטה אדומה בסיר אחד",
+   "gist": "פסטה אדומה בסיר אחד עם רסק עגבניות ושניצל קריספי בשומשום ופנקו.",
+   "try_prompt": "פתחו שום ותבלינים בשמן בסיר והוסיפו 2 כפות רסק עגבניות.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "מבשלים את הפסטה הלא מבושלת ישר ברוטב עם 3-4 כוסות מים",
+    "מכסים ונותנים למים להצטמצם עוד 7-8 דקות",
+    "מתבלים את הביצים לשניצל עם מיונז וחרדל",
+    "מצפים בשומשום ופירורי לחם/פנקו ומטגנים"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DUEV7ybDYpK",
+  "lego_screen": "none",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools"
+ },
+ {
+  "post_id": "instagram:DU_mSPDgvXe",
+  "lego_screen": "learn",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools",
+  "tip": {
+   "title": "AI motion workflow with After Effects skills",
+   "gist": "Build black-and-white mattes, curate reference images for look-dev, and let Kling render via a node graph.",
+   "try_prompt": "Build a simple black-and-white matte for a shot you want AI to render.",
+   "tip_type": "technique",
+   "key_points": [
+    "Build structural black-and-white mattes",
+    "Curate high-level reference images for look-dev",
+    "Let Kling handle the heavy lifting through your node graph"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DSVXKrvjPeW",
+  "lego_screen": "none",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools"
+ },
+ {
+  "post_id": "instagram:DVBp5vCiINp",
+  "lego_screen": "learn",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools",
+  "tip": {
+   "title": "AI video + Figma for a website concept",
+   "gist": "Generate a cinematic hero video with Kling 3.0 in Higgsfield, then build the hero in Figma and prototype.",
+   "try_prompt": "Drop an AI-generated hero video into a Figma frame and hit Prototype.",
+   "tip_type": "technique",
+   "key_points": [
+    "Generate a cinematic hero video in Higgsfield using Kling 3.0",
+    "Guide the look with two image references",
+    "Design a clean hero layout in Figma with the video in the frame",
+    "Switch to Prototype"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DU0UntsEgTv",
+  "lego_screen": "learn",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools",
+  "tip": {
+   "title": "Prompt for a high-end product ad",
+   "gist": "A timed, scene-by-scene AI video prompt for a commercial ad of a juice can.",
+   "try_prompt": "Adapt the scene-by-scene prompt to a product of your own.",
+   "tip_type": "idea",
+   "key_points": [
+    "00:00 - 00:02 (The Rapid Entry)",
+    "00:02 - 00:04 (The Slice & Expansion)",
+    "00:04 - 00:07 (The Suspended Float)",
+    "00:07 - 00:08 (The Snap Close)",
+    "00:08 - 00:10 (The Loop Exit)"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVMEOfTEcqd",
+  "lego_screen": "learn",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools",
+  "tip": {
+   "title": "Adobe Firefly Quick Cut",
+   "gist": "Quick Cut builds a starter edit from lots of clips so you can focus on the creative parts.",
+   "try_prompt": "Run your clips through Firefly Quick Cut for a starter edit.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVGE_L8AKL2",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DUTN7-ijcp1",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "One-pot noodle recipe",
+   "gist": "Recipe sent by DM when you comment \"Recipe\".",
+   "try_prompt": "Comment Recipe on the post to get the recipe.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "Recipe",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVBUjdCiDdE",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Build a website fast with Google Antigravity",
+   "gist": "A process for building any website in minutes with Antigravity; comment Nike for the guide.",
+   "try_prompt": "Comment Nike on the post to get the guide.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": "Nike",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DVKgkKPDCjr",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Stuffed onions",
+   "gist": "Like stuffed peppers with a glow-up, and easier than you'd think; full recipe linked.",
+   "try_prompt": "Comment RECIPE on the post to get the stuffed onions recipe.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "RECIPE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DSFmy6WjlVd",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Honey miso short ribs",
+   "gist": "Seared short ribs braised with miso, soy, sake, honey and stock at 325f for 3 hours.",
+   "try_prompt": "Sear seasoned short ribs hard on all sides.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "Season well and sear hard on all sides",
+    "Deglaze with sake, add honey, soy, star anise",
+    "Cover with stock, cook at 325f covered for 3 hours",
+    "Thicken the strained liquid with a cornstarch slurry",
+    "Serve over mashed potato with sliced green onion"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DU-vnf_DBYn",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "ג׳חנון עם סחוג",
+   "gist": "ג׳חנון מ-1 ק״ג קמח עם דבש, חמאה וסוכר חום, וסחוג ירוק בבלנדר.",
+   "try_prompt": "טחנו בבלנדר פלפלים ירוקים חריפים, שום, לימון, כוסברה ושמן לסחוג.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "לשים 10 דק על מהירות נמוכה",
+    "מכסים את הכדורים בשמן ומניחים 6-8 שעות",
+    "מרדדים דק, מורחים חמאה מומסת, מקפלים ומגלגלים",
+    "אופים על 100 מעלות למשך הלילה (כ-10 שעות)"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DQW32A0jcGK",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Crispy beef tacos",
+   "gist": "Cheesy ground beef tacos in a crispy tortilla shell with cilantro lime sauce.",
+   "try_prompt": "Open the website link in bio for the full recipe.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DU3g0OVjdOp",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Dumpling tacos",
+   "gist": "Dumplings turned into golden, crunchy tacos.",
+   "try_prompt": "Comment RECIPE on the post to get the recipe.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": "RECIPE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DU_GFRLDNFh",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Short rib ragu",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DT1SObDAAgj",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:DUDqxTVEX4v",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DU19ejqDcPY",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Getting people to pay for vibe-coded apps",
+   "gist": "A case study versus Cal AI on monetizing vibe-coded apps.",
+   "try_prompt": "Look at how Cal AI gets users to pay.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DU04eKukXle",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DToAYarAYuJ",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DUYMVSlDZnd",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Security checks for AI-coded apps",
+   "gist": "10 more security checks for AI-coded apps, each takes about 2 minutes.",
+   "try_prompt": "Check your app against one security item from the slides.",
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DP2S6SngSsa",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Guide to generating revenue from an app",
+   "gist": "Full guide sent when you comment \"info\".",
+   "try_prompt": "Comment info on the post to get the guide.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "info",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DScxVeIDY10",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "3 MCP servers for coding with AI",
+   "gist": "21st Dev Magic for UI components, Browser MCP for testing sites, Context7 for up-to-date docs.",
+   "try_prompt": "Comment CODING on the post to get the links to the 3 MCPs.",
+   "tip_type": "list",
+   "key_points": [
+    "21st Dev Magic MCP: generates UI components from plain English",
+    "Browser MCP: lets your AI test websites like a real user",
+    "Context7: up-to-date code documentation for any prompt"
+   ],
+   "cta_keyword": "CODING",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DUDroabDeOP",
+  "lego_screen": "learn",
+  "topic_hint": "ui-ux-design",
+  "topic_label": "UI/UX design",
+  "tip": {
+   "title": "UI libraries for AI coding agents",
+   "gist": "Component libraries that AI coding agents can copy-paste from.",
+   "try_prompt": "Comment LIBRARY on the post to get the links.",
+   "tip_type": "list",
+   "key_points": [
+    "Tailwind UI",
+    "Hero UI",
+    "Nextra",
+    "Skiper UI",
+    "Tremor"
+   ],
+   "cta_keyword": "LIBRARY",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DNLOcLju388",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Ludus EP02: vibecoding school",
+   "gist": "Episode 2 of a vibecoding school; comment assignment for the instructions.",
+   "try_prompt": "Comment assignment on the post to get the instructions.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "assignment",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DUNIdfyjExj",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DUUCQYBDnkn",
+  "lego_screen": "none",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding"
+ },
+ {
+  "post_id": "instagram:DTM39qNjhwK",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:DUOTWCQCapG",
+  "lego_screen": "learn",
+  "topic_hint": "diy-maker",
+  "topic_label": "DIY & making",
+  "tip": {
+   "title": "Open a device before you trash it",
+   "gist": "A $150 HP dock fixed in 60 seconds by opening it up.",
+   "try_prompt": "Open up a broken device and take a look before trashing it.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DULgRKUDV0J",
+  "lego_screen": "learn",
+  "topic_hint": "ai-coding",
+  "topic_label": "AI coding & vibe coding",
+  "tip": {
+   "title": "Run Claude Code free with Ollama",
+   "gist": "Run Claude Code locally with open-source Ollama models, no API costs; comment CODE for the guide.",
+   "try_prompt": "Comment CODE on the post to get the full guide.",
+   "tip_type": "tutorial",
+   "key_points": [
+    "Install Ollama",
+    "Download an open-source coding model",
+    "Launch Claude Code from your terminal"
+   ],
+   "cta_keyword": "CODE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DT5lnWOERH4",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Steak au poivre",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DTN5IzKFkXQ",
+  "lego_screen": "none",
+  "topic_hint": "diy-maker",
+  "topic_label": "DIY & making"
+ },
+ {
+  "post_id": "instagram:DOJKRlskUTG",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "How to make latte art",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DUBfU5Gjdr8",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Butter chicken with Dhungar smoking",
+   "gist": "Butter chicken done properly: the Dhungar technique adds tandoor-style smokiness at home.",
+   "try_prompt": "Read up on the Dhungar smoking technique for your next curry.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DQMk4ZXjkf7",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Bacon egg and cheese mcmuffins",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C_I1c6OpKFo",
+  "lego_screen": "learn",
+  "topic_hint": "cooking-recipes",
+  "topic_label": "Cooking & recipes",
+  "tip": {
+   "title": "Breakfast burritos",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DNkw3MlIAPk",
+  "lego_screen": "learn",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools",
+  "tip": {
+   "title": "AI tool for motion graphics",
+   "gist": "Describe an animation or upload an image, refine it, and export in any format.",
+   "try_prompt": "Describe a short animation to an AI motion graphics tool.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DNDfOcVO2RL",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "Home espresso machine setup",
+   "gist": "A Rocket espresso machine at home; next up a nicer cup and a bottomless portafilter.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DTMh1xKErxC",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DTIzqvPjJ2l",
+  "lego_screen": "none",
+  "topic_hint": "home-interiors",
+  "topic_label": "Home interiors"
+ },
+ {
+  "post_id": "instagram:DSd9t4lESTN",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "Tool cart for a coffee bar",
+   "gist": "A tool cart made a huge change to this home coffee bar setup.",
+   "try_prompt": "Try organising your coffee tools on a rolling cart.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DSA7mVPD9in",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:DTTQL6BkqeJ",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "Salted maple black sesame latte",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DTP1NTsjJA5",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DQg9kR7AnGh",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DOoH953kZLF",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "Breville Oracle + Varia VS3 coffee bar",
+   "gist": "Current setup: Breville Oracle dual boiler machine and Varia VS3 grinder.",
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [
+    "Machine: Breville Oracle dual boiler",
+    "Grinder: Varia VS3"
+   ],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DR4dsAQCOMw",
+  "lego_screen": "none",
+  "topic_hint": "home-interiors",
+  "topic_label": "Home interiors"
+ },
+ {
+  "post_id": "instagram:DQUJU4OjVyH",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "At-home coffee bar inspo",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DT2tIONDKxi",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DTnUbPnjdgw",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "La Marzocco Pico grinder for a coffee corner",
+   "gist": "Coffee corner upgrade with the La Marzocco Pico grinder: fast, consistent dialing.",
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DNXNwTSs4EY",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DN303gAUABP",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DQmMVacEbdy",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DTgKWTfDboH",
+  "lego_screen": "none",
+  "topic_hint": "home-interiors",
+  "topic_label": "Home interiors"
+ },
+ {
+  "post_id": "instagram:DSHeOAcDXKY",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DM-MExCMVrC",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:DQ1ZDVdirXg",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DSXe7YPjM1C",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DP3AcGmjK1i",
+  "lego_screen": "map",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "places": []
+ },
+ {
+  "post_id": "instagram:DS5kj9yjObS",
+  "lego_screen": "none",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups"
+ },
+ {
+  "post_id": "instagram:DTNMvcTgoUp",
+  "lego_screen": "none",
+  "topic_hint": "home-interiors",
+  "topic_label": "Home interiors"
+ },
+ {
+  "post_id": "instagram:DN6HKHLD8GA",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News"
+ },
+ {
+  "post_id": "instagram:DRrkdq6CDE5",
+  "lego_screen": "none",
+  "topic_hint": "home-interiors",
+  "topic_label": "Home interiors"
+ },
+ {
+  "post_id": "instagram:DU5Lu_HjeiR",
+  "lego_screen": "learn",
+  "topic_hint": "home-coffee-setups",
+  "topic_label": "Home coffee setups",
+  "tip": {
+   "title": "Organised coffee station on a shelf",
+   "gist": "Coffee station relocated onto a Flate barista shelf with Laybird tools, everything in its place.",
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DQ6GJBwjFU4",
+  "lego_screen": "none",
+  "topic_hint": "ai-creative-tools",
+  "topic_label": "AI creative tools"
+ },
+ {
+  "post_id": "instagram:DUQr4ptEV0b",
+  "lego_screen": "none",
+  "topic_hint": "misc",
+  "topic_label": "Misc"
+ },
+ {
+  "post_id": "instagram:DUnrZcFDHgi",
+  "lego_screen": "none",
+  "topic_hint": "ui-ux-design",
+  "topic_label": "UI/UX design"
+ }
+]

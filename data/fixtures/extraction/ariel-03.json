@@ -1,0 +1,1331 @@
+[
+ {
+  "post_id": "instagram:DA8lCoutJVV",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:DA8dJuGuXuU",
+  "lego_screen": "fitness",
+  "topic_hint": "workouts",
+  "topic_label": "Workouts",
+  "routine": {
+   "title": "Realistic boxing bagwork",
+   "body_areas": [
+    "full_body"
+   ],
+   "goal": "strength",
+   "exercises": [],
+   "est_minutes": null,
+   "equipment": [
+    "other"
+   ],
+   "do_prompt": null,
+   "is_thin": true,
+   "is_pain_related": false
+  },
+  "tip": {
+   "title": "Make your boxing bagwork more realistic",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DA6Yvp0xC4f",
+  "lego_screen": "learn",
+  "topic_hint": "nyc-tips",
+  "topic_label": "NYC tips",
+  "tip": {
+   "title": "$9 Uber rides from Manhattan to LGA",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DA6RRjqS2Wn",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Presets behind \"Please Please Please\"",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DA3g6l4yr7T",
+  "lego_screen": "learn",
+  "topic_hint": "money-career",
+  "topic_label": "Money & career",
+  "tip": {
+   "title": "Hack for getting job referrals fast",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:DApPnQKPVn8",
+  "lego_screen": "learn",
+  "topic_hint": "money-career",
+  "topic_label": "Money & career",
+  "tip": {
+   "title": "Buy your first rental with under $10k down",
+   "gist": "Buys $60-80k properties, putting $8-12k down per deal.",
+   "try_prompt": "Comment SECTION 8 on the post to learn the rental strategy.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": "SECTION 8",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DAgQ4ZeuM2p",
+  "lego_screen": "map",
+  "topic_hint": "nyc-spots",
+  "topic_label": "NYC things to do",
+  "places": [
+   {
+    "name": "Central Park",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "other",
+    "reason": "secret code in the park",
+    "evidence": "Central Park NYC",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DAdYa-OOhNv",
+  "lego_screen": "map",
+  "topic_hint": "nyc-spots",
+  "topic_label": "NYC things to do",
+  "places": [
+   {
+    "name": "World Trade Center",
+    "handle": "wtc",
+    "area_hint": "Lower Manhattan, New York",
+    "address": null,
+    "type": "other",
+    "reason": "fun and cheap things to do nearby",
+    "evidence": "@wtc",
+    "evidence_kind": "mention",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:DAZGtxEIcZN",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:DAWnI7-t-Xs",
+  "lego_screen": "none",
+  "topic_hint": "misc",
+  "topic_label": "Misc"
+ },
+ {
+  "post_id": "instagram:DATQH3jiKu7",
+  "lego_screen": "learn",
+  "topic_hint": "money-career",
+  "topic_label": "Money & career",
+  "tip": {
+   "title": "MrBeast's internal production memo",
+   "gist": "MrBeast wrote a 36-page internal memo called How to Succeed in MrBeast Production.",
+   "try_prompt": "Look up the memo \"How to Succeed in MrBeast Production\".",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:DAKnwNUxAnb",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:DAG6h_7gLNE",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C__0bO6N3N8",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C_-MtkwNm-N",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C_0pD3OOt8s",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-7k9DYtSwa",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-463B0Mi-i",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-1LSa-Ry_X",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C-tBVczyrsR",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Spotify experiment to push your music",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-rzGWHgYyl",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-pwproO2H7",
+  "lego_screen": "learn",
+  "topic_hint": "nyc-tips",
+  "topic_label": "NYC tips",
+  "tip": {
+   "title": "Free NYC traffic light photos",
+   "gist": "A camera site by Brooklyn artist @wttdotm lets you take free NYC traffic light pictures.",
+   "try_prompt": "Find the camera site by @wttdotm and take a traffic light photo.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C-dPpoSsaTJ",
+  "lego_screen": "learn",
+  "topic_hint": "life-hacks",
+  "topic_label": "Tips & how-tos",
+  "tip": {
+   "title": "African dance steps",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-PNat0MX9U",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C9-V8TGOXxM",
+  "lego_screen": "map",
+  "topic_hint": "nyc-spots",
+  "topic_label": "NYC things to do",
+  "places": [
+   {
+    "name": "South Mountain Reservation",
+    "handle": null,
+    "area_hint": null,
+    "address": null,
+    "type": "other",
+    "reason": "fun day trip, 37 min train from NYC",
+    "evidence": "South Mountain Reservation",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   },
+   {
+    "name": "Turtle Back Zoo",
+    "handle": null,
+    "area_hint": null,
+    "address": null,
+    "type": "other",
+    "reason": "fun day trip, 37 min train from NYC",
+    "evidence": "Turtle Back Zoo",
+    "evidence_kind": "pin_emoji",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C_xmH7oMknu",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C_n-naPRRkY",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Live stream your DAW to Instagram",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C_kJdDYowt0",
+  "lego_screen": "learn",
+  "topic_hint": "life-hacks",
+  "topic_label": "Tips & how-tos",
+  "tip": {
+   "title": "דיבור שוטף באנגלית",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C_VWp5WoyMF",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C_JKNziRgyb",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Fadr finds key, scale & chords of any song",
+   "gist": "Fadr automatically finds the key, scale & chord progression of anything you drop into it.",
+   "try_prompt": "Comment fadr on the post to get the link.",
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": "fadr",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C_AYs1FMQZw",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "FL Studio beat trick",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-sPIxkuiJB",
+  "lego_screen": "map",
+  "topic_hint": "nyc-spots",
+  "topic_label": "NYC things to do",
+  "places": [
+   {
+    "name": "The High Line",
+    "handle": null,
+    "area_hint": "New York",
+    "address": null,
+    "type": "other",
+    "reason": "giant pigeon statue \"Dinosaur\" in October",
+    "evidence": "High Line Plinth",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C-pyvyyty1K",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-otrKlMSzC",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Side-chain for a pumping kick sound",
+   "gist": "Get the pumping sound around the kick, used in Daft Punk songs, with side-chaining.",
+   "try_prompt": "Side-chain a track to your kick to get the pumping effect.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C-iph3yyMJ5",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Melody breakdown for a LaRussell beat",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-huyXuslpJ",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C-YTBQ1RODm",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-YPTBsph3U",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Low-end treatment on vocals",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-N8RRwMRcC",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Favorite VST plugins",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C-FHODqtJy386i4aEkTS_hGghHYl8zb8UIE0h80",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C-DAH5RtlGv",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C95Hyukx4HX",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Production trick + 2,000 free samples",
+   "gist": "A production trick, plus 2,000+ free samples if you comment FREEBIE.",
+   "try_prompt": "Comment FREEBIE on the post to get the 2,000+ free samples.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": "FREEBIE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C9vMflWtUCZ",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C9kOi9JRR09",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Creative FX with Fruity Delay 3",
+   "gist": "Use Fruity Delay 3 to create original delays and other FX.",
+   "try_prompt": "Load Fruity Delay 3 on a sound and try an original delay.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C9kNkaNpZ_h",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Dua Lipa's vocal chain",
+   "gist": "Screenshots of Dua Lipa's actual vocal session settings by DJ Swivel.",
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C9kDxpxyksF",
+  "lego_screen": "learn",
+  "topic_hint": "life-hacks",
+  "topic_label": "Tips & how-tos",
+  "tip": {
+   "title": "4 cuts to spice up your videos",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C9fpxJKRV9m",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C9egocxtLYx",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C9ceQixpLLd",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Steven Slate vocal chain",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C9ZwmZZoyHh",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C9FBjvVMEGz",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "9th Wonder on why sampling is hard",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C9DFd6FR0i0",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Reverb melody effect with automation",
+   "gist": "Quick reverb melody effect using automation in FL Studio.",
+   "try_prompt": "Automate the reverb on a melody in FL Studio.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C9Ab8FuuFC1",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C82xerGxQvL",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "How to make Pluggnb melodies",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C82Dt5WpW6h",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Plugin for recording vocals at home",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C8wkZ2Msgys",
+  "lego_screen": "none",
+  "topic_hint": "misc",
+  "topic_label": "Misc"
+ },
+ {
+  "post_id": "instagram:C8uttLjRIZd",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8sUspwSkad",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C8r3kA9B9t0",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8ruhqcur4i",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C8ho2NINmCd",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8hjYhzp1IQ",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C8fBUP7Jl9L",
+  "lego_screen": "learn",
+  "topic_hint": "design-inspo",
+  "topic_label": "Design inspo",
+  "tip": {
+   "title": "Pen and Pixel 90s album covers",
+   "gist": "Pen and Pixel designed some of the most iconic 90s hip-hop album covers.",
+   "try_prompt": "Look up Pen and Pixel's 90s hip-hop album covers.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C8cPwrFuXdq",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Fills between chords",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C8aytQgsM-0",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8aovUCvubu",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Ambient pad from any sound in FL Studio",
+   "gist": "How to make an ambient pad out of any sound in FL Studio.",
+   "try_prompt": "Comment fl studio on the post to get the free cheat sheet.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "fl studio",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C8SUsEfu37W",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C8NKjPlsGmr",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8MvjqdRZ9d",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "The \"Drake Effect\" in FL Studio",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C8LFFfDM8Eg",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C8JpsXFoQeN",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8Ds98vx4rJ",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C8C6ybZs9qC",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C7-C4lCSAH5",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Double stops on guitar",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C77v_ies33J",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C74anHgOKBy",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C71km2wAX6_",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Harmony recording technique in FL Studio",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7zdiTePMsB",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C7zLnEfsG4H",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Little-known FL Studio trick",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7yiCkBMhgi",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "EQ groupings for mixing",
+   "gist": "Common EQ themes and groupings that come up regularly in mixing.",
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C7tosTnsILj",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Split frequencies in FL Studio",
+   "gist": "Splitting frequencies in FL Studio, used for mixing bass and 808s.",
+   "try_prompt": "Split the frequencies of your 808 in FL Studio.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C7r4uoxoWOz",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C7qJNJDNIp6",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Bainz vocal chain",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7pzrHxP0yL",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C7ou6vSuOqs",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Best Omnisphere keyboard presets",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7oBVNoO7-i",
+  "lego_screen": "map",
+  "topic_hint": "israel-trips",
+  "topic_label": "Israel trips & beaches",
+  "places": [
+   {
+    "name": "חוף דור החדש",
+    "handle": null,
+    "area_hint": null,
+    "address": null,
+    "type": "other",
+    "reason": "לגונות רחבות ידיים עם שרידים עתיקים",
+    "evidence": "חוף דור החדש",
+    "evidence_kind": "plain_text",
+    "confidence": "high"
+   }
+  ]
+ },
+ {
+  "post_id": "instagram:C7mGvCwtMNJ",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C7hQnR3IRDa",
+  "lego_screen": "learn",
+  "topic_hint": "design-inspo",
+  "topic_label": "Design inspo",
+  "tip": {
+   "title": "Free fonts",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7cqSJSs2-f",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Quick FL Studio tip",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7ZbFfGvXXM",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C7ZaQlQsH8O",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Remove mic noise with Edison",
+   "gist": "Completely erase noise from a noisy mic recording using Edison in FL Studio.",
+   "try_prompt": "Open a noisy recording in Edison and erase the noise.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C7WyZ3DR9cc",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C7WrXZRsLSE",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C7U4Dt_gFov",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C7T_VyvxpMn",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "DJ Mustard on sample interpolation",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7Tsm67M4GI",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C7SB9XYJxFs",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Yeat bass in Omnisphere",
+   "gist": "Make the famous Yeat bass in Omnisphere in 10 seconds.",
+   "try_prompt": "Comment sound design on the post to sign up for the free masterclass.",
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": "sound design",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C7R0HIvpDn5",
+  "lego_screen": "none",
+  "topic_hint": "money-career",
+  "topic_label": "Money & career"
+ },
+ {
+  "post_id": "instagram:C7LhQsiMBwo",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Best free plugins",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7HnpE6pZP8",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Favorite sound design trick",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C7EqyCqMvY5",
+  "lego_screen": "none",
+  "topic_hint": "news",
+  "topic_label": "News & politics"
+ },
+ {
+  "post_id": "instagram:C7ADZX6ISRV",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C6_RxgrIepx",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C69lrhlPbnN",
+  "lego_screen": "none",
+  "topic_hint": "money-career",
+  "topic_label": "Money & career"
+ },
+ {
+  "post_id": "instagram:C69D0LTOhrh",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Diminished scale tricks for solos",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C67JEE5yMNP",
+  "lego_screen": "learn",
+  "topic_hint": "music-theory",
+  "topic_label": "Music theory",
+  "tip": {
+   "title": "I chord to V7/vi",
+   "gist": "Go from the I chord to V7/vi, a magical eyebrow-raising device.",
+   "try_prompt": "Play the I chord, then V7/vi, in any key.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C6y6kw-s0HV",
+  "lego_screen": "none",
+  "topic_hint": "music-production",
+  "topic_label": "Music production"
+ },
+ {
+  "post_id": "instagram:C6v0j4lomyS",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C6oDS5ioLjh",
+  "lego_screen": "none",
+  "topic_hint": "ads-promos",
+  "topic_label": "Ads & promos"
+ },
+ {
+  "post_id": "instagram:C6e1__pLWG1",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C6d_HxerUB6",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Directwave in FL Studio",
+   "gist": "Directwave is a powerful FL Studio tool, especially for collaboration.",
+   "try_prompt": null,
+   "tip_type": "tool",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C6WumZ_Jxqq",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Step-by-step pop song",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C6QZYYiMXzT",
+  "lego_screen": "learn",
+  "topic_hint": "life-hacks",
+  "topic_label": "Tips & how-tos",
+  "tip": {
+   "title": "Fix car problems yourself",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C6Kzxfsuc97",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Vocal dynamics like Miguel",
+   "gist": "Use dynamics to create contrast throughout the phrases, like Miguel does.",
+   "try_prompt": "Sing one phrase with deliberate dynamic contrast.",
+   "tip_type": "technique",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C6I45zTRmyM",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C5_q6PGu4Vl",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C58SMNMMh1c",
+  "lego_screen": "learn",
+  "topic_hint": "guitar",
+  "topic_label": "Guitar",
+  "tip": {
+   "title": "Top 6 rap songs to play on guitar",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "list",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C56QGnmieCS",
+  "lego_screen": "none",
+  "topic_hint": "pop-culture",
+  "topic_label": "Music & pop culture"
+ },
+ {
+  "post_id": "instagram:C56DYoux4wp",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Stayin' Alive breakdown",
+   "gist": null,
+   "try_prompt": null,
+   "tip_type": "tutorial",
+   "key_points": [],
+   "cta_keyword": null,
+   "is_thin": true
+  }
+ },
+ {
+  "post_id": "instagram:C5zBEPcykx4",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C5WgqcRLePy",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C4_UT2qrQmJ",
+  "lego_screen": "learn",
+  "topic_hint": "music-theory",
+  "topic_label": "Music theory",
+  "tip": {
+   "title": "El círculo de quintas",
+   "gist": "El círculo de quintas es una herramienta muy útil para entender relaciones musicales.",
+   "try_prompt": "Manda un DM con EBOOK para recibir el libro gratis.",
+   "tip_type": "idea",
+   "key_points": [],
+   "cta_keyword": "EBOOK",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C35F9ePsdlP",
+  "lego_screen": "learn",
+  "topic_hint": "music-production",
+  "topic_label": "Music production",
+  "tip": {
+   "title": "Free plugins: ZENOLOGY Lite and more",
+   "gist": "Free plugins, including Roland ZENOLOGY Lite (free with a Roland Cloud account).",
+   "try_prompt": "Comment FREE on the post to get the download links.",
+   "tip_type": "list",
+   "key_points": [
+    "ZENOLOGY Lite by Roland"
+   ],
+   "cta_keyword": "FREE",
+   "is_thin": false
+  }
+ },
+ {
+  "post_id": "instagram:C3jZCC2tnC6",
+  "lego_screen": "none",
+  "topic_hint": "memes",
+  "topic_label": "Memes"
+ },
+ {
+  "post_id": "instagram:C0bA_wCsCVh",
+  "lego_screen": "none",
+  "topic_hint": "misc",
+  "topic_label": "Misc"
+ }
+]

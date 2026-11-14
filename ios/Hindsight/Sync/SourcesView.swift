@@ -20,7 +20,10 @@ struct SourcesView: View {
                 SourceCards(store: store)
             } actions: {
                 Button("Run setup again") {
-                    // HindsightApp watches this flag and shows onboarding again.
+                    // Same as the beta menu's "Start onboarding over": back to Connect,
+                    // keeping everything imported. HindsightApp watches the flag.
+                    AppModel.resetMySetup()
+                    UserDefaults.standard.set("", forKey: "setupSource")
                     hasCompletedOnboarding = false
                     dismiss()
                 }

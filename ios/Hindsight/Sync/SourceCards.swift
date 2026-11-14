@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// The source cards (Instagram + Facebook via Muse, X, TikTok, WhatsApp notes).
+/// The source cards (Instagram + Facebook via Muse or Meta's data file, X, TikTok, WhatsApp notes).
 /// Shared by onboarding's "Plug in your apps" step and the Sources page, so
 /// both always offer the same ways to connect and sync.
 struct SourceCards: View {
     let store: SavedPostStore
     @State private var isMuseSheetPresented = false
     @State private var isWhatsAppSheetPresented = false
+    @State private var isMetaImportPresented = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -21,6 +22,9 @@ struct SourceCards: View {
         }
         .sheet(isPresented: $isWhatsAppSheetPresented) {
             WhatsAppImportView(store: store)
+        }
+        .sheet(isPresented: $isMetaImportPresented) {
+            MetaImportSheet(store: store)
         }
     }
 
@@ -41,11 +45,14 @@ struct SourceCards: View {
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text("Instagram + Facebook").font(OnboardingStyle.title)
-                Text("Through Muse, Meta's AI. It can already see your saves. One tap, no passwords.")
+                Text("Through Muse, Meta's AI: it can already see your saves. Or import the file Meta can send you.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
             }
             Button("Sync with Muse") { isMuseSheetPresented = true }
+                .buttonStyle(.onboardingSecondary)
+            // The dependable second way while Muse is unreliable.
+            Button("Import your Meta data file") { isMetaImportPresented = true }
                 .buttonStyle(.onboardingSecondary)
         }
         .onboardingCard()

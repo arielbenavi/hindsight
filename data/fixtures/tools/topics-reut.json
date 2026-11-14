@@ -1,0 +1,54 @@
+{
+ "topics": {
+  "nyc-food": {"label": "NYC food", "emoji": "🍽️", "lego_screen": "map"},
+  "nyc-cafes": {"label": "NYC cafés", "emoji": "☕️", "lego_screen": "map"},
+  "brooklyn": {"label": "Brooklyn", "emoji": "🌉", "lego_screen": "map"},
+  "nyc-things-to-do": {"label": "NYC things to do", "emoji": "🎟️", "lego_screen": "map"},
+  "greece": {"label": "Greece", "emoji": "🇬🇷", "lego_screen": "map"},
+  "argentina": {"label": "Argentina", "emoji": "🇦🇷", "lego_screen": "map"},
+  "travel": {"label": "Travel", "emoji": "✈️", "lego_screen": "map"},
+
+  "cooking": {"label": "Cooking", "emoji": "🍳", "lego_screen": "learn"},
+  "coffee-at-home": {
+   "label": "Coffee at home", "emoji": "☕️", "lego_screen": "learn", "confidence": "low",
+   "ambiguity": {
+    "question": "Your \"Aesthetic coffee\" saves: cafés you want to visit, or coffee setups for home?",
+    "options": [
+     {"label": "Home setups", "lego_screen": "learn"},
+     {"label": "Cafés to visit", "lego_screen": "map"},
+     {"label": "Just vibes", "lego_screen": "none"}
+    ]
+   }
+  },
+  "ai-design-tools": {"label": "AI & design tools", "emoji": "🤖", "lego_screen": "learn"},
+  "guitar": {"label": "Guitar", "emoji": "🎸", "lego_screen": "learn"},
+  "travel-tips": {"label": "Travel tips", "emoji": "🧳", "lego_screen": "learn"},
+  "stretches": {"label": "Stretches", "emoji": "🧘", "lego_screen": "learn"},
+
+  "coffee-vibes": {"label": "Coffee vibes", "emoji": "☕️", "lego_screen": "none"},
+  "ads-promos": {"label": "Ads & promos", "emoji": "📣", "lego_screen": "none"},
+  "random": {"label": "Random", "emoji": "🤷", "lego_screen": "none"}
+ },
+ "defaults": {"learn": "ai-design-tools", "fitness": "stretches", "map": "travel", "none": "random"},
+ "map": {
+  "map": {
+   "nyc-food": "nyc-food", "nyc-cafes": "nyc-cafes", "home-coffee-setups": "nyc-cafes",
+   "brooklyn-spots": "brooklyn", "nyc-things-to-do": "nyc-things-to-do",
+   "travel-greece": "greece", "travel-athens": "greece",
+   "travel-argentina": "argentina",
+   "travel-usa": "travel", "travel-spots": "travel"
+  },
+  "learn": {
+   "cooking-recipes": "cooking",
+   "home-coffee-setups": "coffee-at-home", "design-inspo": "coffee-at-home",
+   "ai-coding": "ai-design-tools", "ai-creative-tools": "ai-design-tools", "ui-ux-design": "ai-design-tools", "online-business": "ai-design-tools", "diy-maker": "ai-design-tools",
+   "guitar": "guitar",
+   "travel-greece": "travel-tips", "travel-athens": "travel-tips", "travel-argentina": "travel-tips", "travel-usa": "travel-tips",
+   "mobility-stretching": "stretches"
+  },
+  "none": {
+   "home-coffee-setups": "coffee-vibes", "home-interiors": "coffee-vibes",
+   "ads-promos": "ads-promos"
+  }
+ }
+}

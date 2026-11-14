@@ -288,6 +288,10 @@ struct PracticeState: Codable {              // user's, persisted separately so
 3. **The "Suggested" label** on AI-written prompts stays visible.
 4. **Check questions after a try:** built later, behind a setting that's **off by default**. Not in the MVP.
 
+## Decided (after the first device test, 2026-09-30)
+
+1. **"Comment X to get the guide" posts are gated, not tips.** Creators often keep the real resource behind a DM; the caption's call to action isn't something to practice. A tip with a `cta_keyword` and no `key_points` is **gated**: it stays in the library (tagged "Behind a DM", sorted to the end of its section, detail sheet explains how to get it) but is never in Today's 1 or setup. "Comment X" is never used as a try prompt. This replaces the earlier "the try is literally comment X" rule.
+
 ## Sources
 
 From the research report (2026-09-30). Figures marked *unverified* couldn't be checked against the primary source.

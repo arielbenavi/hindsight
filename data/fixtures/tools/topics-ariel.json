@@ -1,0 +1,57 @@
+{
+ "topics": {
+  "music-production": {"label": "Music production", "emoji": "🎛️", "lego_screen": "learn"},
+  "guitar": {"label": "Guitar", "emoji": "🎸", "lego_screen": "learn"},
+  "quant-money": {"label": "Quant & money", "emoji": "📈", "lego_screen": "learn"},
+  "ai-tools": {"label": "AI tools", "emoji": "🤖", "lego_screen": "learn"},
+  "coding-web": {"label": "Coding & web", "emoji": "💻", "lego_screen": "learn"},
+  "career-creator": {"label": "Career & creator tips", "emoji": "💼", "lego_screen": "learn"},
+  "design-visuals": {"label": "Design & visuals", "emoji": "🎨", "lego_screen": "learn"},
+  "cooking": {"label": "Cooking", "emoji": "🍳", "lego_screen": "learn"},
+  "health": {"label": "Health", "emoji": "🌿", "lego_screen": "learn"},
+  "languages": {"label": "Languages", "emoji": "🗣️", "lego_screen": "learn"},
+  "life-hacks": {"label": "Life hacks", "emoji": "💡", "lego_screen": "learn"},
+  "other-tips": {"label": "Other tips", "emoji": "✨", "lego_screen": "learn"},
+
+  "back-mobility": {"label": "Back & mobility", "emoji": "🧘", "lego_screen": "fitness"},
+  "workouts": {"label": "Workouts", "emoji": "🏋️", "lego_screen": "fitness"},
+
+  "nyc-spots": {"label": "NYC spots", "emoji": "🗽", "lego_screen": "map"},
+  "travel-spots": {"label": "Travel spots", "emoji": "✈️", "lego_screen": "map", "confidence": "low"},
+
+  "memes": {"label": "Memes & fun", "emoji": "😂", "lego_screen": "none"},
+  "news": {"label": "News & causes", "emoji": "📰", "lego_screen": "none"},
+  "music-culture": {"label": "Music culture", "emoji": "🎤", "lego_screen": "none"},
+  "tattoo-inspo": {"label": "Tattoo inspo", "emoji": "🖋️", "lego_screen": "none"},
+  "ads-promos": {"label": "Ads & promos", "emoji": "📣", "lego_screen": "none"},
+  "random": {"label": "Random", "emoji": "🤷", "lego_screen": "none"}
+ },
+ "defaults": {"learn": "other-tips", "fitness": "workouts", "map": "nyc-spots", "none": "random"},
+ "fitness_by_goal": {"pain_relief": "back-mobility", "mobility": "back-mobility", "posture": "back-mobility", "recovery": "back-mobility", "strength": "workouts"},
+ "map": {
+  "learn": {
+   "music-production": "music-production", "music-theory": "music-production", "music-career": "music-production", "music-business": "music-production", "dance": "other-tips",
+   "guitar": "guitar",
+   "quant-finance": "quant-money", "money-tips": "quant-money", "money-career": "quant-money", "crypto-finance": "quant-money",
+   "ai-tools": "ai-tools", "web-tools": "ai-tools", "online-tools": "ai-tools", "web-tricks": "ai-tools",
+   "coding": "coding-web", "web-design": "coding-web",
+   "career": "career-creator", "content-creation": "career-creator", "marketing": "career-creator", "branding": "career-creator", "side-hustles": "career-creator",
+   "design-inspo": "design-visuals", "photoshop": "design-visuals", "photo-video": "design-visuals",
+   "cooking-recipes": "cooking", "vegan-food": "cooking", "nutrition-health": "cooking",
+   "health": "health", "health-tips": "health", "wellbeing": "health", "natural-living": "health", "fitness-health": "health", "plants-gardening": "health",
+   "languages": "languages", "english-learning": "languages", "language-learning": "languages",
+   "life-hacks": "life-hacks", "life-tips": "life-hacks", "productivity": "life-hacks", "nyc-tips": "life-hacks"
+  },
+  "map": {
+   "nyc-spots": "nyc-spots", "food-spots": "nyc-spots",
+   "travel-spots": "travel-spots", "israel-trips": "travel-spots"
+  },
+  "none": {
+   "memes": "memes", "pop-culture": "memes", "entertainment": "memes", "interesting-facts": "memes", "motivation": "memes", "mindset": "memes",
+   "news": "news", "ai-news": "news", "science": "news", "religion": "news", "animal-activism": "news", "animal-rights": "news", "legal-tips": "news",
+   "hip-hop": "music-culture", "music-culture": "music-culture", "music-scene": "music-culture", "music": "music-culture", "music-production": "music-culture", "music-theory": "music-culture", "music-career": "music-culture",
+   "tattoo-inspo": "tattoo-inspo",
+   "ads-promos": "ads-promos"
+  }
+ }
+}

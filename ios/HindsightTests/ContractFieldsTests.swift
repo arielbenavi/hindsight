@@ -64,7 +64,9 @@ struct ContractFieldsTests {
         #expect(merged.collections == ["NYC"])
         #expect(merged.authorDisplayName == "The Chef")
         #expect(merged.mentions.map(\.username) == ["lilia"])
-        #expect(merged.source == .seedMD)
+        // Changed 2026-09-30 (all/merge, needs Ariel's OK): a real import of a seed
+        // post makes it the user's, so the sort engine (which skips the seed) keeps it.
+        #expect(merged.source == .igExport)
     }
 
     @Test @MainActor func storeMergeUpdatesKnownPosts() {

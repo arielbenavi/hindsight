@@ -132,7 +132,7 @@ A `map` post where no place name can be found (the place is only in the video) g
 | **`try_prompt`** | string / null | ✅ | ≤ 100 characters, imperative, doable in ~2 minutes, based only on the caption. **The heart of the practice loop.** `null` when `is_thin`. |
 | `tip_type` | `tool` · `technique` · `tutorial` · `list` · `idea` | ✅ | |
 | `key_points` | [string] (0–5) | ✅ | Only when the caption lists them. |
-| `cta_keyword` | string / null | ✅ | "DESIGN" for "comment DESIGN and I'll send you the link" posts. |
+| `cta_keyword` | string / null | ✅ | "DESIGN" for "comment DESIGN and I'll send you the link" posts. The app treats a tip with a `cta_keyword` and no `key_points` as **gated** (library only, never practiced), so don't put the "comment X" instruction in `try_prompt`. |
 | `is_thin` | bool | ✅ | Too little text to tell what the tip is. |
 
 ### `routine` (lego screen `fitness`)
