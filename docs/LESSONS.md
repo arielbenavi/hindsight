@@ -212,6 +212,9 @@ DATA_FETCHING_RESEARCH.md.)
   still builds on Xcode 26 (where the cloud path is simply absent; iOS 26 phones never run it
   anyway). Keep new iOS 27-only API behind the same guard. (2026-11-15)
 
+- ngrok 3.39 with `--log=stdout` outside a terminal printed nothing and the tunnel never
+  came up (public URL 404). `--log=<file>` works. (2026-11-15)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.

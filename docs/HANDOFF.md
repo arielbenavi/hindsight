@@ -51,7 +51,7 @@
 - **Ariel:** after opening WhatsApp on the bot phone, run `whatsapp-bot/healthcheck.sh opened` (feeds the 14-day log); keep the bot's spare phone online at least every ~14 days (or the bot gets logged out); hosting decision with Reut, manual tests in [TESTING.md](TESTING.md), and the WhatsApp research answer (`research/WHATSAPP_RESEARCH_PROMPT.md`).
 
 ### Running things locally
-- Connector: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.
+- Connector + ngrok run under launchd on Ariel's Mac (`connector/install-launchd.sh`; logs in `connector/data/`), so they survive restarts until real hosting. By hand: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain `supermom-depose-retail.ngrok-free.dev`). The token is in `connector/data/token`.
 - Phone builds (Personal Team, 7-day expiry): `ios/scripts/device.sh install|log` with `HINDSIGHT_TEAM=Y93Y9ZACWZ HINDSIGHT_BUNDLE_ID=…`. Launch args: `-resetOnboarding`, `-museConnectorBaseURL <https://host/token>`, `-whatsAppBotNumber <digits>` (normally not needed: the app asks the server's `/whatsapp`, which reads `connector/data/whatsapp_bot`; the number stays out of this public repo).
 - WhatsApp bot: runs under launchd (`whatsapp-bot/install-launchd.sh`), log in `whatsapp-bot/state/bot.log`.
 - Reut's Apple account is **Individual**, so Ariel can't sign under it. TestFlight (Reut uploads) or Xcode Cloud are the shared-build paths.
