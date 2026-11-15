@@ -122,7 +122,9 @@ enum ModelStatus: String, Sendable {
     case none = "None"
 
     static var current: ModelStatus {
+#if compiler(>=6.3)
         if #available(iOS 27, *), PrivateCloudComputeLanguageModel().isAvailable { return .cloud }
+#endif
         return SystemLanguageModel.default.isAvailable ? .onDevice : .none
     }
 }
@@ -152,12 +154,14 @@ enum ChatHelp {
 struct AppleChatReplier: ChatReplying {
     func reply(to message: String, about summary: String) async -> ChatReply? {
         let prompt = "\(summary)\n\nThe person says: \"\(message.prefix(500))\""
+#if compiler(>=6.3)
         if #available(iOS 27, *) {
             let cloud = PrivateCloudComputeLanguageModel()
             if cloud.isAvailable, let answer = await ask(LanguageModelSession(model: cloud, instructions: Instructions(ChatReplierPrompt.instructions)), prompt) {
                 return answer
             }
         }
+#endif
         guard SystemLanguageModel.default.isAvailable else { return nil }
         return await ask(LanguageModelSession(model: SystemLanguageModel.default, instructions: Instructions(ChatReplierPrompt.instructions)), prompt)
     }

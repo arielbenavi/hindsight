@@ -143,13 +143,22 @@ final class ModelEvalRunner {
     func runProbe() async {
         var lines: [String] = []
         let local = SystemLanguageModel.default
+#if compiler(>=6.3)
         if #available(iOS 27, *) {
             lines.append("On-device: \(local.availability) · model: \(local.variant.displayName)")
         } else {
             lines.append("On-device: \(local.availability)")
         }
+#else
+        lines.append("On-device: \(local.availability)")
+#endif
+#if compiler(>=6.3)
         lines.append("  Hebrew: \(local.supportsLocale(Locale(identifier: "he_IL")) ? "yes" : "no") · context \(local.contextSize) tokens")
+#else
+        lines.append("  Hebrew: \(local.supportsLocale(Locale(identifier: "he_IL")) ? "yes" : "no")")
+#endif
         lines.append("  languages: \(Self.codes(local.supportedLanguages))")
+#if compiler(>=6.3)
         if #available(iOS 27, *) {
             let cloud = PrivateCloudComputeLanguageModel()
             lines.append("Private Cloud Compute: \(cloud.availability)")
@@ -165,6 +174,9 @@ final class ModelEvalRunner {
         } else {
             lines.append("Private Cloud Compute: needs iOS 27")
         }
+#else
+        lines.append("Private Cloud Compute: needs the iOS 27 SDK (Xcode 27)")
+#endif
         probe = lines
         DebugLog.write("model eval probe\n" + lines.joined(separator: "\n"))
     }
@@ -183,7 +195,9 @@ final class ModelEvalRunner {
                 summaries[engine] = summary
                 if row.error?.hasPrefix("quotaLimitReached") == true { summary.stoppedForQuota = true; break }
             }
+#if compiler(>=6.3)
             if #available(iOS 27, *), engine == .cloud { summary.quotaAfter = Self.describe(PrivateCloudComputeLanguageModel().quotaUsage) }
+#endif
             summaries[engine] = summary
             running = nil
             Self.save(summary)
@@ -220,8 +234,12 @@ final class ModelEvalRunner {
         case .onDevice:
             return LanguageModelSession(model: SystemLanguageModel.default, instructions: Instructions(instructions))
         case .cloud:
+#if compiler(>=6.3)
             guard #available(iOS 27, *) else { return nil }
             return LanguageModelSession(model: PrivateCloudComputeLanguageModel(), instructions: Instructions(instructions))
+#else
+            return nil
+#endif
         }
     }
 
@@ -229,15 +247,18 @@ final class ModelEvalRunner {
 
     /// Token usage is iOS 27+; on iOS 26 the counts stay 0.
     private static func count(_ session: LanguageModelSession, into row: inout EvalRow) {
+#if compiler(>=6.3)
         guard #available(iOS 27, *) else { return }
         row.inputTokens += session.usage.input.totalTokenCount
         row.outputTokens += session.usage.output.totalTokenCount
+#endif
     }
 
     private static func codes(_ languages: Set<Locale.Language>) -> String {
         Set(languages.compactMap { $0.languageCode?.identifier }).sorted().joined(separator: " ")
     }
 
+#if compiler(>=6.3)
     @available(iOS 27, *)
     private static func describe(_ usage: PrivateCloudComputeLanguageModel.QuotaUsage) -> String {
         let reset = usage.resetDate.map { " (resets \($0.formatted(date: .abbreviated, time: .shortened)))" } ?? ""
@@ -247,6 +268,7 @@ final class ModelEvalRunner {
         @unknown default: return "unknown" + reset
         }
     }
+#endif
 
     /// `Application Support/model-eval-<engine>.json` + the debug log, so the
     /// results can be pulled off the phone (scripts/device.sh log).

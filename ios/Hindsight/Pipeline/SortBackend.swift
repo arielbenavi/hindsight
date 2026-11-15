@@ -113,6 +113,7 @@ actor AppleSortBackend: SortBackend {
     // MARK: - Requests
 
     private func ask<T: Generable>(_ instructions: String, _ prompt: String, _ type: T.Type, cloudOnly: Bool = false) async -> T? {
+#if compiler(>=6.3)
         if #available(iOS 27, *), !cloudExhausted, cloudFailuresInARow < Self.cloudFailureLimit {
             let cloud = PrivateCloudComputeLanguageModel()
             if cloud.isAvailable {
@@ -134,6 +135,7 @@ actor AppleSortBackend: SortBackend {
                 tally.quota = Self.describe(cloud.quotaUsage)
             }
         }
+#endif
         guard !cloudOnly, SystemLanguageModel.default.isAvailable else { return nil }
         let session = LanguageModelSession(model: SystemLanguageModel.default, instructions: Instructions(instructions))
         do {
@@ -154,12 +156,15 @@ actor AppleSortBackend: SortBackend {
 
     private func record(_ session: LanguageModelSession, cloud: Bool) {
         if cloud { tally.cloudRequests += 1 } else { tally.onDeviceRequests += 1 }
+#if compiler(>=6.3)
         if #available(iOS 27, *) {
             tally.inputTokens += session.usage.input.totalTokenCount
             tally.outputTokens += session.usage.output.totalTokenCount
         }
+#endif
     }
 
+#if compiler(>=6.3)
     @available(iOS 27, *)
     private static func describe(_ usage: PrivateCloudComputeLanguageModel.QuotaUsage) -> String {
         switch usage.status {
@@ -168,6 +173,7 @@ actor AppleSortBackend: SortBackend {
         @unknown default: "unknown"
         }
     }
+#endif
 }
 
 extension String {
