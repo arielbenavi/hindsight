@@ -207,6 +207,11 @@ DATA_FETCHING_RESEARCH.md.)
   `device.sh install` now always launches with `-museConnectorBaseURL` (from
   `connector/data/token`), and the screen says when it can't reach the server. (2026-10-01)
 
+- Private Cloud Compute (`PrivateCloudComputeLanguageModel`, `session.usage`, `contextSize`)
+  exists only in the iOS 27 SDK. Every use is wrapped in `#if compiler(>=6.3)` so the app
+  still builds on Xcode 26 (where the cloud path is simply absent; iOS 26 phones never run it
+  anyway). Keep new iOS 27-only API behind the same guard. (2026-11-15)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.
