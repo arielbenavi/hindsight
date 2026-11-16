@@ -219,7 +219,7 @@ final class AppModel {
     /// account if needed, then pull what the server has (Muse, WhatsApp bot) into
     /// the store. At most once a minute; failures only go to the debug log.
     func syncWithServer(now: Date = .now) async {
-        guard persist, let store, ServerSync.isConfigured, !pulling else { return }
+        guard persist, let store, ServerSync.isConfigured, !pulling, !Self.isUnitTestHost else { return }
         guard Self.isPullDue(last: lastPull, now: now) else { return }
         pulling = true
         defer { pulling = false }
@@ -232,6 +232,9 @@ final class AppModel {
             DebugLog.write("server pull failed: \(error.localizedDescription)")
         }
     }
+
+    /// The app hosting the unit tests: no network from there.
+    private static var isUnitTestHost: Bool { ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil }
 
     nonisolated static func isPullDue(last: Date?, now: Date, interval: TimeInterval = pullInterval) -> Bool {
         guard let last else { return true }
