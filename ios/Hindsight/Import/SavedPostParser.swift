@@ -8,7 +8,8 @@ import Foundation
 ///   `{username, display_name}`, `author_display_name`, `caption`, `hashtags`,
 ///   `mentions`, `collections`, `saved_at`, `posted_at`, `thumbnail_url`,
 ///   `location_tag`). This is what `MusePrompt` asks Muse for. The pre-contract
-///   `date` key is read as `saved_at`.
+///   `date` key is read as `saved_at`, and so is the server's `received_at` when
+///   neither is there.
 /// - Markdown (the seed / older Muse output):
 ///   ```
 ///   12. **@username** · reel · 2026-09-16
@@ -61,7 +62,9 @@ enum SavedPostParser {
                     }
                 },
                 collections: (entry["collections"] as? [String]) ?? [],
-                savedAt: string(entry["saved_at"] ?? entry["date"]).flatMap(parseDate),
+                // The server's `received_at` stands in when a source has no saved date (WhatsApp bot,
+                // `/ingest`), so new arrivals sort as new instead of last.
+                savedAt: (string(entry["saved_at"]) ?? string(entry["date"]) ?? string(entry["received_at"])).flatMap(parseDate),
                 postedAt: string(entry["posted_at"]).flatMap(parseDate),
                 thumbnailURL: string(entry["thumbnail_url"]).flatMap(cleanURL),
                 locationTag: (entry["location_tag"] as? [String: Any]).map {

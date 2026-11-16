@@ -145,7 +145,10 @@ enum MuseConnector {
         do {
             let tenant = try await createTenant(base: configured)
             let defaults = UserDefaults.standard
-            defaults.set(ServerAccount.root(of: configured).absoluteString, forKey: accountRootKey)
+            let root = ServerAccount.root(of: configured).absoluteString
+            // A tenant URL set by hand would win over the new account (`resolve`): go back to the root.
+            if ServerAccount.isTenant(configured) { defaults.set(root, forKey: baseURLKey) }
+            defaults.set(root, forKey: accountRootKey)
             defaults.set(tenant.absoluteString, forKey: accountBaseKey)
             // A new store: Muse needs the new connector URL before it can send.
             defaults.set(false, forKey: connectedKey)

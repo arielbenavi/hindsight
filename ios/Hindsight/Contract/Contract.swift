@@ -150,7 +150,10 @@ struct ContractPost: Codable, Sendable, Identifiable, Hashable {
     var savedDate: Date? { savedAt.flatMap(ContractDate.parse) }
 
     /// "@author" for bylines.
-    var byline: String { "@\(author.username)" }
+    /// "@chef.anna"; a link with no author shows its site instead of a bare "@".
+    var byline: String {
+        author.username.isEmpty ? (url.host()?.replacingOccurrences(of: "www.", with: "") ?? platform.displayName) : "@\(author.username)"
+    }
 
     /// First non-empty caption line, for list rows.
     var firstLine: String? {
