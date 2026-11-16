@@ -1,8 +1,10 @@
 import Foundation
 import Observation
 
-/// The app's root state: which dataset is loaded, the approved layout, and the
+/// The app's root state: which dataset is loaded, the views' layout, and the
 /// per-screen stores. Everything user-owned is saved under the dataset's folder.
+/// There's no setup to go through: the user's saves are sorted in the background
+/// and the layout follows from the sorted topics (`autoSetup`).
 @Observable
 @MainActor
 final class AppModel {
@@ -13,11 +15,12 @@ final class AppModel {
     private(set) var data: HindsightData?
     private(set) var loadError: String?
 
+    /// Which topics each view (Map, Learn, Fitness) shows. Set automatically.
     private(set) var layout: LayoutConfig?
-    /// Set once the post-layout place confirmation pass is finished or skipped.
-    private(set) var confirmationDone = false
-    /// Set when the user taps "Open my app" at the end of the setup chat.
+    /// Set once the saves were sorted and the layout set, the first time.
     private(set) var setupDone = false
+    /// Bumped every time sorting starts, so Home can follow the new run.
+    private(set) var sortRuns = 0
 
     private(set) var places: PlaceStore
     private(set) var practice: PracticeStore
@@ -25,17 +28,17 @@ final class AppModel {
     private(set) var fitness: FitnessCatalog?
 
     /// The user's own imports (Ariel's store), sorted by `engine` into the "me" dataset.
-    private let store: SavedPostStore?
+    let store: SavedPostStore?
     private(set) var engine: SortEngine?
+    private var setupTask: Task<Void, Never>?
 
     private let persist: Bool
     private var layoutFile: JSONFile<LayoutConfig>
     private var flagsFile: JSONFile<Flags>
 
     private struct Flags: Codable {
+        /// Older builds finished setup with a place check; kept so their flags still read.
         var confirmationDone = false
-        /// Missing in flags saved before the setup chat: those users finished
-        /// setup when they finished confirmation.
         var setupDone: Bool?
     }
 
@@ -54,25 +57,23 @@ final class AppModel {
         flagsFile = JSONFile(name: "flags", directory: nil)
         places = PlaceStore(directory: nil, data: nil)
         practice = PracticeStore(directory: nil)
-        let initial = useMySaves ? mine
-            : (datasets.first { $0.id == selected } ?? datasets.first { $0.id == "reut" } ?? datasets.first)
+        let initial = useMySaves ? mine : Self.sample(in: datasets, selected: selected)
         if let initial { select(initial) }
-        // Before any screen appears: my saves but none imported → back to Connect;
-        // imports changed mid-setup → the setup chat starts over on the new set.
-        if persist, isMySaves, !setupDone {
-            if myPosts.isEmpty {
-                UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
-            } else if mySavesAreOutdated {
-                restartMySetup()
-            }
-        } else if persist, isMySaves, setupDone, hasNewImports {
-            // Saves imported after setup: sort them in the background; they join the
-            // existing topics (or Everything else) and the tabs reload when done.
-            startSorting()
+        // Before any screen appears: my saves but none imported → back to Connect.
+        if persist, isMySaves, !setupDone, myPosts.isEmpty {
+            UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
         }
+        autoSetup()
     }
 
-    /// Switch testers' data. Each dataset keeps its own layout and user state.
+    /// The bundled sample ("Just looking?"): the last one picked, else Reut's.
+    static func sample(in datasets: [Dataset] = Dataset.bundled(),
+                       selected: String? = UserDefaults.standard.string(forKey: AppModel.datasetKey)) -> Dataset? {
+        let bundled = datasets.filter { !$0.isMine }
+        return bundled.first { $0.id == selected } ?? bundled.first { $0.id == "reut" } ?? bundled.first
+    }
+
+    /// Load a dataset. Each dataset keeps its own layout and user state.
     func select(_ dataset: Dataset) {
         self.dataset = dataset
         if persist { UserDefaults.standard.set(dataset.id, forKey: Self.datasetKey) }
@@ -94,8 +95,7 @@ final class AppModel {
         flagsFile = JSONFile(name: "flags", directory: directory)
         layout = layoutFile.load()
         let flags = flagsFile.load()
-        confirmationDone = flags?.confirmationDone ?? false
-        setupDone = flags?.setupDone ?? confirmationDone
+        setupDone = flags?.setupDone ?? flags?.confirmationDone ?? false
         let bundledCache = Self.bundledMatchCache(for: dataset)
         places = PlaceStore(directory: directory, data: data, bundledCache: bundledCache)
         practice = PracticeStore(directory: directory)
@@ -110,16 +110,25 @@ final class AppModel {
         return try? JSONDecoder().decode(MatchCache.self, from: data)
     }
 
-    /// Point the screens at the approved layout's topics (or the natural ones
-    /// while the proposal is still open, so matching can start early).
+    /// Point the screens at the layout's topics (or the natural ones until it's
+    /// set). Every place topic is matched, even below the Map's threshold, so a
+    /// small place topic still opens on a map from its topic page.
     private func applyLayout() {
         guard let data else { learn = nil; fitness = nil; return }
         let natural = LayoutRules.propose(data).draft
         let tabs = layout?.tabs ?? natural.tabs
         let topics = { (s: LegoScreen) in tabs.first { $0.legoScreen == s }?.topicIDs ?? [] }
-        places.setMapTopics(layout == nil ? data.topics.filter { $0.legoScreen == .map }.map(\.id) : topics(.map))
+        places.setMapTopics(data.topics.filter { $0.legoScreen == .map }.map(\.id))
         learn = LearnCatalog(data: data, topicIDs: topics(.learn))
         fitness = FitnessCatalog(data: data, topicIDs: topics(.fitness))
+    }
+
+    /// The view for a screen: the layout's tab, or every topic of that kind.
+    func tab(for screen: LegoScreen) -> TabConfig {
+        var tab = layout?.tab(for: screen)
+            ?? TabConfig(legoScreen: screen, topicIDs: data?.topics.filter { $0.legoScreen == screen }.map(\.id) ?? [])
+        tab.title = screen.homeTitle
+        return tab
     }
 
     func approve(_ layout: LayoutConfig) {
@@ -134,8 +143,47 @@ final class AppModel {
                 await self?.rewriteMySaves()
             }
         }
-        if !layout.hasMap { finishConfirmation() }
     }
+
+    // MARK: - Setup, without a setup screen
+
+    /// Sorts the user's saves in the background and, once enough are sorted, writes
+    /// the file and sets the natural layout. Sample data gets its layout at once.
+    /// Home shows the raw saves meanwhile, so nothing waits on this.
+    private func autoSetup() {
+        guard isMySaves else {
+            if data != nil, layout == nil || !setupDone { finishAutoSetup() }
+            return
+        }
+        guard persist, !myPosts.isEmpty else { return }
+        if setupDone {
+            // Saves imported since: they join the topics when sorted (`rewriteMySaves`).
+            if hasNewImports { startSorting() }
+            return
+        }
+        guard setupTask == nil else { return }
+        startSorting()
+        setupTask = Task { [weak self] in
+            guard let stream = self?.sortProgress() else { return }
+            let clock = ContinuousClock()
+            let started = clock.now
+            // The same hand-off rule the setup chat used: most sorted, or half after 20 s.
+            for await progress in stream where progress.shouldHandOff(after: clock.now - started) { break }
+            guard let self else { return }
+            _ = await buildMySaves()
+            finishAutoSetup()
+            setupTask = nil
+        }
+    }
+
+    private func finishAutoSetup() {
+        guard let data else { return }
+        if layout == nil { approve(LayoutRules.propose(data).draft.config()) }
+        finishSetup()
+    }
+
+    /// New imports (after the Sources sheet): sort them in the background.
+    func importsChanged() { autoSetup() }
 
     // MARK: - My saves (the sort engine)
 
@@ -153,6 +201,7 @@ final class AppModel {
 
     /// Start (or resume) sorting the user's saves. Safe to call again.
     func startSorting() {
+        sortRuns += 1
         sortEngine().start(myPosts) { [weak self] in
             Task { await self?.rewriteMySaves() }
         }
@@ -160,12 +209,9 @@ final class AppModel {
 
     func sortProgress() -> AsyncStream<SortProgress> { sortEngine().progressStream() }
 
-    /// The sorted file no longer matches the user's imports (they added or
-    /// removed saves mid-setup): the chat should start over on the new set.
-    var mySavesAreOutdated: Bool {
-        guard isMySaves, !setupDone, let data else { return false }
-        return Set(data.posts.map(\.id)) != Set(myPosts.map(\.id))
-    }
+    /// Every save, newest first: the user's imports (the source of truth, sorted
+    /// or not; topics come from the sorted file), or the sample's.
+    var allPosts: [ContractPost] { isMySaves ? myPosts : (data?.posts ?? []) }
 
     /// Imports the sorted file doesn't have yet (after setup).
     var hasNewImports: Bool {
@@ -173,26 +219,16 @@ final class AppModel {
         return !Set(myPosts.map(\.id)).isSubset(of: Set(data.posts.map(\.id)))
     }
 
-    /// Dev reset (beta menu → Start onboarding over): forget the "my saves" setup
-    /// so the next start runs the whole chat again. Keeps the sort cache.
+    /// "Run setup again" (Sources, beta menu): forget the sorted file and layout so
+    /// onboarding can run again. Keeps the imports and the sort cache.
     static func resetMySetup() {
         let directory = Dataset.mine().url.deletingLastPathComponent()
-        for name in ["hindsight.json", "setup-chat.json", "layout.json", "flags.json", "proposal-chat.json"] {
+        for name in ["hindsight.json", "layout.json", "flags.json"] {
             try? FileManager.default.removeItem(at: directory.appending(path: name))
         }
     }
 
-    /// Start the setup chat over on the current imports. The sort cache stays, so
-    /// posts sorted before aren't sorted again.
-    func restartMySetup() {
-        guard let mine = datasets.first(where: \.isMine) else { return }
-        for name in ["hindsight.json", "setup-chat.json", "layout.json", "flags.json"] {
-            try? FileManager.default.removeItem(at: mine.url.deletingLastPathComponent().appending(path: name))
-        }
-        select(mine)
-    }
-
-    /// End of reading: write the user's contract file from what's sorted so far
+    /// Enough is sorted: write the user's contract file from what's sorted so far
     /// and load it. The rest joins later (`rewriteMySaves`).
     func buildMySaves() async -> HindsightData? {
         await writeMySaves()
@@ -202,8 +238,8 @@ final class AppModel {
         return data
     }
 
-    /// Late posts or new details: rewrite the file; reload only once the user is
-    /// in the app, so nothing shifts under the setup chat.
+    /// Late posts or new details: rewrite the file and reload (Home follows), once
+    /// the first file is in.
     private func rewriteMySaves() async {
         guard isMySaves, data != nil else { return }
         await writeMySaves()
@@ -226,25 +262,12 @@ final class AppModel {
         }
     }
 
-    func finishConfirmation() {
-        confirmationDone = true
-        saveFlags()
-    }
-
-    /// End of the setup chat: show the tabs (with anything sorted since the proposal).
+    /// The layout is set: load anything sorted since the first file.
     func finishSetup() {
-        finishConfirmation()
         setupDone = true
-        saveFlags()
+        flagsFile.save(Flags(confirmationDone: true, setupDone: true))
         if isMySaves { Task { await rewriteMySaves() } }
     }
-
-    private func saveFlags() {
-        flagsFile.save(Flags(confirmationDone: confirmationDone, setupDone: setupDone))
-    }
-
-    /// Bundled data (the sample saves) rather than the user's own sorted saves.
-    var isSampleData: Bool { dataset.map { !$0.isMine } ?? false }
 
     /// Dev: forget the layout and all user state for this dataset.
     func resetCurrentDataset() {
@@ -253,14 +276,7 @@ final class AppModel {
             try? FileManager.default.removeItem(at: directory)
         }
         select(dataset)
-    }
-
-    /// Posts that show in no tab, for the Everything else sheet.
-    var everythingElse: [ContractPost] {
-        guard let data else { return [] }
-        let notAPlace = places.notAPlacePostIDs
-        let extra = notAPlace.isEmpty ? [] : data.posts.filter { notAPlace.contains($0.id) }
-        return data.everythingElse(layout: layout) + extra
+        autoSetup()
     }
 
     // MARK: - Reminders

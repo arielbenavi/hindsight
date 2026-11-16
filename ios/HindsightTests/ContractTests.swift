@@ -33,12 +33,6 @@ struct ContractTests {
         }
     }
 
-    @Test func noneTopicsAreEverythingElse() throws {
-        let data = try Fixtures.load("reut")
-        let noneCount = data.topics.filter { $0.legoScreen == nil }.reduce(0) { $0 + $1.postIds.count }
-        #expect(data.everythingElse(layout: nil).count == noneCount)
-    }
-
     @Test func decodesTheContractExample() throws {
         let json = """
         {"contract_version":1,"user":{"handle":"x","platforms":["instagram"]},

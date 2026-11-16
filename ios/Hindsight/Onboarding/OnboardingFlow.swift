@@ -19,7 +19,8 @@ struct OnboardingFlow: View {
                 switch model.step {
                 case .welcome: WelcomeStep(model: model)
                 case .howItWorks: HowItWorksStep(model: model)
-                case .connect: ConnectStep(model: model, store: store, onFinish: onFinish)
+                case .connect: ConnectStep(model: model, store: store) { choose($0) }
+                case .done: DoneStep(posts: model.donePosts) { onFinish(model.choice ?? .sample) }
                 }
             }
             .id(model.step)
@@ -103,6 +104,15 @@ struct OnboardingFlow: View {
                 .frame(width: 36, height: 36)
         }
         .accessibilityLabel("Beta menu")
+    }
+
+    /// The saves the app opens with: the user's imports, or the bundled sample's.
+    private func choose(_ choice: OnboardingChoice) {
+        let posts: [ContractPost] = switch choice {
+        case .mySaves: ContractPost.userPosts(from: store.posts)
+        case .sample: AppModel.sample().flatMap { try? HindsightData.load(from: $0.url).posts } ?? []
+        }
+        model.choose(choice, posts: posts)
     }
 
     /// Brings the bundled seed in as the user's own imports (the sort engine

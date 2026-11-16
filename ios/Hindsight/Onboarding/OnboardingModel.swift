@@ -10,16 +10,19 @@ enum OnboardingChoice: String, Sendable {
 @Observable
 @MainActor
 final class OnboardingModel {
-    /// The screens before the setup chat (docs/specs/onboarding-chat.md). The chat
-    /// takes over after Connect and ends on `DoneStep`.
+    /// Welcome → How it works → Plug in your apps → You're in, then Home.
     enum Step: Int, CaseIterable {
-        case welcome, howItWorks, connect
+        case welcome, howItWorks, connect, done
     }
 
     static let completedKey = "hasCompletedOnboarding"
 
     private(set) var step: Step = .welcome
     private(set) var isMovingForward = true
+    /// Set on Connect: the user's own saves, or the sample.
+    private(set) var choice: OnboardingChoice?
+    /// What "You're in" shows: the saves the app opens with.
+    private(set) var donePosts: [ContractPost] = []
 
     init() {}
 
@@ -35,6 +38,13 @@ final class OnboardingModel {
         guard let previous = Step(rawValue: step.rawValue - 1) else { return }
         isMovingForward = false
         step = previous
+    }
+
+    /// Leaving Connect: on to "You're in" with the saves the app will open with.
+    func choose(_ choice: OnboardingChoice, posts: [ContractPost]) {
+        self.choice = choice
+        donePosts = posts
+        while step != .done { next() }
     }
 
 }

@@ -1,3 +1,5 @@
+> Superseded 2026-11: replaced by the fixed Home screen (see docs/HANDOFF.md).
+
 # Flow spec: Layout proposal ("here's your app")
 
 Status: draft for the MVP sprint ([mvp-sprint.md](../mvp-sprint.md)). Owner: Reut (the proposal and editing). Ariel owns the chat shell and topic clustering that come before it.

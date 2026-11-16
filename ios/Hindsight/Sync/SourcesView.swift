@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// "Sources": connect and sync saves after onboarding. Same cards as the
-/// onboarding step, plus a way to run the whole setup again. Meant to be
-/// opened from a profile/settings entry in the main app.
+/// "Sources": connect and sync saves after onboarding (Home's gear). Same cards
+/// as the onboarding step, plus a way to run onboarding again.
 struct SourcesView: View {
     let store: SavedPostStore
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +19,7 @@ struct SourcesView: View {
                 SourceCards(store: store)
             } actions: {
                 Button("Run setup again") {
-                    // Same as the beta menu's "Start onboarding over": back to Connect,
+                    // Same as the beta menu's "Start onboarding over": back to onboarding,
                     // keeping everything imported. HindsightApp watches the flag.
                     AppModel.resetMySetup()
                     UserDefaults.standard.set("", forKey: "setupSource")

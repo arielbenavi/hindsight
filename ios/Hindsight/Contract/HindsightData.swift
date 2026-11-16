@@ -35,16 +35,6 @@ struct HindsightData: Sendable {
         return posts.filter { topicIDByPostID[$0.id].map(wanted.contains) ?? false }
     }
 
-    /// Saves that don't show in any tab: `none` topics, topics not placed in the
-    /// layout, and posts with no topic. Newest first.
-    func everythingElse(layout: LayoutConfig?) -> [ContractPost] {
-        let shown = Set(layout?.tabs.flatMap(\.topicIDs) ?? topics.filter { $0.legoScreen != nil }.map(\.id))
-        return posts.filter { post in
-            guard let topicID = topicIDByPostID[post.id] else { return true }
-            return !shown.contains(topicID)
-        }
-    }
-
     static func load(from url: URL) throws -> HindsightData {
         HindsightData(file: try ContractFile.decode(Data(contentsOf: url)))
     }

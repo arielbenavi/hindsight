@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The last screen of onboarding, shown when the setup chat is done.
+/// The last screen of onboarding ("You're in"), then Home.
 struct DoneStep: View {
     /// The saves the app was just built from: the user's imports, or the sample's.
     let posts: [ContractPost]

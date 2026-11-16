@@ -3,14 +3,7 @@ import Testing
 @testable import Hindsight
 
 @MainActor
-struct SetupChatTests {
-    @Test func helpAnswersCommonProblemsWithoutAModel() {
-        #expect(ChatHelp.answer(to: "why didn't my X bookmarks get sorted?")?.contains("Everything else") == true)
-        #expect(ChatHelp.answer(to: "how do I import more")?.contains("Plug in your apps") == true)
-        #expect(ChatHelp.answer(to: "is the AI broken?") != nil)
-        #expect(ChatHelp.answer(to: "purple monkey dishwasher") == nil)
-    }
-
+struct SortProgressTests {
     @Test func simulatedSortGrowsToCompleteAndHandsOff() throws {
         let data = try Fixtures.load("reut")
         let snapshots = SimulatedSort.snapshots(for: data, steps: 24)
@@ -22,6 +15,7 @@ struct SetupChatTests {
     }
 }
 
+/// When background sorting has enough to show topics (`AppModel.autoSetup`).
 struct HandOffTests {
     private func progress(_ decided: Int, of total: Int) -> SortProgress { SortProgress(decided: decided, total: total, topics: []) }
 

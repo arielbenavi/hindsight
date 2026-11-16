@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Fitness tab root (F1): weekly ring, fresh-start card, Today's 1, Regulars,
-/// problem search and the body-area grid. First open shows setup (F0).
+/// Fitness (Home → Workouts, F1): weekly ring, fresh-start card, Today's 1, Regulars,
+/// problem search and the body-area grid. First open shows setup (F0). Pushed
+/// onto Home's stack.
 struct FitnessScreen: View {
     let app: AppModel
     let tab: TabConfig
@@ -11,7 +12,7 @@ struct FitnessScreen: View {
     @State private var opened = false
     @State private var showSetup = false
     @State private var showProgress = false
-    @State private var showEverythingElse = false
+    @State private var showAllSaves = false
     @State private var detail: Routine?
     @State private var notificationsAllowed = true
     @State private var noMore = false
@@ -21,31 +22,24 @@ struct FitnessScreen: View {
     private var practice: PracticeStore { app.practice }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    ScreenHeader(title: tab.title) {
-                        HStack(spacing: 6) {
-                            DevMenu(app: app)
-                            EverythingElseButton(app: app)
-                        }
-                    }
-                    if let catalog = app.fitness, !catalog.routines.isEmpty {
-                        content(catalog)
-                    } else {
-                        ContentUnavailableView("No stretches yet", systemImage: "figure.flexibility",
-                                               description: Text("Save a stretch you like and it'll show up here."))
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                ScreenHeader(title: tab.title) { EmptyView() }
+                if let catalog = app.fitness, !catalog.routines.isEmpty {
+                    content(catalog)
+                } else {
+                    ContentUnavailableView("No stretches yet", systemImage: "figure.flexibility",
+                                           description: Text("Save a stretch you like and it'll show up here."))
                 }
-                .padding(Theme.padding)
-                .padding(.bottom, 40)
             }
-            .scrollDismissesKeyboard(.interactively)
-            .themedScreen()
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: BodyArea.self) { area in
-                BodyAreaView(app: app, area: area)
-            }
+            .padding(Theme.padding)
+            .padding(.bottom, 40)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .themedScreen()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: BodyArea.self) { area in
+            BodyAreaView(app: app, area: area)
         }
         .overlay(alignment: .bottom) {
             if let undo {
@@ -65,7 +59,7 @@ struct FitnessScreen: View {
         }
         .sheet(isPresented: $showProgress) { FitnessProgressSheet(app: app) }
         .sheet(item: $detail) { routine in RoutineDetailSheet(app: app, routine: routine) }
-        .sheet(isPresented: $showEverythingElse) { EverythingElseSheet(app: app, initialQuery: query) }
+        .sheet(isPresented: $showAllSaves) { AllSavesSheet(app: app, initialQuery: query) }
         .sensoryFeedback(.success, trigger: practice.progress(.fitness).done)
     }
 
@@ -207,7 +201,7 @@ struct FitnessScreen: View {
                 if results.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Nothing saved for that yet.").font(Theme.body(16, weight: .semibold))
-                        Button("Search Everything else") { showEverythingElse = true }
+                        Button("Search all saves") { showAllSaves = true }
                             .buttonStyle(.pillCompact)
                     }
                     .card()
@@ -395,10 +389,10 @@ enum FitnessPreview {
 
 #Preview("Fitness home") {
     let app = FitnessPreview.app()
-    FitnessScreen(app: app, tab: FitnessPreview.tab(app))
+    NavigationStack { FitnessScreen(app: app, tab: FitnessPreview.tab(app)) }
 }
 
 #Preview("First open (setup)") {
     let app = FitnessPreview.app(setupDone: false)
-    FitnessScreen(app: app, tab: FitnessPreview.tab(app))
+    NavigationStack { FitnessScreen(app: app, tab: FitnessPreview.tab(app)) }
 }

@@ -1,34 +1,25 @@
 import SwiftUI
 
-/// The fallback when setup produced no tabs (nothing could be sorted, or reading
-/// failed): every save in one searchable list, so the app never opens empty.
+/// Every save in one searchable list, newest first ("See all" on Home, and
+/// "Search all saves" from Learn and Fitness).
 struct AllSavesScreen: View {
     let app: AppModel
+    var initialQuery = ""
     @State private var query = ""
-    @Environment(\.openURL) private var openURL
-
-    /// The sorted file if there is one, else the raw imports.
-    private var posts: [ContractPost] { app.data?.posts ?? app.myPosts }
+    @State private var platform: Platform?
 
     var body: some View {
-        let all = posts
-        let terms = TextMatch.terms(query)
-        let shown = terms.isEmpty ? all : all.filter { post in
-            TextMatch.score(terms: terms, fields: [(post.caption, 1), (post.author.username, 1), (post.hashtags.joined(separator: " "), 1)]) > 0
-        }
+        let all = app.allPosts
+        let shown = SaveSearch.filter(all, query: query, platform: platform)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 10) {
-                ScreenHeader(title: "All saves", subtitle: "\(all.count.formatted()) saves. I couldn't sort these into tabs yet.") {
-                    DevMenu(app: app)
-                }
-                .padding(.bottom, 6)
-                searchField
-                ForEach(shown) { post in
-                    Button { PostOpener.open(post, openURL: openURL) } label: { row(post) }
-                        .buttonStyle(.plain)
-                }
+                ScreenHeader(title: "All saves", subtitle: subtitle(all: all.count, shown: shown.count)) { EmptyView() }
+                    .padding(.bottom, 6)
+                SaveSearchField(text: $query)
+                PlatformFilterChips(posts: all, selection: $platform)
+                ForEach(shown) { SaveCardRow(post: $0) }
                 if shown.isEmpty {
-                    Text(all.isEmpty ? "No saves yet." : "Nothing for \"\(query)\".")
+                    Text(all.isEmpty ? "No saves yet." : query.isEmpty ? "Nothing from there." : "Nothing for \"\(query)\".")
                         .font(Theme.body(17, weight: .semibold))
                         .padding(.vertical, 8)
                 }
@@ -37,41 +28,29 @@ struct AllSavesScreen: View {
         }
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)
+        .themedScreen()
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { if query.isEmpty { query = initialQuery } }
     }
 
-    private var searchField: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Theme.muted)
-            TextField("Search your saves", text: $query)
-                .font(Theme.body(16))
-                .autocorrectionDisabled()
-                .submitLabel(.search)
-            if !query.isEmpty {
-                Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.muted) }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Clear search")
-            }
-        }
-        .padding(.horizontal, 16).padding(.vertical, 13)
-        .background(Theme.surface, in: Capsule())
-        .overlay(Capsule().strokeBorder(Theme.stroke))
+    private func subtitle(all: Int, shown: Int) -> String {
+        shown == all ? "\(all.formatted()) saves, newest first." : "\(shown.formatted()) of \(all.formatted()) saves."
     }
+}
 
-    /// Same shape as Learn's search rows.
-    private func row(_ post: ContractPost) -> some View {
-        HStack(spacing: 14) {
-            PostLinkThumbnail(post: post, size: 60)
-            VStack(alignment: .leading, spacing: 5) {
-                Text(post.firstLine ?? "No caption")
-                    .font(Theme.body(16, weight: .bold))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                PostByline(post: post)
-            }
-            Spacer(minLength: 0)
-            Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.muted)
+/// All saves in a sheet, already searched ("Search all saves" when Learn or
+/// Fitness has nothing for a query).
+struct AllSavesSheet: View {
+    let app: AppModel
+    var initialQuery = ""
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            AllSavesScreen(app: app, initialQuery: initialQuery)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
-        .card(padding: 14)
-        .contentShape(.rect)
+        .presentationDragIndicator(.visible)
+        .tint(Theme.lime)
     }
 }
