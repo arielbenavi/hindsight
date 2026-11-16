@@ -81,16 +81,6 @@ struct MapTests {
         #expect(Triage.status(for: place("Nowhere"), results: [], area: westVillage) == .cantTell)
     }
 
-    @Test func onboardingCardsAreOnePerPostAndCapped() {
-        let topN = (0..<12).map { (ref: PlaceRef(postID: "instagram:TOP", index: $0), strength: 3) }
-        let singles = (0..<30).map { (ref: PlaceRef(postID: "instagram:S\($0)", index: 0), strength: $0 % 6) }
-        let cards = Triage.onboardingCards(topN + singles)
-        #expect(cards.count == Triage.onboardingLimit)
-        #expect(cards.count <= Triage.hardCap)
-        #expect(cards.filter { $0.first?.postID == "instagram:TOP" }.allSatisfy { $0.count == 12 })
-        #expect(Set(cards.map { $0[0].postID }).count == cards.count)
-    }
-
     @Test func topNPostMakesNPinsLinkingToTheSamePost() async throws {
         let data = try Fixtures.load("reut")
         let cookies = try #require(data.file.items.first { ($0.places?.count ?? 0) == 12 })
@@ -133,7 +123,6 @@ struct MapTests {
         store.pick(ref, match("Somewhere"))
         store.markNotAPlace(ref)
         #expect(store.allPlaces.isEmpty)
-        #expect(store.notAPlacePostIDs.contains(ref.postID))
     }
 
     @Test func homeCoffeeSetupsAreNotOnTheMap() throws {

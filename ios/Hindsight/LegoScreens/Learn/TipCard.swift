@@ -154,7 +154,7 @@ enum LearnStatus {
 enum LearnPreview {
     static func app(setupDone: Bool = true) -> AppModel {
         let app = AppModel(datasets: Dataset.bundled(), selected: "ariel", persist: false)
-        if let data = app.data { app.approve(LayoutRules.propose(data).draft.config()) }
+        if let data = app.data { app.approve(LayoutRules.propose(data).config()) }
         if setupDone { app.practice.skipSetup(.learn) }
         return app
     }

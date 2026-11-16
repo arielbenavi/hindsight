@@ -6,7 +6,7 @@ import Testing
 struct LearnTests {
     func catalog(_ id: String) throws -> LearnCatalog {
         let data = try Fixtures.load(id)
-        let layout = LayoutRules.propose(data).draft
+        let layout = LayoutRules.propose(data)
         return LearnCatalog(data: data, topicIDs: layout.tab(for: .learn)?.topicIDs ?? [])
     }
 
@@ -73,7 +73,7 @@ struct LearnTests {
 struct FitnessTests {
     func catalog() throws -> FitnessCatalog {
         let data = try Fixtures.load("ariel")
-        return FitnessCatalog(data: data, topicIDs: LayoutRules.propose(data).draft.tab(for: .fitness)?.topicIDs ?? [])
+        return FitnessCatalog(data: data, topicIDs: LayoutRules.propose(data).tab(for: .fitness)?.topicIDs ?? [])
     }
 
     @Test func problemSearchSynonyms() {

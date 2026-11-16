@@ -2,16 +2,18 @@ import Foundation
 import Observation
 
 /// Sorts a user's own saves into a contract file (docs/data-contract.md) on the
-/// phone, with Apple's models (ADR-001, E1–E2; spec: onboarding-chat.md):
+/// phone, with Apple's models (ADR-001, E1–E2):
 ///
 /// 1. each post: rules if certain, else the model's bucket + topic slug; map
 ///    posts also get their places (checked against the text) — `sort`
-/// 2. topic slugs → named topics, one model call — `assemble`
-/// 3. in the background after approval: tip and routine details — `enrich`
+/// 2. topic slugs → named topics, one model call — `assemble`. Every slug gets
+///    a topic, including the ones no view fits ("memes": `legoScreen` nil)
+/// 3. in the background once the layout is set: tip and routine details — `enrich`
 ///
 /// Every result is cached by post id + caption, so a restart resumes and later
 /// syncs only sort new posts. Models never block anything: a post no model can
-/// answer falls back to the rules, and ends up in Everything else at worst.
+/// answer falls back to the rules (a topic named from its slug at worst). Only
+/// posts not sorted yet sit in "Unsorted".
 @Observable
 @MainActor
 final class SortEngine {
@@ -45,6 +47,8 @@ final class SortEngine {
     private(set) var progress: SortProgress?
     private(set) var isSorting = false
     private var task: Task<Void, Never>?
+    /// Posts that came in while a run was going: sorted right after it.
+    private var rerun: (posts: [ContractPost], onFinish: (@MainActor () -> Void)?)?
     private var observers: [UUID: AsyncStream<SortProgress>.Continuation] = [:]
 
     /// `directory: nil` keeps the cache in memory (tests, previews).
@@ -59,15 +63,20 @@ final class SortEngine {
     // MARK: - 1. Sorting
 
     /// Starts sorting whatever isn't sorted yet. Runs on its own: observers can
-    /// stop listening (the chat moves on at 90%) without stopping the sort.
+    /// stop listening (setup hands off at 90%) without stopping the sort. Called
+    /// again while running (new imports), it sorts the newcomers right after.
     func start(_ posts: [ContractPost], concurrency: Int = 4, onFinish: (@MainActor () -> Void)? = nil) {
         // A stable shuffle, not newest-first: whatever is sorted by the hand-off
         // is a fair sample of the whole history, so the proposal's topics are too.
         let todo = posts.filter { cache.records[$0.id]?.captionHash != Self.hash($0.caption) }
             .sorted { Self.hash($0.id) < Self.hash($1.id) }
+        if task != nil {
+            if !todo.isEmpty { rerun = (posts, onFinish) }
+            return
+        }
         publish(posts)
-        guard !todo.isEmpty, task == nil else {
-            if todo.isEmpty { finishStreams(); onFinish?() }
+        guard !todo.isEmpty else {
+            finishStreams(); onFinish?()
             return
         }
         isSorting = true
@@ -94,12 +103,18 @@ final class SortEngine {
             isSorting = false
             task = nil
             DebugLog.write("sort: done · \(cache.usage)")
+            if let next = rerun {
+                rerun = nil
+                onFinish?()
+                start(next.posts, concurrency: concurrency, onFinish: next.onFinish)
+                return
+            }
             finishStreams()
             onFinish?()
         }
     }
 
-    /// Progress for the chat's "Reading your saves…" message.
+    /// Progress for Home's "Sorting your saves…" strip.
     func progressStream() -> AsyncStream<SortProgress> {
         AsyncStream { continuation in
             let id = UUID()
@@ -154,8 +169,8 @@ final class SortEngine {
     // MARK: - 2. Assembling the contract file
 
     /// The contract file from everything decided so far. Names new topic slugs
-    /// with one model call; slugs named before keep their topic. Posts not
-    /// decided yet go to Everything else until they are.
+    /// (every screen, "none" too) with one model call; slugs named before keep
+    /// their topic. Posts not decided yet go to "Unsorted" until they are.
     func assemble(_ posts: [ContractPost], user: ContractUser) async -> ContractFile {
         // Group decided posts by hint ("screen/slug").
         var hintPosts: [String: [ContractPost]] = [:]
@@ -168,8 +183,9 @@ final class SortEngine {
             hintDecision[key] = d
         }
 
-        // Name the hints we haven't named before (the "none" ones don't need a name).
-        let newHints = hintPosts.keys.filter { cache.topicByHint[$0] == nil && hintDecision[$0]?.screen != nil }.sorted()
+        // Name the hints we haven't named before. Caches from before "none" hints
+        // were named get theirs here too.
+        let newHints = hintPosts.keys.filter { cache.topicByHint[$0] == nil }.sorted()
         if !newHints.isEmpty {
             let hints = newHints.map { key in
                 let posts = hintPosts[key] ?? []
@@ -190,16 +206,16 @@ final class SortEngine {
             topicPosts[topicID, default: []].append(post)
         }
         for post in posts {
-            if let d = cache.records[post.id]?.decision, d.screen != nil, let topicID = cache.topicByHint[Self.hintKey(d)] {
+            if let d = cache.records[post.id]?.decision, let topicID = cache.topicByHint[Self.hintKey(d)] {
                 add(post, to: topicID)
             } else {
-                add(post, to: Self.randomTopicID)
+                add(post, to: Self.unsortedTopicID)
             }
         }
         var topics: [ContractTopic] = order.compactMap { id in
             let members = topicPosts[id] ?? []
-            if id == Self.randomTopicID {
-                return ContractTopic(id: id, label: "Random", emoji: "🤷", legoScreen: nil, postIds: members.map(\.id))
+            if id == Self.unsortedTopicID {
+                return ContractTopic(id: id, label: "Unsorted", emoji: "⏳", legoScreen: nil, postIds: members.map(\.id))
             }
             guard let info = cache.topics[id] else { return nil }
             let ambiguity = info.question.map {
@@ -240,7 +256,7 @@ final class SortEngine {
     /// Store the model's names; any hint it skipped (or got wrong) gets its own topic.
     private func name(_ hints: [TopicHint], with planned: [PlannedTopic]?) {
         var remaining = Dictionary(uniqueKeysWithValues: hints.map { (Self.hintKey(SortDecision(screen: $0.screen, slug: $0.slug)), $0) })
-        var usedIDs = Set(cache.topics.keys).union([Self.randomTopicID])
+        var usedIDs = Set(cache.topics.keys).union([Self.unsortedTopicID])
         func newID(_ label: String) -> String {
             var id = SortRules.slug(label), n = 2
             while usedIDs.contains(id) { id = "\(SortRules.slug(label))-\(n)"; n += 1 }
@@ -315,7 +331,18 @@ final class SortEngine {
 
     // MARK: - Helpers
 
-    static let randomTopicID = "random"
+    /// Posts not sorted yet. (Was "random", the catch-all for every "none" post,
+    /// before those got real topics; that id is now free for a named topic.)
+    static let unsortedTopicID = "unsorted"
+
+    /// Whether some sorted posts have no topic yet (a cache from before "none"
+    /// hints were named): the next `assemble` names them.
+    func hasUnnamedHints(_ posts: [ContractPost]) -> Bool {
+        posts.contains { post in
+            guard let d = cache.records[post.id]?.decision else { return false }
+            return cache.topicByHint[Self.hintKey(d)] == nil
+        }
+    }
 
     private static func hintKey(_ d: SortDecision) -> String { "\(d.screen?.rawValue ?? "none")/\(d.slug)" }
 

@@ -4,8 +4,6 @@ import Foundation
 /// topics Map, Learn and Fitness show. Set automatically (`AppModel.autoSetup`). Pure.
 enum LayoutRules {
     static let threshold = 5
-    static let maxQuestions = 2
-    static let fewSaves = 20
 
     /// Which topics sit in which view, and in what order.
     struct Draft: Equatable, Sendable {
@@ -19,32 +17,14 @@ enum LayoutRules {
         }
     }
 
-    /// What the chat shows before the proposal (B1) and the questions (B2).
-    struct Proposal: Equatable, Sendable {
-        var draft: Draft
-        var questions: [ContractTopic]
-        /// Screens that could be added but didn't make the threshold ("Also add a map? 4 spots").
-        var offers: [LegoScreen]
-        var situation: Situation
-    }
-
-    enum Situation: Equatable, Sendable { case normal, oneTab, nothingFits, fewSaves }
-
-    /// Topics currently assigned to each screen (after any answers/moves).
-    typealias Assignment = [String: LegoScreen?]
-
-    static func naturalAssignment(_ data: HindsightData) -> Assignment {
-        Dictionary(uniqueKeysWithValues: data.topics.map { ($0.id, $0.legoScreen) })
-    }
-
-    static func propose(_ data: HindsightData, assignment: Assignment? = nil) -> Proposal {
-        let assignment = assignment ?? naturalAssignment(data)
+    /// Every view with enough in it, and its topics. Topics no view fits (`legoScreen`
+    /// nil: memes, news…) stay out of the views; Home lists them under Topics.
+    static func propose(_ data: HindsightData) -> Draft {
         var tabs: [TabConfig] = []
-        var offers: [LegoScreen] = []
         var excluded: [String] = []
 
         func topics(for screen: LegoScreen) -> [ContractTopic] {
-            data.topics.filter { assignment[$0.id] == .some(screen) }.sorted { $0.postIds.count > $1.postIds.count }
+            data.topics.filter { $0.legoScreen == screen }.sorted { $0.postIds.count > $1.postIds.count }
         }
 
         var learnTopics = topics(for: .learn)
@@ -62,8 +42,7 @@ enum LayoutRules {
         let mapTopics = topics(for: .map)
         if placeCount(mapTopics, data) >= threshold {
             tabs.append(TabConfig(legoScreen: .map, topicIDs: mapTopics.map(\.id)))
-        } else if !mapTopics.isEmpty {
-            offers.append(.map)
+        } else {
             excluded += mapTopics.map(\.id)
         }
 
@@ -75,26 +54,14 @@ enum LayoutRules {
             return size(a) > size(b)
         }
 
-        var situation = Situation.normal
-        if tabs.isEmpty {
-            situation = .nothingFits
-            if !learnTopics.isEmpty { tabs = [TabConfig(legoScreen: .learn, topicIDs: learnTopics.map(\.id))] }
-        } else if tabs.count == 1 {
-            situation = .oneTab
-        }
-        if learnCount < threshold, !tabs.contains(where: { $0.legoScreen == .learn }) {
+        // Nothing big enough anywhere: Learn with what there is.
+        if tabs.isEmpty, !learnTopics.isEmpty {
+            tabs = [TabConfig(legoScreen: .learn, topicIDs: learnTopics.map(\.id))]
+        } else if learnCount < threshold {
             excluded += learnTopics.map(\.id)
         }
-        excluded += data.topics.filter { assignment[$0.id] == .some(nil) }.map(\.id)
-
-        let total = data.posts.count
-        if total < fewSaves { situation = situation == .normal ? .fewSaves : situation }
-        let questions = total < fewSaves ? [] : Array(data.topics
-            .filter { $0.ambiguity != nil && assignment[$0.id] == naturalAssignment(data)[$0.id] }
-            .sorted { ($0.confidence == .low ? 0 : 1, -$0.postIds.count) < ($1.confidence == .low ? 0 : 1, -$1.postIds.count) }
-            .prefix(maxQuestions))
-
-        return Proposal(draft: Draft(tabs: tabs, excludedTopicIDs: excluded), questions: questions, offers: offers, situation: situation)
+        excluded += data.topics.filter { $0.legoScreen == nil }.map(\.id)
+        return Draft(tabs: tabs, excludedTopicIDs: excluded)
     }
 
     static func placeCount(_ topics: [ContractTopic], _ data: HindsightData) -> Int {

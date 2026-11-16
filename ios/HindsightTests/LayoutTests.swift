@@ -4,37 +4,30 @@ import Testing
 
 @MainActor
 struct LayoutTests {
-    @Test func reutGetsMapAndLearnWithTheCoffeeQuestion() throws {
+    @Test func reutGetsMapAndLearn() throws {
         let data = try Fixtures.load("reut")
-        let p = LayoutRules.propose(data)
-        #expect(p.draft.tabs.map(\.legoScreen) == [.map, .learn])
-        #expect(p.questions.map(\.id) == ["coffee-at-home"])
-        #expect(p.questions[0].ambiguity?.question.contains("Aesthetic coffee") == true)
+        let draft = LayoutRules.propose(data)
+        #expect(draft.tabs.map(\.legoScreen) == [.map, .learn])
         // her 2 stretches live in Learn (under the Fitness threshold)
-        #expect(p.draft.tab(for: .learn)?.topicIDs.contains("stretches") == true)
+        #expect(draft.tab(for: .learn)?.topicIDs.contains("stretches") == true)
     }
 
     @Test func arielGetsLearnFitnessAndMap() throws {
         let data = try Fixtures.load("ariel")
-        let p = LayoutRules.propose(data)
-        #expect(Set(p.draft.tabs.map(\.legoScreen)) == [.learn, .fitness, .map])
-        #expect(p.draft.tabs.first?.legoScreen == .map)
-        #expect(p.questions.count <= LayoutRules.maxQuestions)
+        let draft = LayoutRules.propose(data)
+        #expect(Set(draft.tabs.map(\.legoScreen)) == [.learn, .fitness, .map])
+        #expect(draft.tabs.first?.legoScreen == .map)
     }
 
-    @Test func neverMoreThanTwoQuestions() throws {
+    /// Topics no view fits (memes, news) are real topics now, but never in a view.
+    @Test func topicsWithoutAViewStayOutOfTheViews() throws {
         for id in ["reut", "ariel"] {
-            #expect(LayoutRules.propose(try Fixtures.load(id)).questions.count <= 2)
+            let data = try Fixtures.load(id)
+            let draft = LayoutRules.propose(data)
+            let none = Set(data.topics.filter { $0.legoScreen == nil }.map(\.id))
+            #expect(!none.isEmpty)
+            #expect(none.isDisjoint(with: draft.tabs.flatMap(\.topicIDs)))
+            #expect(none.isSubset(of: draft.excludedTopicIDs))
         }
-    }
-
-    @Test func answeringMovesTheTopic() throws {
-        let data = try Fixtures.load("reut")
-        var assignment = LayoutRules.naturalAssignment(data)
-        assignment["coffee-at-home"] = .some(nil)
-        let p = LayoutRules.propose(data, assignment: assignment)
-        #expect(p.draft.excludedTopicIDs.contains("coffee-at-home"))
-        #expect(p.draft.tab(for: .learn)?.topicIDs.contains("coffee-at-home") == false)
-        #expect(p.questions.isEmpty)
     }
 }

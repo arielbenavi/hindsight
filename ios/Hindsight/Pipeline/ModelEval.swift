@@ -18,7 +18,7 @@ enum EvalEngine: String, CaseIterable, Codable, Sendable, Identifiable {
 struct EvalCase: Sendable {
     let post: ContractPost
     let dataset: String
-    /// The fixture's lego screen; nil = none (Everything else).
+    /// The fixture's lego screen; nil = none (no view fits).
     let gold: LegoScreen?
     let goldPlaces: [String]
     var isHebrew: Bool { post.caption?.unicodeScalars.contains { (0x0590...0x05FF).contains($0.value) } ?? false }

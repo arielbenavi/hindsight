@@ -5,7 +5,7 @@ import FoundationModels
 /// swap in a fake without Apple Intelligence.
 protocol SortBackend: Sendable {
     /// Bucket + topic slug for one post. nil when no model can answer (the
-    /// engine falls back to rules / Everything else).
+    /// engine falls back to the rules).
     func bucket(_ post: ContractPost) async -> SortDecision?
     /// Places named in a map post (names as written + type).
     func places(_ post: ContractPost) async -> [(name: String, type: PlaceType)]?
@@ -18,7 +18,7 @@ protocol SortBackend: Sendable {
 }
 
 struct SortDecision: Codable, Sendable, Hashable {
-    /// nil = none (Everything else).
+    /// nil = none: no view fits (memes, news…); the post still gets a topic.
     var screen: LegoScreen?
     var slug: String
 }

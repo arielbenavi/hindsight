@@ -115,7 +115,7 @@ final class AppModel {
     /// small place topic still opens on a map from its topic page.
     private func applyLayout() {
         guard let data else { learn = nil; fitness = nil; return }
-        let natural = LayoutRules.propose(data).draft
+        let natural = LayoutRules.propose(data)
         let tabs = layout?.tabs ?? natural.tabs
         let topics = { (s: LegoScreen) in tabs.first { $0.legoScreen == s }?.topicIDs ?? [] }
         places.setMapTopics(data.topics.filter { $0.legoScreen == .map }.map(\.id))
@@ -158,7 +158,8 @@ final class AppModel {
         guard persist, !myPosts.isEmpty else { return }
         if setupDone {
             // Saves imported since: they join the topics when sorted (`rewriteMySaves`).
-            if hasNewImports { startSorting() }
+            // A cache from an older build may also have topics to name.
+            if hasNewImports || sortEngine().hasUnnamedHints(myPosts) { startSorting() }
             return
         }
         guard setupTask == nil else { return }
@@ -167,7 +168,7 @@ final class AppModel {
             guard let stream = self?.sortProgress() else { return }
             let clock = ContinuousClock()
             let started = clock.now
-            // The same hand-off rule the setup chat used: most sorted, or half after 20 s.
+            // Most sorted, or half after 20 s (SortProgress.shouldHandOff).
             for await progress in stream where progress.shouldHandOff(after: clock.now - started) { break }
             guard let self else { return }
             _ = await buildMySaves()
@@ -178,7 +179,7 @@ final class AppModel {
 
     private func finishAutoSetup() {
         guard let data else { return }
-        if layout == nil { approve(LayoutRules.propose(data).draft.config()) }
+        if layout == nil { approve(LayoutRules.propose(data).config()) }
         finishSetup()
     }
 
