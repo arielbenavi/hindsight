@@ -37,44 +37,4 @@ struct LayoutTests {
         #expect(p.draft.tab(for: .learn)?.topicIDs.contains("coffee-at-home") == false)
         #expect(p.questions.isEmpty)
     }
-
-    @Test func tapEditsReorderRenameRemoveAdd() throws {
-        let data = try Fixtures.load("reut")
-        var d = LayoutRules.propose(data).draft
-        d = LayoutEdit.move(.learn, toIndex: 0).apply(to: d, data: data)
-        #expect(d.tabs.map(\.legoScreen) == [.learn, .map])
-        d = LayoutEdit.rename(.map, "Eats").apply(to: d, data: data)
-        #expect(d.tab(for: .map)?.title == "Eats")
-        d = LayoutEdit.remove(.learn).apply(to: d, data: data)
-        #expect(d.tabs.map(\.legoScreen) == [.map])
-        #expect(d.excludedTopicIDs.contains("cooking"))
-        d = LayoutEdit.add(.learn).apply(to: d, data: data)
-        #expect(d.tab(for: .learn) != nil)
-        #expect(!d.excludedTopicIDs.contains("cooking"))
-    }
-
-    @Test func typedEdits() throws {
-        let data = try Fixtures.load("reut")
-        let d = LayoutRules.propose(data).draft
-        func parse(_ s: String, last: LegoScreen? = nil) -> LayoutEdit? {
-            TypedEditParser.parse(s, draft: d, data: data, lastTouched: last)
-        }
-        #expect(parse("call it Eats", last: .map) == .rename(.map, "Eats"))
-        #expect(parse("rename learn to Skills") == .rename(.learn, "Skills"))
-        #expect(parse("drop cooking") == .leaveOut(topicID: "cooking"))
-        #expect(parse("remove the map") == .remove(.map))
-        #expect(parse("put Learn first") == .move(.learn, toIndex: 0))
-        #expect(parse("add fitness") == .add(.fitness))
-        #expect(parse("make it purple") == nil)
-    }
-
-    @Test func approvedCardBecomesTheTabBar() throws {
-        let data = try Fixtures.load("reut")
-        let d = LayoutEdit.rename(.map, "Eats").apply(to: LayoutRules.propose(data).draft, data: data)
-        let config = d.config()
-        #expect(config.tabs == d.tabs)
-        let app = AppModel(datasets: Dataset.bundled(), selected: "reut", persist: false)
-        app.approve(config)
-        #expect(app.layout?.tabs.map(\.title) == ["Eats", "Learn"])
-    }
 }

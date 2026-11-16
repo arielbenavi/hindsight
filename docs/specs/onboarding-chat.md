@@ -1,3 +1,5 @@
+> Superseded 2026-11: replaced by the fixed Home screen (see docs/HANDOFF.md).
+
 # Flow spec: Onboarding as one conversation
 
 Status: **accepted** (2026-09-30). Decisions 1–4 below were made by Reut, all as recommended. Owners: Reut (the chat), Ariel (the Connect screen and the data behind it). Part of [ADR-001](../merge-plan.md), where it replaces workstream O1.
