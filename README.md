@@ -9,6 +9,15 @@ The product is an **iOS app**. The original web prototype is kept in [`web/`](we
 > Sorting and extraction run on Apple's models (on-device, and Private Cloud Compute), which need Apple Intelligence turned on. Apple Intelligence only turns on when **Settings → General → Language & Region → iPhone Language** and the **Siri language** are the same supported language. A phone set to Hebrew gets **no AI at all**, not even for English posts, and Hebrew captions are rejected by the model (`unsupportedLanguageOrLocale`).
 > It also needs an **iPhone 15 Pro or newer** with Apple Intelligence on. Testers so far (Reut, Ariel, Reut's girlfriend): iPhone 16 or later, English. ✅ Details: [docs/merge-plan.md](docs/merge-plan.md#ai-requirements-read-this).
 
+## What the app does
+
+Bring saves in → see them organized → get old ones resurfaced. After a short onboarding (connect your apps,
+or look around with sample saves) there's one **Home** screen: **Today** (three old saves brought back each day),
+**Views** (a map of saved places, tips to try, workouts, when you have those), **Topics** (every save sorted into
+one, plus your own Instagram collections and WhatsApp chats) and **Recent**, with search on top. Sorting runs on
+the phone in the background with Apple's models, so Home works the moment onboarding ends. New saves from the
+server (Muse, the WhatsApp bot) are pulled whenever the app opens.
+
 ## Repo layout
 
 ```
@@ -35,7 +44,7 @@ Change project settings in `ios/project.yml`, not in Xcode's settings UI. See [i
 
 Every platform is different; see [docs/DATA_FETCHING_RESEARCH.md](docs/DATA_FETCHING_RESEARCH.md) for the full picture.
 
-- **Instagram + Facebook:** through **Meta Muse**. The app opens Muse with our question on the clipboard, Muse replies with a JSON list of saves, and the user pastes it back. This works on a real iPhone today. A Muse MCP connector (needs our backend) would remove the paste.
+- **Instagram + Facebook:** through **Meta Muse**: one message asks Muse to add our MCP connector (`connector/`) and send the saves there; the app pulls them. Copy & paste of Muse's reply is the fallback. Or import the data file Meta sends you.
 - **X:** "Connect X" (OAuth 2.0 PKCE, X's own sign-in page). Pulls the user's bookmarks. Works on device.
 - **WhatsApp notes:** a bot number you add to your notes group (new messages + last 100), plus a one-time "Export chat" import for older notes.
 - **TikTok:** no official API for US users. The plan is a share extension ("Share → hindsight") for new saves plus the "Download your data" export for backfill.
