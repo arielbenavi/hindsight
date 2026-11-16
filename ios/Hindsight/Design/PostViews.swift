@@ -125,7 +125,7 @@ struct CaptionDisclosure: View {
     }
 }
 
-/// Simple list row: thumbnail, first caption line, author (Everything else, search).
+/// Simple list row: thumbnail, first caption line, author.
 struct PostRow: View {
     let post: ContractPost
     var emoji: String?

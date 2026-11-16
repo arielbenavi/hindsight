@@ -1,16 +1,15 @@
 import SwiftUI
 
-/// Learn tab root (L1): the practice loop on top (weekly ring + Today's 1), the
-/// library below (search + topic sections).
+/// Learn (Home → Tips, L1): the practice loop on top (weekly ring + Today's 1), the
+/// library below (search + topic sections). Pushed onto Home's stack.
 struct LearnScreen: View {
     let app: AppModel
     let tab: TabConfig
 
-    @State private var path: [String] = []
     @State private var detail: Tip?
     @State private var showingProgress = false
     @State private var showingSetup = false
-    @State private var everythingElseQuery: String?
+    @State private var allSavesQuery: String?
     @State private var query = ""
     @State private var freshStart: WeeklyProgress.FreshStart?
     @State private var didOpen = false
@@ -31,24 +30,22 @@ struct LearnScreen: View {
     private var screen: ScreenPractice { practice.screen(.learn) }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            Group {
-                if let catalog = app.learn, !catalog.sections.isEmpty {
-                    content(catalog)
-                } else {
-                    VStack(alignment: .leading) {
-                        header
-                        ContentUnavailableView("Nothing in Learn yet", systemImage: "books.vertical",
-                                               description: Text("Tips you save will show up here."))
-                    }
-                    .padding(Theme.padding)
+        Group {
+            if let catalog = app.learn, !catalog.sections.isEmpty {
+                content(catalog)
+            } else {
+                VStack(alignment: .leading) {
+                    header
+                    ContentUnavailableView("Nothing in Learn yet", systemImage: "books.vertical",
+                                           description: Text("Tips you save will show up here."))
                 }
+                .padding(Theme.padding)
             }
-            .themedScreen()
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: String.self) { id in
-                if let section = app.learn?.section(id) { LearnTopicView(app: app, section: section) }
-            }
+        }
+        .themedScreen()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: String.self) { id in
+            if let section = app.learn?.section(id) { LearnTopicView(app: app, section: section) }
         }
         .overlay(alignment: .bottom) {
             if let undo, let tip = app.learn?.tipsByID[undo.id] {
@@ -60,8 +57,8 @@ struct LearnScreen: View {
         .sensoryFeedback(.success, trigger: triedTick)
         .sheet(item: $detail) { TipDetailSheet(app: app, tip: $0) }
         .sheet(isPresented: $showingProgress) { LearnProgressSheet(app: app) }
-        .sheet(isPresented: Binding(get: { everythingElseQuery != nil }, set: { if !$0 { everythingElseQuery = nil } })) {
-            EverythingElseSheet(app: app, initialQuery: everythingElseQuery ?? "")
+        .sheet(isPresented: Binding(get: { allSavesQuery != nil }, set: { if !$0 { allSavesQuery = nil } })) {
+            AllSavesSheet(app: app, initialQuery: allSavesQuery ?? "")
         }
         .fullScreenCover(isPresented: $showingSetup, onDismiss: prepare) {
             LearnSetupView(app: app) { showingSetup = false }
@@ -97,19 +94,13 @@ struct LearnScreen: View {
         guard let link = practice.deepLink, link.screen == .learn else { return }
         practice.deepLink = nil
         guard let tip = app.learn?.tipsByID[link.id] else { return }
-        path = []
         detail = tip
     }
 
     // MARK: - Layout
 
     private var header: some View {
-        ScreenHeader(title: tab.title) {
-            HStack(spacing: 6) {
-                DevMenu(app: app)
-                EverythingElseButton(app: app)
-            }
-        }
+        ScreenHeader(title: tab.title) { EmptyView() }
     }
 
     private func content(_ catalog: LearnCatalog) -> some View {
@@ -350,8 +341,8 @@ struct LearnScreen: View {
         if results.isEmpty {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Nothing in Learn for \"\(query)\".").font(Theme.body(17, weight: .semibold))
-                Button { everythingElseQuery = query } label: {
-                    Label("Search Everything else", systemImage: "tray.full")
+                Button { allSavesQuery = query } label: {
+                    Label("Search all saves", systemImage: "tray.full")
                 }
                 .buttonStyle(.pillCompact)
             }
@@ -466,11 +457,11 @@ struct LearnScreen: View {
 #if DEBUG
 #Preview("Learn") {
     let app = LearnPreview.app()
-    LearnScreen(app: app, tab: LearnPreview.tab(app))
+    NavigationStack { LearnScreen(app: app, tab: LearnPreview.tab(app)) }
 }
 
 #Preview("Learn · first open") {
     let app = LearnPreview.app(setupDone: false)
-    LearnScreen(app: app, tab: LearnPreview.tab(app))
+    NavigationStack { LearnScreen(app: app, tab: LearnPreview.tab(app)) }
 }
 #endif

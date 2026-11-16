@@ -1,10 +1,13 @@
 import MapKit
 import SwiftUI
 
-/// Map tab root (map.md → M1): "I'm out. What have I saved near here?"
+/// The map (map.md → M1, Home → Places): "I'm out. What have I saved near here?"
+/// Pushed onto Home's stack; full screen, with its own back button. Shows the
+/// places of `tab`'s topics (all place topics, or one from a topic page).
 struct MapScreen: View {
     let app: AppModel
     let tab: TabConfig
+    @Environment(\.dismiss) private var dismiss
 
     @State private var location = LocationModel()
     @State private var position: MapCameraPosition = .automatic
@@ -19,6 +22,15 @@ struct MapScreen: View {
     @State private var wrongPlace: Place?
 
     private var store: PlaceStore { app.places }
+
+    /// Only the places saved in this tab's topics.
+    private func inTab(_ places: [Place]) -> [Place] {
+        guard let data = app.data, !tab.topicIDs.isEmpty else { return places }
+        let topics = Set(tab.topicIDs)
+        return places.filter { place in
+            place.sources.contains { data.topicIDByPostID[$0.ref.postID].map(topics.contains) ?? false }
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -35,6 +47,7 @@ struct MapScreen: View {
                 }
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             store.startMatching()
             positionIfNeeded()
@@ -95,7 +108,7 @@ struct MapScreen: View {
     }
 
     private var clusters: [PlaceCluster] {
-        PlaceCluster.make(store.places, region: region)
+        PlaceCluster.make(inTab(store.places), region: region)
     }
 
     // MARK: - Floating controls
@@ -103,6 +116,7 @@ struct MapScreen: View {
     private var topBar: some View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
+                CircleIconButton(systemImage: "chevron.left", label: "Back") { dismiss() }
                 Button { showCities = true } label: {
                     HStack(spacing: 6) {
                         Text(currentCityName).lineLimit(1)
@@ -116,11 +130,9 @@ struct MapScreen: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("City: \(currentCityName). Change city")
                 Spacer()
-                DevMenu(app: app)
                 CircleIconButton(systemImage: location.isDenied ? "location.slash" : "location.fill", label: "Show my location") {
                     centerOnMe()
                 }
-                EverythingElseButton(app: app)
             }
             if store.needsReviewCount > 0 && !store.isMatching {
                 Button { showReview = true } label: {
@@ -176,7 +188,7 @@ struct MapScreen: View {
 
     /// The list follows what's visible on the map, sorted by distance.
     private var visiblePlaces: [Place] {
-        var places = store.places
+        var places = inTab(store.places)
         if let region {
             let latHalf = region.span.latitudeDelta / 2, lngHalf = region.span.longitudeDelta / 2
             places = places.filter {
@@ -203,7 +215,7 @@ struct MapScreen: View {
     /// Open centered on you with your nearest places (max ~3 km); else on your biggest city.
     private func positionIfNeeded(force: Bool = false) {
         guard !positioned || force else { return }
-        let places = store.allPlaces.filter { !$0.isHidden }
+        let places = inTab(store.allPlaces).filter { !$0.isHidden }
         if let me = location.location {
             let nearest = places.sorted { $0.coordinate.distance(to: me) < $1.coordinate.distance(to: me) }
             if let first = nearest.first, first.coordinate.distance(to: me) < 25_000 {
@@ -219,7 +231,12 @@ struct MapScreen: View {
                 showCities = true
             }
         }
-        if (location.isDenied || force || !location.notAskedYet), let city = store.cities.first {
+        guard location.isDenied || force || !location.notAskedYet else { return }
+        if places.count < store.allPlaces.filter({ !$0.isHidden }).count, !places.isEmpty {
+            // One topic's map (from its topic page): fit its places, wherever they are.
+            fit(places.map(\.coordinate), fallback: nil)
+            positioned = true
+        } else if let city = store.cities.first {
             fit(store.places(inCity: city.name).map(\.coordinate), fallback: city.center)
             positioned = true
         }

@@ -209,7 +209,7 @@ struct WrapLayout: Layout {
 
 // MARK: - Screen header
 
-/// Big heavy screen title with trailing actions (every tab has the Everything else button).
+/// Big heavy screen title with optional trailing actions.
 struct ScreenHeader<Trailing: View>: View {
     let title: String
     var subtitle: String?

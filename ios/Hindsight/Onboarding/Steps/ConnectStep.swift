@@ -1,12 +1,11 @@
 import SwiftUI
 
-/// Bring your saves in. Once the user says they're done, the setup chat takes
-/// over (docs/specs/onboarding-chat.md).
+/// Bring your saves in, then on to "You're in" (`DoneStep`).
 struct ConnectStep: View {
     let model: OnboardingModel
     let store: SavedPostStore
-    /// Done connecting → the setup chat, on the user's saves or the sample.
-    let onFinish: (OnboardingChoice) -> Void
+    /// Done connecting: the user's saves or the sample.
+    let onChoose: (OnboardingChoice) -> Void
 
     var body: some View {
         OnboardingPage {
@@ -15,12 +14,12 @@ struct ConnectStep: View {
 
             SourceCards(store: store)
         } actions: {
-            Button(finishTitle) { onFinish(.mySaves) }
+            Button(finishTitle) { onChoose(.mySaves) }
                 .buttonStyle(.onboardingPrimary)
                 .disabled(importedCount == 0)
                 .opacity(importedCount == 0 ? 0.5 : 1)
             // For testing during the beta; remove before the App Store release.
-            Button("Just looking? Try it with sample saves") { onFinish(.sample) }
+            Button("Just looking? Try it with sample saves") { onChoose(.sample) }
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.accent)
         }

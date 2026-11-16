@@ -1,14 +1,10 @@
 import MapKit
 import SwiftUI
 
-/// Place confirmation (confirm.md): "is this the place?" cards. One component for
-/// the post-onboarding pass, Needs review (M4) and "Wrong place?" (M2).
+/// Place confirmation (confirm.md): "is this the place?" cards. Opened from the
+/// map only: Needs review (M4) and "Wrong place?" (M2). Nothing opens it on its own.
 struct ConfirmationFlow: View {
     enum Mode {
-        case onboarding
-        /// Opened from the setup chat, which already asked "want to check them?":
-        /// straight to the cards, and back to the chat at the end.
-        case fromChat
         case review
         case wrongPlace([PlaceRef])
     }
@@ -18,18 +14,16 @@ struct ConfirmationFlow: View {
     let onFinish: () -> Void
 
     private enum Phase: Equatable {
-        case intro, cards, review, alternatives(PlaceRef), done
+        case cards, review, alternatives(PlaceRef)
     }
 
-    @State private var phase: Phase = .intro
+    @State private var phase: Phase = .review
     @State private var cards: [[PlaceRef]] = []
     @State private var index = 0
     @State private var undo: (refs: [(PlaceRef, MatchRecord)], index: Int, message: String)?
     @State private var toastTask: Task<Void, Never>?
     @State private var yesStreak = 0
     @State private var toneLine: String?
-    /// After alternatives, go back to the review list instead of the next card.
-    @State private var returnToReview = false
     /// Checklist ticks per card (keyed by the card's first place), kept here so
     /// they survive a detour to fix one of the places.
     @State private var checklistUnticked: [String: Set<PlaceRef>] = [:]
@@ -39,23 +33,19 @@ struct ConfirmationFlow: View {
     private var store: PlaceStore { app.places }
 
     var body: some View {
-        // The undo toast sits at the bottom, except on the done screen, where
-        // the bottom is the "go to the map" button: there it moves to the top.
-        ZStack(alignment: phase == .done ? .top : .bottom) {
+        ZStack(alignment: .bottom) {
             Group {
                 switch phase {
-                case .intro: intro
                 case .cards: cardsView
                 case .review: reviewList
                 case .alternatives(let ref): AlternativesView(store: store, ref: ref, onDone: { answered in afterAlternatives(ref, answered: answered) })
-                case .done: done
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity)
             if let undo {
                 UndoToast(message: undo.message) { performUndo() }
-                    .padding(phase == .done ? .top : .bottom, 12)
+                    .padding(.bottom, 12)
             }
         }
         .animation(.snappy, value: phase)
@@ -68,12 +58,6 @@ struct ConfirmationFlow: View {
 
     private func start() {
         switch mode {
-        case .onboarding:
-            store.startMatching()
-            phase = .intro
-        case .fromChat:
-            store.startMatching()
-            beginCards()
         case .review:
             phase = .review
         case .wrongPlace(let refs):
@@ -86,25 +70,16 @@ struct ConfirmationFlow: View {
         }
     }
 
-    private func beginCards() {
-        cards = store.onboardingCards()
-        index = 0
-        phase = cards.isEmpty ? .done : .cards
-    }
-
     private func advance() {
         if index + 1 < cards.count {
             index += 1
             phase = .cards
-        } else if returnToReview || isReviewMode {
-            phase = .review
         } else {
-            phase = .done
+            phase = .review
         }
     }
 
     private var isReviewMode: Bool { if case .review = mode { true } else { false } }
-    private var isFromChat: Bool { if case .fromChat = mode { true } else { false } }
 
     private func record(_ refs: [PlaceRef], message: String, _ change: () -> Void) {
         let before = refs.map { ($0, store.record($0)) }
@@ -175,47 +150,6 @@ struct ConfirmationFlow: View {
         advance()
     }
 
-    // MARK: - C1 Intro
-
-    private var intro: some View {
-        let found = store.totalFound
-        let placed = store.placedCount
-        let ready = store.onboardingCards().count
-        // Cards can start once a full hand is ready; matching carries on behind them.
-        let canStart = !store.isMatching || ready >= Triage.onboardingLimit
-        let asks = ready
-        return VStack(alignment: .leading, spacing: 18) {
-            Spacer()
-            if store.isMatching && !canStart {
-                Text("Finding your spots… \(found - store.pendingCount)")
-                    .font(Theme.number(40))
-                    .contentTransition(.numericText(value: Double(found - store.pendingCount)))
-                ProgressView(value: Double(found - store.pendingCount), total: Double(max(found, 1))).tint(Theme.lime)
-                Text("Matching every place you saved with Apple Maps.").font(Theme.body(17)).foregroundStyle(Theme.secondary)
-            } else if store.isOffline {
-                Text("We'll finish finding your spots when you're back online.").font(Theme.title(30))
-            } else {
-                Text("We found \(found) spots in your saves.").font(Theme.number(44)).fixedSize(horizontal: false, vertical: true)
-                Text(asks == 0 ? "\(placed) are on your map already." : store.isMatching ?
-                        "\(placed) are on your map already, more on the way. Help us check \(asks)? Takes 30 seconds." :
-                        "\(placed) are on your map already. Help us check \(asks) more? Takes 30 seconds.")
-                    .font(Theme.body(19)).foregroundStyle(Theme.secondary)
-            }
-            Spacer()
-            if store.isOffline {
-                Button("Open the app") { onFinish() }.buttonStyle(.pill)
-            } else {
-                Button(asks == 0 && !store.isMatching ? "See my map" : "Let's go") { beginCards() }
-                    .buttonStyle(.pill)
-                    .disabled(!canStart)
-                    .opacity(canStart ? 1 : 0.5)
-                Button("Later") { onFinish() }
-                    .buttonStyle(.pillSecondary)
-            }
-        }
-        .padding(Theme.padding)
-    }
-
     // MARK: - C2 / C4 / C6 cards
 
     @ViewBuilder private var cardsView: some View {
@@ -240,7 +174,7 @@ struct ConfirmationFlow: View {
                                               }
                                               advance()
                                           },
-                                          onFix: { ref in fixingFromChecklist = true; returnToReview = isReviewMode; phase = .alternatives(ref) },
+                                          onFix: { ref in fixingFromChecklist = true; phase = .alternatives(ref) },
                                           onSkip: { answerSkip(refs) })
                             // a fresh card per post; its ticks live in checklistUnticked
                             .id(refs[0].key)
@@ -326,7 +260,6 @@ struct ConfirmationFlow: View {
                     Button {
                         cards = groups
                         index = i
-                        returnToReview = true
                         phase = .cards
                     } label: {
                         ReviewRow(store: store, refs: refs)
@@ -337,37 +270,6 @@ struct ConfirmationFlow: View {
                 .scrollContentBackground(.hidden)
             }
         }
-    }
-
-    // MARK: - C5 Done
-
-    private var done: some View {
-        let places = store.allPlaces.filter { !$0.isHidden }
-        let skipped = store.needsReviewCount
-        let nothingAsked = cards.isEmpty
-        return VStack(alignment: .leading, spacing: 16) {
-            Spacer(minLength: 8)
-            Text(nothingAsked ? "Nailed all of them. Didn't even need you." : "Map's ready. Go eat something.")
-                .font(Theme.body(17, weight: .semibold)).foregroundStyle(Theme.lime)
-            Text("Your map is ready. \(places.count) spots.").font(Theme.number(40)).fixedSize(horizontal: false, vertical: true)
-            Map(initialPosition: .automatic) {
-                ForEach(places.prefix(300)) { place in
-                    Annotation(place.name, coordinate: place.coordinate.clCoordinate) {
-                        Circle().fill(Theme.lime).frame(width: 9, height: 9).overlay(Circle().stroke(.black.opacity(0.4)))
-                    }
-                    .annotationTitles(.hidden)
-                }
-            }
-            .disabled(true)
-            .frame(height: 260)
-            .clipShape(.rect(cornerRadius: Theme.radius))
-            if skipped > 0 {
-                Text("\(skipped) are in Needs review whenever you want.").font(Theme.body(16)).foregroundStyle(Theme.secondary)
-            }
-            Spacer()
-            Button(isFromChat ? "Done" : "Open map") { onFinish() }.buttonStyle(.pill)
-        }
-        .padding(Theme.padding)
     }
 }
 
