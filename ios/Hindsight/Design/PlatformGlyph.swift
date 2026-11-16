@@ -67,7 +67,8 @@ struct PostLinkThumbnail: View {
         ZStack(alignment: .bottomTrailing) {
             Group {
                 if let url = post?.thumbnailUrl {
-                    AsyncImage(url: url) { phase in
+                    // The glyph stands in while loading and if it fails; the image fades in over it.
+                    AsyncImage(url: url, transaction: Transaction(animation: .easeOut(duration: 0.2))) { phase in
                         if let image = phase.image { image.resizable().scaledToFill() } else { glyph }
                     }
                 } else {

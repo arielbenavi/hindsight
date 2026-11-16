@@ -32,7 +32,7 @@ struct ContractUser: Codable, Sendable, Hashable {
     var platforms: [String]
 }
 
-/// Where a topic or item lives. `none` topics decode to `nil` (Everything else).
+/// Where a topic or item lives. `none` topics decode to `nil` (no view; Home still lists them).
 enum LegoScreen: String, Codable, Sendable, CaseIterable, Identifiable {
     case map, fitness, learn
 
@@ -150,7 +150,10 @@ struct ContractPost: Codable, Sendable, Identifiable, Hashable {
     var savedDate: Date? { savedAt.flatMap(ContractDate.parse) }
 
     /// "@author" for bylines.
-    var byline: String { "@\(author.username)" }
+    /// "@chef.anna"; a link with no author shows its site instead of a bare "@".
+    var byline: String {
+        author.username.isEmpty ? (url.host()?.replacingOccurrences(of: "www.", with: "") ?? platform.displayName) : "@\(author.username)"
+    }
 
     /// First non-empty caption line, for list rows.
     var firstLine: String? {
@@ -175,7 +178,7 @@ struct ContractTopic: Codable, Sendable, Identifiable, Hashable {
     var id: String
     var label: String
     var emoji: String?
-    /// `nil` = `none` (Everything else).
+    /// `nil` = `none`: no view fits; still a topic on Home.
     var legoScreen: LegoScreen?
     var confidence: Confidence
     var postIds: [String]

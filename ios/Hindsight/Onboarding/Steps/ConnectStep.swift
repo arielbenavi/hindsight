@@ -29,6 +29,6 @@ struct ConnectStep: View {
     private var importedCount: Int { store.posts.count { $0.source != .seedMD } }
 
     private var finishTitle: String {
-        importedCount > 0 ? "Start with \(importedCount.formatted()) saves" : "Connect at least one to start"
+        importedCount > 0 ? "Start with \(importedCount.counted("save"))" : "Connect at least one to start"
     }
 }

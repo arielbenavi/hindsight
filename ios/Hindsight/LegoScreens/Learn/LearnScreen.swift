@@ -43,7 +43,7 @@ struct LearnScreen: View {
             }
         }
         .themedScreen()
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
         .navigationDestination(for: String.self) { id in
             if let section = app.learn?.section(id) { LearnTopicView(app: app, section: section) }
         }
@@ -77,7 +77,6 @@ struct LearnScreen: View {
             freshStart = practice.markOpened(.learn)
             app.rescheduleReminders()
         }
-        if !screen.setupDone { showingSetup = true }
         handleDeepLink()
     }
 
@@ -107,6 +106,12 @@ struct LearnScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
+                if !screen.setupDone {
+                    SetupOfferCard(title: "Make Tips yours",
+                                   detail: "Pick what you actually want to learn, how often, and when to get a nudge. 30 seconds.",
+                                   onSetUp: { showingSetup = true },
+                                   onDismiss: { withAnimation(.snappy) { practice.skipSetup(.learn) } })
+                }
                 Button { showingProgress = true } label: {
                     WeeklyRing(progress: practice.progress(.learn)).card(padding: 18)
                 }

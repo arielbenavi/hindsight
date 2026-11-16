@@ -206,10 +206,10 @@ struct WhatsAppImportView: View {
             }
         case .done(let added, let links, let notes, let othersSkipped):
             VStack(alignment: .leading, spacing: 4) {
-                Label(added > 0 ? "+\(added) new saves" : "Nothing new since last time", systemImage: "checkmark.circle.fill")
+                Label(added > 0 ? "+\(added.counted("new save"))" : "Nothing new since last time", systemImage: "checkmark.circle.fill")
                     .font(OnboardingStyle.title)
                     .foregroundStyle(OnboardingStyle.accent)
-                Text("\(links) links and \(notes) notes in the chat." + (othersSkipped > 0
+                Text("\(links.counted("link")) and \(notes.counted("note")) in the chat." + (othersSkipped > 0
                      ? " Other people's messages were left out; their links were kept." : ""))
                     .font(OnboardingStyle.caption)
                     .foregroundStyle(OnboardingStyle.muted)

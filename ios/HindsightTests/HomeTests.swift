@@ -109,18 +109,19 @@ struct HomeTests {
                           sourceCollections: ["NYC Restaurants"]),
             ContractTopic(id: "memes", label: "Memes", legoScreen: nil, postIds: Array(ids[6..<15])),
             ContractTopic(id: "guitar", label: "Guitar", legoScreen: .learn, postIds: Array(ids[15..<17])),
-            ContractTopic(id: SortEngine.randomTopicID, label: "Random", legoScreen: nil, postIds: Array(ids[17..<20])),
+            ContractTopic(id: SortEngine.unsortedTopicID, label: "Unsorted", legoScreen: nil, postIds: Array(ids[17..<20])),
         ]
         let home = HomeTopics.build(data: data(topics, posts: posts), posts: posts)
         // Memes 9, NYC food 6, Recipes 4 (a collection no topic covers), then Other: Guitar 2 + Tiny 1.
         #expect(home.map(\.label) == ["Memes", "NYC food", "Recipes", "Other"])
         #expect(home.map(\.count) == [9, 6, 4, 3])
         #expect(home.map(\.kind) == [.ai, .ai, .collection, .other])
+        #expect(home[0].legoScreen == nil)                                   // a topic without a view is a normal topic
         #expect(home[1].legoScreen == .map)
         #expect(home[1].topicID == "nyc-food")
         #expect(home[1].emoji == "🍜")
         #expect(home[2].id == "collection:recipes")
-        #expect(!home.contains { $0.topicID == SortEngine.randomTopicID })   // the catch-all is skipped
+        #expect(!home.contains { $0.topicID == SortEngine.unsortedTopicID }) // not sorted yet: only in Recent
         #expect(!home.contains { $0.label == "NYC Restaurants" })           // already a topic
         #expect(Set(home[3].postIDs) == ["p15", "p16", "p10"])
         #expect(home[3].postIDs == ["p10", "p15", "p16"])                    // in the saves' order
@@ -139,12 +140,28 @@ struct HomeTests {
         #expect(HomeTopics.build(data: nil, posts: posts).map(\.label) == ["Alpha", "Beta"])
     }
 
-    @Test func reutsSampleHasTopicsForEverySortedSaveButTheCatchAll() throws {
+    @Test func theSorterNamedOtherJoinsOurOther() {
+        let posts = (0..<8).map { post("p\($0)") }
+        let ids = posts.map(\.id)
+        let topics = [
+            ContractTopic(id: "memes", label: "Memes", legoScreen: nil, postIds: Array(ids[0..<4])),
+            ContractTopic(id: "other", label: "Other", legoScreen: nil, postIds: Array(ids[4..<8])),
+        ]
+        let home = HomeTopics.build(data: data(topics, posts: posts), posts: posts)
+        #expect(home.map(\.label) == ["Memes", "Other"])
+        #expect(home.map(\.kind) == [.ai, .other])
+    }
+
+    @Test func samplesHaveATopicForEverySave() throws {
+        for id in ["reut", "ariel"] {
+            let data = try Fixtures.load(id)
+            let home = HomeTopics.build(data: data, posts: data.posts)
+            let covered = Set(home.flatMap(\.postIDs))
+            #expect(data.posts.allSatisfy { covered.contains($0.id) })
+            #expect(home.contains { $0.kind == .ai && $0.legoScreen == nil })   // memes, ads…
+        }
         let data = try Fixtures.load("reut")
         let home = HomeTopics.build(data: data, posts: data.posts)
-        let covered = Set(home.flatMap(\.postIDs))
-        let random = Set(data.topic(SortEngine.randomTopicID)?.postIds ?? [])
-        #expect(data.posts.allSatisfy { covered.contains($0.id) || random.contains($0.id) })
         #expect(home.last?.kind == .other)
         #expect(home.dropLast().map(\.count) == home.dropLast().map(\.count).sorted(by: >))
     }

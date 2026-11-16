@@ -34,6 +34,18 @@ actor FixtureBackend: SortBackend {
     func usage() async -> SortUsage { SortUsage() }
 }
 
+/// Answers every post the same way and names nothing.
+actor StubBackend: SortBackend {
+    let decision: SortDecision
+    init(decision: SortDecision) { self.decision = decision }
+    func bucket(_ post: ContractPost) async -> SortDecision? { decision }
+    func places(_ post: ContractPost) async -> [(name: String, type: PlaceType)]? { [] }
+    func topics(_ hints: [TopicHint]) async -> [PlannedTopic]? { [] }
+    func tip(_ post: ContractPost) async -> ExtractedTip? { nil }
+    func routine(_ post: ContractPost) async -> ExtractedRoutine? { nil }
+    func usage() async -> SortUsage { SortUsage() }
+}
+
 @MainActor
 struct SortEngineTests {
     private func sortAll(_ engine: SortEngine, _ posts: [ContractPost]) async {
@@ -62,7 +74,7 @@ struct SortEngineTests {
 
         // Survives the round trip the app does, and proposes Map + Learn (layout-proposal "Done when").
         let data = HindsightData(file: try ContractFile.decode(file.encoded()))
-        let tabs = LayoutRules.propose(data).draft.tabs.map(\.legoScreen)
+        let tabs = LayoutRules.propose(data).tabs.map(\.legoScreen)
         #expect(tabs.first == .map)
         #expect(tabs.contains(.learn))
         // Only places actually named in the post survive.
@@ -108,6 +120,86 @@ struct SortEngineTests {
         #expect(Set(file.topics.flatMap(\.postIds)).count == fixture.posts.count)
         // 📍 posts are still recognized as places by the rules.
         #expect(file.topics.contains { $0.legoScreen == .map })
+    }
+
+    /// Every sorted post lands in a named topic, "none" ones too (memes, ads…),
+    /// with no view and no items; only unsorted posts sit in "Unsorted".
+    @Test func noneHintsBecomeNamedTopicsWithoutItems() async throws {
+        let fixture = try Fixtures.load("reut")
+        let engine = SortEngine(backend: FixtureBackend(fixture), directory: nil)
+        let sorted = Array(fixture.posts.prefix(150))
+        await sortAll(engine, sorted)
+        let file = await engine.assemble(fixture.posts, user: user)
+
+        let none = file.topics.filter { $0.legoScreen == nil && $0.id != SortEngine.unsortedTopicID }
+        let fixtureNone = Set(fixture.topics.filter { $0.legoScreen == nil }.map(\.label))
+        #expect(!none.isEmpty)
+        #expect(Set(none.map(\.label)).isSubset(of: fixtureNone))
+        #expect(!none.contains { $0.label.isEmpty })
+        let noneIDs = Set(none.flatMap(\.postIds))
+        #expect(!file.items.contains { noneIDs.contains($0.postId) })
+
+        let unsorted = try #require(file.topics.first { $0.id == SortEngine.unsortedTopicID })
+        #expect(unsorted.label == "Unsorted")
+        #expect(Set(unsorted.postIds) == Set(fixture.posts.dropFirst(150).map(\.id)))
+        #expect(!engine.hasUnnamedHints(fixture.posts))
+
+        // Once everything is sorted there's nothing left in Unsorted.
+        await sortAll(engine, fixture.posts)
+        let all = await engine.assemble(fixture.posts, user: user)
+        #expect(!all.topics.contains { $0.id == SortEngine.unsortedTopicID })
+    }
+
+    /// A model that skips a "none" slug: it still gets a topic, named from the slug.
+    @Test func skippedNoneHintGetsALabelFromItsSlug() async throws {
+        let posts = (0..<3).map { i in
+            ContractPost(id: "x:\(i)", url: URL(string: "https://x.com/a/status/\(i)")!, author: "a", caption: "lol \(i)")
+        }
+        let engine = SortEngine(backend: StubBackend(decision: SortDecision(screen: nil, slug: "gym-memes")), directory: nil)
+        await sortAll(engine, posts)
+        let file = await engine.assemble(posts, user: user)
+        #expect(file.topics.map(\.label) == ["Gym memes"])
+        #expect(file.topics.first?.legoScreen == nil)
+        #expect(file.items.isEmpty)
+    }
+
+    /// A cache from before "none" hints were named: the next assemble names them.
+    @Test func oldCacheGetsItsNoneHintsNamed() async throws {
+        let fixture = try Fixtures.load("reut")
+        let dir = URL.temporaryDirectory.appending(path: UUID().uuidString)
+        let engine = SortEngine(backend: FixtureBackend(fixture), directory: dir)
+        await sortAll(engine, fixture.posts)
+        _ = await engine.assemble(fixture.posts, user: user)
+
+        // Rewrite the cache the way older builds left it: no topics for "none/…".
+        let url = dir.appending(path: "sort-cache.json")
+        var json = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        var byHint = try #require(json["topicByHint"] as? [String: String])
+        var topics = try #require(json["topics"] as? [String: Any])
+        for (key, id) in byHint where key.hasPrefix("none/") { byHint[key] = nil; topics[id] = nil }
+        json["topicByHint"] = byHint
+        json["topics"] = topics
+        try JSONSerialization.data(withJSONObject: json).write(to: url)
+
+        let reopened = SortEngine(backend: FixtureBackend(fixture), directory: dir)
+        #expect(reopened.hasUnnamedHints(fixture.posts))
+        let file = await reopened.assemble(fixture.posts, user: user)
+        #expect(!reopened.hasUnnamedHints(fixture.posts))
+        #expect(!file.topics.contains { $0.id == SortEngine.unsortedTopicID })
+        #expect(file.topics.contains { $0.legoScreen == nil && $0.label == "Ads & promos" })
+    }
+
+    /// Posts imported while a run is going are sorted right after it.
+    @Test func importsDuringARunAreSortedNext() async throws {
+        let fixture = try Fixtures.load("reut")
+        let engine = SortEngine(backend: FixtureBackend(fixture), directory: nil)
+        let first = Array(fixture.posts.prefix(40))
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            engine.start(first)
+            engine.start(Array(fixture.posts.prefix(60))) { done.resume() }
+        }
+        let file = await engine.assemble(Array(fixture.posts.prefix(60)), user: user)
+        #expect(!file.topics.contains { $0.id == SortEngine.unsortedTopicID })
     }
 
     @Test func detailsReplaceTheStandIns() async throws {

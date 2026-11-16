@@ -81,6 +81,21 @@ DATA_FETCHING_RESEARCH.md.)
 
 ## iOS / Xcode
 
+- **A `@State` initial value is built on every init of the view, even though SwiftUI keeps the first one.**
+  `RootView(...)` makes `AppModel(...)` in its init, and `AppModel.init` starts sorting; so anything that
+  re-runs `HindsightApp.body` (an `@AppStorage` it observes changing) built a second, throwaway AppModel with
+  a second sort engine on the same cache file. `HindsightApp` now reads `setupSource` instead of observing it,
+  and AppModel switches sample → own saves in place. Keep side effects out of view inits. (2026-11-15)
+- **MapKit's pan beats the edge swipe back**, even with the interactive pop gesture re-enabled for screens
+  that hide the nav bar. A thin clear strip on the left edge with its own drag gesture works (`MapScreen.backEdge`).
+  Other pushed screens got the system swipe back via `UINavigationController` as the pop gesture's delegate. (2026-11-15)
+- In a `LazyVGrid`, `.lineLimit(2, reservesSpace: true)` keeps cards the same height but leaves a gap under
+  one-line titles; a `minHeight` on the card's content looks right. (2026-11-15)
+- `xcrun simctl spawn booted defaults read <bundle id> <key>` didn't see keys the app had just written.
+  Check server-side effects (connector `calls.log`) instead of the simulator's defaults. (2026-11-15)
+- Swift 6: a `nonisolated static func` can't use a `@MainActor` static as a default argument
+  ("main actor-isolated default value in a nonisolated context"); mark the constant `nonisolated`. (2026-11-15)
+
 - **Fresh Xcode installs have no iOS platform.** `xcodebuild -downloadPlatform iOS`
   (about 8.4 GB) is needed even to build for a physical device, not just the
   simulator. It's an Xcode component, not a macOS update. (2026-09-29)
@@ -183,6 +198,9 @@ DATA_FETCHING_RESEARCH.md.)
 
 ## WhatsApp bot (Baileys)
 
+- **Confirmed: the bot is logged out when its phone is offline ~14 days.** The spare phone stayed off 15 days
+  and the bot has been logged out since 2026-10-17. The bot needs a phone that stays online, or a relink
+  every ~2 weeks. (2026-11-15)
 - Pairing codes fail ("Couldn't link device") with a made-up browser name like
   `Browsers.macOS('hindsight')`. Use a real one (`Browsers.macOS('Chrome')`). (2026-10-01)
 - Right after pairing, WhatsApp closes the stream with code 515 ("restart required").

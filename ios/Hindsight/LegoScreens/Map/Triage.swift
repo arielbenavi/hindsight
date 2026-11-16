@@ -2,11 +2,6 @@ import Foundation
 
 /// Who gets asked what (confirm.md → Triage). Pure; no MapKit.
 enum Triage {
-    /// Cards in the post-onboarding pass. The spec targets a handful (≤ 10) with a
-    /// hard cap of 20; the rest wait in Needs review.
-    static let onboardingLimit = 10
-    static let hardCap = 20
-
     /// A search area: the center and radius of the area hint's bounding region.
     struct Area: Codable, Hashable, Sendable {
         var center: Coordinate
@@ -31,18 +26,6 @@ enum Triage {
         let strong = place.evidenceKind.isStrong && place.confidence == .high
         if strong || plausible.count == 1 || agreedByOtherPost { return .auto }
         return .ask
-    }
-
-    /// How sure we are, for ordering the Ask cards (strongest first).
-    static func strength(of place: ExtractedPlace, match: MatchedPlace?, area: Area?) -> Int {
-        var score = 0
-        if place.evidenceKind.isStrong { score += 2 }
-        if place.confidence == .high { score += 1 }
-        if let match {
-            if namesMatch(place.name, match.name) { score += 2 }
-            if area?.contains(match.coordinate) == true { score += 1 }
-        }
-        return score
     }
 
     /// Loose name equality: case, accents, punctuation, "the" and "'s" don't matter;
@@ -95,18 +78,5 @@ enum Triage {
         let words = handle.replacingOccurrences(of: "_", with: " ").replacingOccurrences(of: ".", with: " ")
             .split(separator: " ").map(String.init).filter { !$0.isEmpty }
         return words.isEmpty ? nil : TextMatch.fold(words.joined(separator: " "))
-    }
-
-    /// The onboarding pass: posts with Ask places, strongest first, one card per
-    /// post (a Top-N post is one checklist card), at most `limit` cards.
-    static func onboardingCards(_ asks: [(ref: PlaceRef, strength: Int)], limit: Int = onboardingLimit) -> [[PlaceRef]] {
-        var byPost: [String: [(PlaceRef, Int)]] = [:]
-        for a in asks { byPost[a.ref.postID, default: []].append((a.ref, a.strength)) }
-        let cards = byPost.values.map { refs in
-            (refs: refs.map(\.0).sorted(), score: refs.map(\.1).max() ?? 0)
-        }
-        return cards.sorted { ($0.score, $1.refs[0].postID) > ($1.score, $0.refs[0].postID) }
-            .prefix(min(limit, hardCap))
-            .map(\.refs)
     }
 }

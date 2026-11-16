@@ -40,7 +40,7 @@ struct DevMenu: View {
             // Back to onboarding, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
                 AppModel.resetMySetup()
-                UserDefaults.standard.set("", forKey: "setupSource")
+                UserDefaults.standard.set("", forKey: AppModel.setupSourceKey)
                 UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
             }
             Button("Reset \(app.dataset?.displayName ?? "") state", role: .destructive) { app.resetCurrentDataset() }
@@ -51,5 +51,19 @@ struct DevMenu: View {
         }
         .accessibilityLabel("Beta menu")
         .sheet(isPresented: $showsModelTest) { ModelEvalView() }
+    }
+}
+
+/// Keeps the edge swipe back on pushed screens that hide the navigation bar (the
+/// Map draws its own back button); SwiftUI turns the gesture off with the bar.
+/// Never on a stack's root screen.
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        viewControllers.count > 1
     }
 }

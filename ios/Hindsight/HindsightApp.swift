@@ -3,8 +3,6 @@ import SwiftUI
 @main
 struct HindsightApp: App {
     @AppStorage(OnboardingModel.completedKey) private var hasCompletedOnboarding = false
-    /// "mine" once the user starts with their own saves; empty = the sample.
-    @AppStorage("setupSource") private var setupSource = ""
     /// The user's own imports only: no bundled seed (the sample lives in data/fixtures).
     @State private var store = SavedPostStore(seed: { [] })
 
@@ -18,10 +16,13 @@ struct HindsightApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                RootView(store: store, useMySaves: setupSource == OnboardingChoice.mySaves.rawValue)
+                // "mine" once the user starts with (or later brings in) their own saves; else the sample.
+                // Read, not observed: AppModel switches itself over in place (`importsChanged`), and a
+                // new RootView here would build a second AppModel.
+                RootView(store: store, useMySaves: UserDefaults.standard.string(forKey: AppModel.setupSourceKey) == OnboardingChoice.mySaves.rawValue)
             } else {
                 OnboardingFlow(store: store) { choice in
-                    setupSource = choice.rawValue
+                    UserDefaults.standard.set(choice.rawValue, forKey: AppModel.setupSourceKey)
                     hasCompletedOnboarding = true
                 }
             }

@@ -53,7 +53,7 @@ struct BodyAreaView: View {
         .themedScreen()
         .toolbar(.visible, for: .navigationBar)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
         .sheet(item: $detail) { routine in RoutineDetailSheet(app: app, routine: routine) }
     }
 

@@ -22,8 +22,10 @@ struct HomeTopic: Identifiable, Hashable, Sendable {
     var count: Int { postIDs.count }
 }
 
-/// Builds Home's Topics from the sorted file (if any) and the saves. Pure (main actor only
-/// because `SortEngine.randomTopicID` is).
+/// Builds Home's Topics from the sorted file (if any) and the saves. Every AI topic
+/// shows, with or without a view (`legoScreen` nil: memes, fashion, …); only
+/// "Unsorted" (posts not sorted yet) is left out, since Recent already has them.
+/// Pure (main actor only because `SortEngine.unsortedTopicID` is).
 @MainActor
 enum HomeTopics {
     /// Topics smaller than this fold into "Other".
@@ -40,7 +42,7 @@ enum HomeTopics {
 
         var topics: [HomeTopic] = []
         var represented: Set<String> = []
-        for topic in data?.topics ?? [] where topic.id != SortEngine.randomTopicID {
+        for topic in data?.topics ?? [] where topic.id != SortEngine.unsortedTopicID {
             let ids = newestFirst(topic.postIds)
             guard !ids.isEmpty else { continue }
             represented.insert(TextMatch.fold(topic.label))
@@ -65,9 +67,11 @@ enum HomeTopics {
                                     postIDs: newestFirst(ids), legoScreen: nil, kind: .collection, topicID: nil))
         }
 
-        let big = topics.filter { $0.count >= minimumSize }
+        // A topic the sorter itself called "Other" (its fallback) joins ours.
+        let foldsIntoOther = { (t: HomeTopic) in t.count < minimumSize || TextMatch.fold(t.label) == otherID }
+        let big = topics.filter { !foldsIntoOther($0) }
             .sorted { ($1.count, $0.label) < ($0.count, $1.label) }
-        let small = topics.filter { $0.count < minimumSize }
+        let small = topics.filter(foldsIntoOther)
         guard !small.isEmpty else { return big }
         let other = HomeTopic(id: otherID, label: "Other", emoji: nil, symbol: "ellipsis.circle.fill",
                               postIDs: newestFirst(small.flatMap(\.postIDs)), legoScreen: nil, kind: .other, topicID: nil)

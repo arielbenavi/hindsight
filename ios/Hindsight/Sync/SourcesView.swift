@@ -12,7 +12,7 @@ struct SourcesView: View {
             OnboardingPage {
                 Text("Sources.")
                     .font(OnboardingStyle.display())
-                Text("\(store.posts.count.formatted()) saves so far. Sync again anytime.")
+                Text("\(store.posts.count.counted("save")) so far. Sync again anytime.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
@@ -22,7 +22,7 @@ struct SourcesView: View {
                     // Same as the beta menu's "Start onboarding over": back to onboarding,
                     // keeping everything imported. HindsightApp watches the flag.
                     AppModel.resetMySetup()
-                    UserDefaults.standard.set("", forKey: "setupSource")
+                    UserDefaults.standard.set("", forKey: AppModel.setupSourceKey)
                     hasCompletedOnboarding = false
                     dismiss()
                 }

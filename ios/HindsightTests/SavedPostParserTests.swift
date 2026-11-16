@@ -69,6 +69,17 @@ struct SavedPostParserTests {
         #expect(result.posts.allSatisfy { $0.source == .muse })
     }
 
+    /// What the server's `/saves` returns for a WhatsApp/`/ingest` post: no saved date, but when it arrived.
+    @Test func serverPostWithoutSavedDateUsesReceivedAt() throws {
+        let text = """
+        [{"url":"https://example.com/a","platform":"web","kind":"link","caption":"a note","saved_at":null,
+          "received_at":"2026-11-16T00:48:35+00:00"}]
+        """
+        let post = try #require(SavedPostParser.parse(text).posts.first)
+        #expect(post.savedAt == (try Date("2026-11-16T00:48:35Z", strategy: .iso8601)))
+        #expect(ContractPost(post).byline == "example.com")
+    }
+
     @Test func junkDoesNotCrash() {
         #expect(SavedPostParser.parse("").posts.isEmpty)
         #expect(SavedPostParser.parse("[not json").posts.isEmpty)

@@ -169,16 +169,6 @@ final class PlaceStore {
     var totalFound: Int { refs.count { $0.index >= 0 } }
     var placedCount: Int { allPlaces.count }
 
-    /// Cards for the post-onboarding pass (C2/C4), strongest first, a handful.
-    func onboardingCards() -> [[PlaceRef]] {
-        let asks = refs.compactMap { ref -> (ref: PlaceRef, strength: Int)? in
-            let rec = record(ref)
-            guard rec.status == .ask, let ex = extracted(ref) else { return nil }
-            return (ref, Triage.strength(of: ex, match: rec.match, area: rec.area))
-        }
-        return Triage.onboardingCards(asks)
-    }
-
     // MARK: - Matching
 
     /// Look up every pending place, in order. Safe to call repeatedly.
@@ -285,12 +275,6 @@ final class PlaceStore {
         let hint = area == nil ? (extracted(ref)?.areaHint ?? post(ref)?.collections.first) : nil
         let fullQuery = [query, hint].compactMap { $0 }.joined(separator: ", ")
         return (try? await searcher.freeSearch(fullQuery, near: area)) ?? []
-    }
-
-    /// All posts whose every place was marked "not a place" (they leave the Map).
-    var notAPlacePostIDs: Set<String> {
-        let byPost = Dictionary(grouping: refs, by: \.postID)
-        return Set(byPost.filter { _, refs in refs.allSatisfy { record($0).status == .notAPlace } }.keys)
     }
 
     private func update(_ ref: PlaceRef, _ change: (inout MatchRecord) -> Void) {

@@ -65,3 +65,52 @@ struct MuseConnectorTests {
         #expect(!MuseConnector.isOurPrompt("```json\n[]\n```"))
     }
 }
+
+/// One account per install (`ServerAccount`, `MuseConnector.ensureAccount`): the URL rules, no network.
+struct ServerAccountTests {
+    private let root = URL(string: "https://example.test/tok123")!
+    private let tenant = URL(string: "https://example.test/tok123/t/t-abcd1234")!
+
+    @Test func rootVersusTenant() {
+        #expect(!ServerAccount.isTenant(root))
+        #expect(ServerAccount.isTenant(tenant))
+        #expect(ServerAccount.isTenant(tenant.appending(path: "saves")))
+        #expect(ServerAccount.root(of: tenant) == root)
+        #expect(ServerAccount.root(of: tenant.appending(path: "saves")) == root)
+        #expect(ServerAccount.root(of: root) == root)
+        #expect(MuseConnector.normalized("https://example.test/tok123/saves/") == root)
+    }
+
+    @Test func usesTheAccountMadeOnThisRoot() {
+        let account = ServerAccount(root: root.absoluteString, base: tenant.absoluteString)
+        #expect(ServerAccount.resolve(configured: nil, account: account) == nil)
+        #expect(ServerAccount.resolve(configured: root, account: nil) == root)              // none yet (offline): the root
+        #expect(ServerAccount.resolve(configured: root, account: account) == tenant)
+        let other = URL(string: "https://other.test/tok999")!
+        #expect(ServerAccount.resolve(configured: other, account: account) == other)       // another server: not that account
+        let pasted = URL(string: "https://example.test/tok123/t/t-other")!
+        #expect(ServerAccount.resolve(configured: pasted, account: account) == pasted)     // a tenant set by hand wins
+    }
+
+    /// The launch argument sets the same root on every launch: that must not make a second account.
+    @Test func makesAnAccountOncePerRoot() {
+        let account = ServerAccount(root: root.absoluteString, base: tenant.absoluteString)
+        #expect(ServerAccount.needsAccount(configured: root, account: nil))
+        #expect(!ServerAccount.needsAccount(configured: root, account: account))
+        #expect(!ServerAccount.needsAccount(configured: nil, account: nil))
+        #expect(!ServerAccount.needsAccount(configured: tenant, account: nil))
+        #expect(ServerAccount.needsAccount(configured: URL(string: "https://other.test/tok999")!, account: account))
+    }
+
+    @Test func connectCodeFollowsTheAccount() {
+        #expect(WhatsAppBot.connectCode(base: tenant) == "t-abcd1234")
+        #expect(WhatsAppBot.connectCode(base: root) == "main")
+    }
+
+    @Test func pullsAtMostOnceAMinute() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        #expect(AppModel.isPullDue(last: nil, now: now))
+        #expect(!AppModel.isPullDue(last: now.addingTimeInterval(-30), now: now))
+        #expect(AppModel.isPullDue(last: now.addingTimeInterval(-60), now: now))
+    }
+}
