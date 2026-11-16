@@ -100,7 +100,7 @@ struct LearnProgressSheet: View {
         if best.tried == total {
             return "You've tried \(best.tried) \(best.section.title.lowercased()) \(noun). You're someone who practices."
         }
-        return "You've tried \(total) tips, \(best.tried) of them \(best.section.title.lowercased()). You're someone who practices."
+        return "You've tried \(total.counted("tip")), \(best.tried) of them \(best.section.title.lowercased()). You're someone who practices."
     }
 
     // MARK: - Settings

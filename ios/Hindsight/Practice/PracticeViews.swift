@@ -310,3 +310,31 @@ struct UndoToast: View {
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
+
+/// The first-open setup of Tips or Workouts, offered inline instead of popping up
+/// on its own: "Set it up" opens the flow, "Not now" hides the offer for good.
+struct SetupOfferCard: View {
+    let title: String
+    let detail: String
+    let onSetUp: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(Theme.lime)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(Theme.body(17, weight: .heavy))
+                    Text(detail).font(Theme.body(15)).foregroundStyle(Theme.secondary)
+                }
+            }
+            HStack(spacing: 10) {
+                Button("Set it up", action: onSetUp).buttonStyle(.pillCompactPrimary)
+                Button("Not now", action: onDismiss).buttonStyle(.pillCompact)
+            }
+        }
+        .card(padding: 16, background: Theme.surfaceRaised)
+    }
+}

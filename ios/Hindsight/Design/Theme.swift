@@ -113,6 +113,15 @@ extension View {
             .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.stroke))
     }
 
+    /// A screen pushed onto Home's stack: a solid inline bar (back button only),
+    /// so content never scrolls under the status bar. Home itself hides its bar
+    /// and paints the same strip.
+    func pushedScreen() -> some View {
+        self.navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+    }
+
     /// Full-screen dark background used by every screen.
     func themedScreen() -> some View {
         self.background(Theme.background.ignoresSafeArea())
@@ -226,5 +235,12 @@ struct ScreenHeader<Trailing: View>: View {
             Spacer()
             trailing
         }
+    }
+}
+
+extension Int {
+    /// "1 spot", "12 spots", "1,204 saves": the number and the right form of the noun.
+    func counted(_ singular: String, _ plural: String? = nil) -> String {
+        "\(formatted()) \(self == 1 ? singular : plural ?? singular + "s")"
     }
 }

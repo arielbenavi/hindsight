@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Fitness (Home → Workouts, F1): weekly ring, fresh-start card, Today's 1, Regulars,
-/// problem search and the body-area grid. First open shows setup (F0). Pushed
-/// onto Home's stack.
+/// problem search and the body-area grid. Setup (F0) is offered inline, never
+/// popped up on its own. Pushed onto Home's stack.
 struct FitnessScreen: View {
     let app: AppModel
     let tab: TabConfig
@@ -37,7 +37,7 @@ struct FitnessScreen: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .themedScreen()
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
         .navigationDestination(for: BodyArea.self) { area in
             BodyAreaView(app: app, area: area)
         }
@@ -66,6 +66,12 @@ struct FitnessScreen: View {
     // MARK: - Sections
 
     @ViewBuilder private func content(_ catalog: FitnessCatalog) -> some View {
+        if !practice.screen(.fitness).setupDone {
+            SetupOfferCard(title: "Make Workouts yours",
+                           detail: "Pick the body areas you care about, sessions a week, and when to get a nudge.",
+                           onSetUp: { showSetup = true },
+                           onDismiss: { withAnimation(.snappy) { practice.skipSetup(.fitness) } })
+        }
         Button { showProgress = true } label: {
             WeeklyRing(progress: practice.progress(.fitness), unit: "sessions").card()
         }
@@ -268,9 +274,6 @@ struct FitnessScreen: View {
     // MARK: - Actions
 
     private func appear() {
-        if !practice.screen(.fitness).setupDone, app.fitness?.routines.isEmpty == false {
-            showSetup = true
-        }
         if !opened {
             opened = true
             fresh = practice.markOpened(.fitness)

@@ -44,7 +44,7 @@ struct TopicScreen: View {
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)
         .themedScreen()
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
     }
 
     private func kindLine(_ count: Int) -> String {

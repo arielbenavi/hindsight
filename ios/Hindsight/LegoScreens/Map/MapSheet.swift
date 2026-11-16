@@ -71,7 +71,7 @@ struct NearbyList: View {
             Text("Posts that name a restaurant, café, bar or spot get a pin here.")
                 .font(Theme.body(15)).foregroundStyle(Theme.secondary)
             if store.needsReviewCount > 0 {
-                Button("Review \(store.needsReviewCount) posts that might be places", action: onReview).buttonStyle(.pillCompact)
+                Button("Review \(store.needsReviewCount.counted("post")) that might be places", action: onReview).buttonStyle(.pillCompact)
             }
         }
         .card()

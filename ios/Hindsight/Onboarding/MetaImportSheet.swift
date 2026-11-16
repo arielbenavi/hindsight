@@ -138,7 +138,7 @@ struct MetaImportSheet: View {
         switch result {
         case .imported(let added, let found, let inCollections, let partial):
             VStack(alignment: .leading, spacing: 6) {
-                Label(added > 0 ? "+\(added.formatted()) saves imported" : "Nothing new. All \(found.formatted()) were already here.",
+                Label(added > 0 ? "+\(added.counted("save")) imported" : "Nothing new. All \(found.formatted()) were already here.",
                       systemImage: "checkmark.circle.fill")
                     .font(OnboardingStyle.title)
                     .foregroundStyle(OnboardingStyle.accent)

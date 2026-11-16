@@ -38,7 +38,7 @@ struct SourceCards: View {
                 Spacer()
                 let count = store.count(for: .instagram) + store.count(for: .facebook)
                 if count > 0 {
-                    Label("\(count.formatted()) saves", systemImage: "checkmark.circle.fill")
+                    Label(count.counted("save"), systemImage: "checkmark.circle.fill")
                         .font(OnboardingStyle.caption)
                         .foregroundStyle(OnboardingStyle.accent)
                 }
@@ -64,7 +64,7 @@ struct SourceCards: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("WhatsApp notes").font(OnboardingStyle.title)
                 let count = store.count(for: .whatsapp)
-                Text(count > 0 ? "\(count.formatted()) notes saved." : "Links and notes you send yourself.")
+                Text(count > 0 ? "\(count.counted("note")) saved." : "Links and notes you send yourself.")
                     .font(OnboardingStyle.caption)
                     .foregroundStyle(OnboardingStyle.muted)
             }

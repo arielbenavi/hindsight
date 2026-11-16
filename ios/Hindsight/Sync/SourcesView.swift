@@ -12,7 +12,7 @@ struct SourcesView: View {
             OnboardingPage {
                 Text("Sources.")
                     .font(OnboardingStyle.display())
-                Text("\(store.posts.count.formatted()) saves so far. Sync again anytime.")
+                Text("\(store.posts.count.counted("save")) so far. Sync again anytime.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 

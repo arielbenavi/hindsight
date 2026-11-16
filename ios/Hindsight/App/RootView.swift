@@ -53,3 +53,17 @@ struct DevMenu: View {
         .sheet(isPresented: $showsModelTest) { ModelEvalView() }
     }
 }
+
+/// Keeps the edge swipe back on pushed screens that hide the navigation bar (the
+/// Map draws its own back button); SwiftUI turns the gesture off with the bar.
+/// Never on a stack's root screen.
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        viewControllers.count > 1
+    }
+}

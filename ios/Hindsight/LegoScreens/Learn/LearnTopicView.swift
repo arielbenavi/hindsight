@@ -55,7 +55,7 @@ struct LearnTopicView: View {
         }
         .scrollIndicators(.hidden)
         .themedScreen()
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
         .sheet(item: $detail) { TipDetailSheet(app: app, tip: $0) }
     }
 

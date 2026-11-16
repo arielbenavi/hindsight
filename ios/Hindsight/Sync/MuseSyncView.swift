@@ -252,7 +252,7 @@ struct MuseSyncView: View {
         switch (added, received) {
         case (0, 0): return pollID != nil ? "Waiting for Muse to send your saves…" : "Nothing arrived yet. Did Muse say it sent them?"
         case (0, _): return "Muse sent \(received), all already in hindsight.\(checking)"
-        case (_, _) where added == received: return "+\(added) saves arrived from Muse.\(checking)"
+        case (_, _) where added == received: return "+\(added.counted("save")) arrived from Muse.\(checking)"
         default: return "+\(added) new saves from Muse (\(received - added) you already had).\(checking)"
         }
     }

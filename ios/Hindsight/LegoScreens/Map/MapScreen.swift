@@ -35,6 +35,7 @@ struct MapScreen: View {
     var body: some View {
         ZStack(alignment: .top) {
             map
+            backEdge
             topBar
             BottomSheet(detent: $detent) { sheetContent }
             if location.notAskedYet && !explainerDismissed && !store.allPlaces.isEmpty {
@@ -112,6 +113,22 @@ struct MapScreen: View {
     }
 
     // MARK: - Floating controls
+
+    /// Swipe back from the left edge. The map's own pan wins over the system's edge
+    /// swipe, so a thin strip along the edge takes the drag instead.
+    private var backEdge: some View {
+        HStack {
+            Color.clear
+                .frame(width: 18)
+                .contentShape(.rect)
+                .gesture(DragGesture(minimumDistance: 12).onEnded { drag in
+                    if drag.translation.width > 70 && abs(drag.translation.height) < drag.translation.width { dismiss() }
+                })
+            Spacer()
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
 
     private var topBar: some View {
         VStack(spacing: 10) {

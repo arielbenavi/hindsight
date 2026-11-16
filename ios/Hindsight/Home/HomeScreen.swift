@@ -161,19 +161,22 @@ struct HomeScreen: View {
         if !cards.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle("VIEWS")
-                HStack(spacing: 10) {
+                // Same 2-column grid as Topics: one card stays half width.
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                     ForEach(cards, id: \.screen) { card in
                         NavigationLink(value: HomeRoute.lego(card.screen, topicID: nil)) {
-                            VStack(alignment: .leading, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 8) {
                                 Image(systemName: card.screen.symbol)
                                     .font(.system(size: 22, weight: .bold))
                                     .foregroundStyle(Theme.lime)
-                                Spacer(minLength: 0)
-                                Text(card.screen.homeTitle).font(Theme.body(17, weight: .heavy))
-                                Text(card.detail).font(Theme.body(13, weight: .semibold)).foregroundStyle(Theme.secondary)
-                                    .lineLimit(1).minimumScaleFactor(0.8)
+                                    .frame(height: 26, alignment: .leading)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(card.screen.homeTitle).font(Theme.body(17, weight: .heavy))
+                                    Text(card.detail).font(Theme.body(13, weight: .semibold)).foregroundStyle(Theme.secondary)
+                                        .lineLimit(1).minimumScaleFactor(0.8)
+                                        .contentTransition(.numericText())
+                                }
                             }
-                            .frame(height: 104, alignment: .topLeading)
                             .card(padding: 14)
                         }
                         .buttonStyle(.plain)
@@ -188,11 +191,12 @@ struct HomeScreen: View {
         var cards: [(screen: LegoScreen, detail: String)] = []
         let mapPosts = data.topics.filter { $0.legoScreen == .map }.reduce(0) { $0 + $1.postIds.count }
         if mapPosts > 0 {
+            // While places are still being matched the pin count is small and wrong: show saves.
             let spots = app.places.allPlaces.count
-            cards.append((.map, spots > 0 ? "\(spots.formatted()) spots" : "\(mapPosts.formatted()) saves"))
+            cards.append((.map, app.places.isMatching || spots == 0 ? mapPosts.counted("save") : spots.counted("spot")))
         }
-        if let tips = app.learn?.tips.count, tips > 0 { cards.append((.learn, "\(tips.formatted()) tips")) }
-        if let routines = app.fitness?.routines.count, routines > 0 { cards.append((.fitness, "\(routines.formatted()) moves")) }
+        if let tips = app.learn?.tips.count, tips > 0 { cards.append((.learn, tips.counted("tip"))) }
+        if let routines = app.fitness?.routines.count, routines > 0 { cards.append((.fitness, routines.counted("move"))) }
         return cards
     }
 
@@ -211,6 +215,8 @@ struct HomeScreen: View {
                                 }
                                 Spacer(minLength: 0)
                             }
+                            // Room for a two-line name, so a row's cards line up.
+                            .frame(minHeight: 58)
                             .card(padding: 10)
                         }
                         .buttonStyle(.plain)

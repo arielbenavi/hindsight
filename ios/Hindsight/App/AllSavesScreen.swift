@@ -29,12 +29,12 @@ struct AllSavesScreen: View {
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)
         .themedScreen()
-        .navigationBarTitleDisplayMode(.inline)
+        .pushedScreen()
         .onAppear { if query.isEmpty { query = initialQuery } }
     }
 
     private func subtitle(all: Int, shown: Int) -> String {
-        shown == all ? "\(all.formatted()) saves, newest first." : "\(shown.formatted()) of \(all.formatted()) saves."
+        shown == all ? "\(all.counted("save")), newest first." : "\(shown.formatted()) of \(all.counted("save"))."
     }
 }
 
