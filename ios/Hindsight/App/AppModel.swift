@@ -183,8 +183,60 @@ final class AppModel {
         finishSetup()
     }
 
-    /// New imports (after the Sources sheet): sort them in the background.
-    func importsChanged() { autoSetup() }
+    /// New imports (Sources, a server pull): sort them in the background. With the
+    /// sample showing, the user's first own saves switch Home over to them.
+    func importsChanged() {
+        guard persist, !myPosts.isEmpty else { return }
+        if !isMySaves {
+            switchToMySaves()
+            return
+        }
+        autoSetup()
+        // First sort still running: it picks the newcomers up right after (SortEngine.start).
+        if setupTask != nil { startSorting() }
+    }
+
+    /// From the sample to the user's own saves, in place (what "Run setup again" did).
+    private func switchToMySaves() {
+        let mine = Dataset.mine()
+        if !datasets.contains(where: \.isMine) { datasets.insert(mine, at: 0) }
+        UserDefaults.standard.set(OnboardingChoice.mySaves.rawValue, forKey: Self.setupSourceKey)
+        DebugLog.write("own saves arrived: switching from the sample to my saves")
+        select(mine)
+        autoSetup()
+    }
+
+    /// `HindsightApp`'s record of what the user started with ("mine" or empty = sample).
+    static let setupSourceKey = "setupSource"
+
+    // MARK: - Server sync
+
+    private var lastPull: Date?
+    private var pulling = false
+    nonisolated static let pullInterval: TimeInterval = 60
+
+    /// On launch and every time the app comes to the front: make this install's
+    /// account if needed, then pull what the server has (Muse, WhatsApp bot) into
+    /// the store. At most once a minute; failures only go to the debug log.
+    func syncWithServer(now: Date = .now) async {
+        guard persist, let store, ServerSync.isConfigured, !pulling else { return }
+        guard Self.isPullDue(last: lastPull, now: now) else { return }
+        pulling = true
+        defer { pulling = false }
+        lastPull = now
+        await MuseConnector.ensureAccount()
+        do {
+            // New saves land in the store; Home sees them and calls `importsChanged`.
+            _ = try await ServerSync.pull(into: store)
+        } catch {
+            DebugLog.write("server pull failed: \(error.localizedDescription)")
+        }
+    }
+
+    nonisolated static func isPullDue(last: Date?, now: Date, interval: TimeInterval = pullInterval) -> Bool {
+        guard let last else { return true }
+        return now.timeIntervalSince(last) >= interval
+    }
 
     // MARK: - My saves (the sort engine)
 

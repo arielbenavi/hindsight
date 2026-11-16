@@ -40,7 +40,7 @@ struct DevMenu: View {
             // Back to onboarding, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
                 AppModel.resetMySetup()
-                UserDefaults.standard.set("", forKey: "setupSource")
+                UserDefaults.standard.set("", forKey: AppModel.setupSourceKey)
                 UserDefaults.standard.set(false, forKey: OnboardingModel.completedKey)
             }
             Button("Reset \(app.dataset?.displayName ?? "") state", role: .destructive) { app.resetCurrentDataset() }

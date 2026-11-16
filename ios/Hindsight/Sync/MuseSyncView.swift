@@ -20,6 +20,8 @@ struct MuseSyncView: View {
     @State private var olderThan: Date?
     @AppStorage(MuseConnector.baseURLKey) fileprivate var connectorBaseURL = ""
     @AppStorage(MuseConnector.connectedKey) fileprivate var connectorConnected = false
+    /// This install's account (tenant URL); watched so the prompt follows a new one.
+    @AppStorage(MuseConnector.accountBaseKey) fileprivate var accountBase = ""
 
     enum Method: String, CaseIterable, Identifiable {
         case connector = "Automatic"
@@ -37,7 +39,8 @@ struct MuseSyncView: View {
         case failed(String)
     }
 
-    private var base: URL? { MuseConnector.normalized(connectorBaseURL) ?? MuseConnector.baseURL }
+    /// This install's account, else the configured URL (`MuseConnector.baseURL`).
+    private var base: URL? { _ = (connectorBaseURL, accountBase); return MuseConnector.baseURL }
 
     private var prompt: String {
         switch method {
@@ -362,25 +365,24 @@ struct MuseSyncView: View {
 
 #if DEBUG
 extension MuseSyncView {
-    /// Simulates a brand-new user: a fresh, empty tenant on the server (so Muse's
-    /// connector URL is new too), no local saves, and "not connected yet".
+    /// Simulates a brand-new user: a new account (empty tenant) on the server, so
+    /// Muse's connector URL is new too, no local saves, and "not connected yet".
+    /// Replaces this install's account (`MuseConnector.startNewAccount`).
     func startFreshTest() async {
-        guard let current = MuseConnector.normalized(connectorBaseURL) ?? MuseConnector.baseURL else { return }
-        do {
-            let tenant = try await MuseConnector.createTenant(base: current)
-            connectorBaseURL = tenant.absoluteString
-            connectorConnected = false
-            store.removeAll()
-            DebugLog.write("fresh muse test: tenant \(tenant.lastPathComponent), local store emptied")
-        } catch {
-            DebugLog.write("fresh muse test failed: \(error)")
+        guard let tenant = await MuseConnector.startNewAccount() else {
+            DebugLog.write("fresh muse test failed: no server URL, or the server can't be reached")
+            return
         }
+        accountBase = tenant.absoluteString
+        connectorConnected = false
+        store.removeAll()
+        DebugLog.write("fresh muse test: tenant \(tenant.lastPathComponent), local store emptied")
     }
 
     /// Dev-only: where the connector runs (`https://<tunnel>/<token>`, see connector/README.md).
     var connectorSettings: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("MUSE CONNECTOR URL (DEV)")
+            Text("SERVER URL (DEV)")
                 .font(.system(.caption, design: .rounded, weight: .heavy))
                 .tracking(1.4)
                 .foregroundStyle(OnboardingStyle.muted)
@@ -393,7 +395,11 @@ extension MuseSyncView {
                 .font(OnboardingStyle.caption)
             Button("Fresh Muse test (new user)") { Task { await startFreshTest() } }
                 .buttonStyle(.onboardingSecondary)
-            Text("New empty store on the server + empties this app's saves. The message tells Muse to replace its old hindsight connector.")
+            Text(accountBase.isEmpty ? "No account on the server yet: one is made when the app can reach it."
+                 : "This install's account: …/t/\(URL(string: accountBase)?.lastPathComponent ?? "?")")
+                .font(OnboardingStyle.caption)
+                .foregroundStyle(OnboardingStyle.muted)
+            Text("Fresh test: new empty account on the server + empties this app's saves. The message tells Muse to replace its old hindsight connector.")
                 .font(OnboardingStyle.caption)
                 .foregroundStyle(OnboardingStyle.muted)
         }

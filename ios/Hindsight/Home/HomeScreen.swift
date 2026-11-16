@@ -63,6 +63,13 @@ struct HomeScreen: View {
             if let store = app.store { SourcesView(store: store) }
         }
         .task(id: app.sortRuns) { await followSorting() }
+        // Pull from the server on launch and on every return to the app (at most once a minute).
+        .task { await app.syncWithServer() }
+        // New saves (a pull, an import): sort them. Not while Sources is open, since the
+        // first own saves switch Home from the sample, which would close the sheet.
+        .onChange(of: app.store?.posts.count) { _, _ in
+            if !showsSources { app.importsChanged() }
+        }
         .onAppear {
             ReminderScheduler.shared.setOnOpen { screen, id in
                 app.practice.deepLink = (screen, id)
@@ -72,6 +79,7 @@ struct HomeScreen: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { app.rescheduleReminders() }
+            if phase == .active { Task { await app.syncWithServer() } }
         }
     }
 
