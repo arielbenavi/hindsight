@@ -73,13 +73,19 @@ struct PlatformFilterChips: View {
     }
 }
 
-/// A save as a tappable card row that opens the post (All saves, a topic, Home).
+/// A save as a tappable card row: opens its detail sheet inside the Library and
+/// Ask (`saveDetailHost`), else the post itself. Shows done and a note at a glance.
 struct SaveCardRow: View {
     let post: ContractPost
+    let app: AppModel
     @Environment(\.openURL) private var openURL
+    @Environment(\.showSaveDetail) private var showDetail
 
     var body: some View {
-        Button { PostOpener.open(post, openURL: openURL) } label: {
+        let state = app.saves.state(post.id)
+        Button {
+            if let showDetail { showDetail(post) } else { SaveOpener.open(post, app: app, openURL: openURL) }
+        } label: {
             HStack(spacing: 14) {
                 PostLinkThumbnail(post: post, size: 56)
                 VStack(alignment: .leading, spacing: 5) {
@@ -87,7 +93,14 @@ struct SaveCardRow: View {
                         .font(Theme.body(16, weight: .bold))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    PostByline(post: post)
+                        .strikethrough(state.status == .done, color: Theme.muted)
+                        .foregroundStyle(state.status == .letGo ? Theme.muted : Theme.text)
+                    HStack(spacing: 8) {
+                        PostByline(post: post)
+                        if state.status == .done { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.lime) }
+                        if state.hasNote { Image(systemName: "note.text").foregroundStyle(Theme.secondary) }
+                    }
+                    .font(.system(size: 12, weight: .bold))
                 }
                 Spacer(minLength: 0)
             }

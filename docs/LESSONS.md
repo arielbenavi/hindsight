@@ -85,6 +85,20 @@ DATA_FETCHING_RESEARCH.md.)
 
 ## iOS / Xcode
 
+- **Today's set was picked before the first sort finished**, when no save had a topic (so every save counted as
+  eligible), and a Career (Know) save showed in Today on a fresh "Load seed saves". `TodayPlan.record` now remakes
+  a set nobody has answered yet when a pick stops being eligible; once the user answers one, the set stays. (2026-11-20)
+- A tab root that hides its nav bar lets scrolled content run under the clock; the old Home painted the strip with
+  a zero-height `Theme.background.ignoresSafeArea(edges: .top)` overlay. That's now `.statusBarStrip()` on all
+  three tab roots. (2026-11-20)
+- Hebrew final letters break prefix matching: "מתכון*" never matches "מתכונים" (final ן vs medial נ). The lexicon
+  already lists both stems ("מתכון*", "מתכונ*"); keyword tables need the same. (2026-11-20)
+- Today's fixed-height card (so the two cards behind always peek by the same amount) pushed the action buttons
+  under the iOS 26 floating tab bar on an iPhone 17 Pro at 470pt; 420pt fits. Check the bottom of a tab's first
+  screen against the tab bar in a screenshot, not just the layout code. (2026-11-20)
+- Simulator: a tap right after `simctl launch` can land before the first frame; the iOS Simulator tool's
+  screenshot-then-tap is more reliable than chaining taps blind (scroll offsets differ run to run). (2026-11-20)
+
 - **A `@State` initial value is built on every init of the view, even though SwiftUI keeps the first one.**
   `RootView(...)` makes `AppModel(...)` in its init, and `AppModel.init` starts sorting; so anything that
   re-runs `HindsightApp.body` (an `@AppStorage` it observes changing) built a second, throwaway AppModel with

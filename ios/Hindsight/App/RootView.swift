@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Everything after onboarding: one fixed Home screen. `HindsightApp` shows
-/// this once onboarding is done.
+/// Everything after onboarding: three tabs, Today · Library · Ask. `HindsightApp`
+/// shows this once onboarding is done.
 struct RootView: View {
     @State private var app: AppModel
 
@@ -15,7 +15,7 @@ struct RootView: View {
             if let error = app.loadError {
                 ContentUnavailableView("Couldn't load your saves", systemImage: "exclamationmark.triangle", description: Text(error))
             } else {
-                HomeScreen(app: app)
+                MainTabs(app: app)
             }
         }
         .themedScreen()
@@ -26,8 +26,60 @@ struct RootView: View {
     }
 }
 
-/// Beta menu (next to Home's gear): model test, onboarding over, reset. In
-/// every build while we're on TestFlight.
+enum AppTab: Hashable { case today, library, ask }
+
+/// The tab bar, and what used to hang off Home: Sources, the server pull, sorting
+/// new imports, practice reminders and Today's 9:00 notification.
+struct MainTabs: View {
+    let app: AppModel
+    @State private var tab: AppTab = .today
+    @State private var libraryPath = NavigationPath()
+    @State private var showsSources = false
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        TabView(selection: $tab) {
+            Tab("Today", systemImage: "sun.max.fill", value: AppTab.today) {
+                TodayScreen(app: app, showSources: { showsSources = true }, showLibrary: { tab = .library })
+            }
+            Tab("Library", systemImage: "books.vertical.fill", value: AppTab.library) {
+                LibraryScreen(app: app, path: $libraryPath, showSources: { showsSources = true })
+            }
+            Tab("Ask", systemImage: "magnifyingglass", value: AppTab.ask) {
+                AskScreen(app: app)
+            }
+        }
+        .sheet(isPresented: $showsSources, onDismiss: { app.importsChanged() }) {
+            if let store = app.store { SourcesView(store: store) }
+        }
+        // Pull from the server on launch and on every return to the app (at most once a minute).
+        .task { await app.syncWithServer() }
+        // New saves (a pull, an import): sort them. Not while Sources is open, since the
+        // first own saves switch from the sample, which would close the sheet.
+        .onChange(of: app.store?.posts.count) { _, _ in
+            if !showsSources { app.importsChanged() }
+        }
+        .onAppear {
+            ReminderScheduler.shared.setOnOpen { screen, id in
+                app.practice.deepLink = (screen, id)
+                tab = .library
+                libraryPath = NavigationPath([LibraryRoute.lego(screen, topicID: nil)])
+            }
+            app.rescheduleReminders()
+            app.rescheduleToday()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                app.rescheduleReminders()
+                app.rescheduleToday()
+            }
+            if phase == .active { Task { await app.syncWithServer() } }
+        }
+    }
+}
+
+/// Beta menu (next to the gear on Today and Library): model test, a new Today set,
+/// onboarding over, reset. In every build while we're on TestFlight.
 struct DevMenu: View {
     let app: AppModel
     @State private var showsModelTest = false
@@ -36,6 +88,10 @@ struct DevMenu: View {
         Menu {
             Section("Model: \(ModelStatus.current.rawValue)") {
                 Button("Model test", systemImage: "cpu") { showsModelTest = true }
+            }
+            Button("New Today set", systemImage: "sun.max") {
+                app.today.reset()
+                app.today.prepare(app.todayContext(app.library()), saves: app.saves)
             }
             // Back to onboarding, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {

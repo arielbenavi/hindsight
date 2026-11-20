@@ -24,6 +24,12 @@ final class AppModel {
 
     private(set) var places: PlaceStore
     private(set) var practice: PracticeStore
+    /// The user's state on each save (new / done / let go, notes, reminders).
+    private(set) var saves: SaveStateStore
+    /// Each topic's job and saves moved between topics.
+    private(set) var topicPrefs: TopicPrefsStore
+    /// Today's set.
+    private(set) var today: TodayStore
     private(set) var learn: LearnCatalog?
     private(set) var fitness: FitnessCatalog?
 
@@ -57,6 +63,9 @@ final class AppModel {
         flagsFile = JSONFile(name: "flags", directory: nil)
         places = PlaceStore(directory: nil, data: nil)
         practice = PracticeStore(directory: nil)
+        saves = SaveStateStore(directory: nil)
+        topicPrefs = TopicPrefsStore(directory: nil)
+        today = TodayStore(directory: nil)
         let initial = useMySaves ? mine : Self.sample(in: datasets, selected: selected)
         if let initial { select(initial) }
         // Before any screen appears: my saves but none imported → back to Connect.
@@ -99,6 +108,9 @@ final class AppModel {
         let bundledCache = Self.bundledMatchCache(for: dataset)
         places = PlaceStore(directory: directory, data: data, bundledCache: bundledCache)
         practice = PracticeStore(directory: directory)
+        saves = SaveStateStore(directory: directory)
+        topicPrefs = TopicPrefsStore(directory: directory)
+        today = TodayStore(directory: directory)
         applyLayout()
     }
 
@@ -339,6 +351,23 @@ final class AppModel {
         }
         select(dataset)
         autoSetup()
+    }
+
+    // MARK: - Library and Today
+
+    /// Topics with the user's moves and jobs applied. Cheap enough to build per view update.
+    func library() -> LibraryIndex {
+        LibraryIndex(data: data, posts: allPosts, prefs: topicPrefs.prefs)
+    }
+
+    func todayContext(_ library: LibraryIndex, now: Date = .now) -> TodayPlan.Context {
+        TodayPlan.Context(posts: allPosts, states: saves.states, job: { library.job(forPost: $0) }, now: now)
+    }
+
+    /// Rebuild the 9:00 notification (only if Today has something to serve).
+    func rescheduleToday() {
+        let hasEligible = !TodayPlan.eligible(todayContext(library())).isEmpty
+        Task { await TodayNotifications.scheduleDaily(hasEligible: hasEligible) }
     }
 
     // MARK: - Reminders
