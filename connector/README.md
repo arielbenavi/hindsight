@@ -34,3 +34,14 @@ ngrok http 8765                                                      # prints ht
 4. Scale up: 50, 100, then "all of them, in batches".
 5. Facebook: "send my Facebook saved items to hindsight".
 6. Routine: "Every day at 9am, send my new Instagram saves since the last run to hindsight." Check `calls.log` the next day, with Muse closed and the phone locked.
+
+## Reading your saves from Claude (or any MCP client)
+The same MCP endpoint also answers questions from your saves: `search_saves(query, platform?, limit?)`
+and `recent_saves(limit?, platform?)` return the link, author, date, caption and, when hindsight has
+them, the video's transcript and on-screen text. Add it to Claude Code once:
+
+```bash
+claude mcp add --transport http hindsight "https://<host>/<token>/mcp"
+```
+
+Then "what did I save about sidechain compression?" searches your saves. Word matching, no embeddings.
