@@ -56,6 +56,10 @@ targets:
         HindsightServerURL: $(HINDSIGHT_SERVER_URL)
         UILaunchScreen:
           UIColorName: LaunchBackground
+        # Destinations: asked only at the first "Add to …" tap (Reminders). Calendar
+        # uses Apple's add-event sheet, which needs no permission on iOS 17+.
+        NSRemindersFullAccessUsageDescription: "hindsight adds the lists you choose (groceries, watchlist) to Reminders."
+        NSRemindersUsageDescription: "hindsight adds the lists you choose (groceries, watchlist) to Reminders."
     settings:
       configs:
         # TestFlight / App Store builds leave out raw data only dev builds use:

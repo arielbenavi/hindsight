@@ -111,6 +111,9 @@ final class TopicPrefsStore {
     struct Prefs: Codable, Equatable {
         var jobs: [String: TopicJob] = [:]
         var moves: [String: String] = [:]
+        /// Topic id → auto-route to a Reminders list (opt-in, off everywhere by
+        /// default). Optional so older files still decode.
+        var autoRoutes: [String: AutoRoute]?
     }
 
     private(set) var prefs: Prefs
@@ -126,6 +129,16 @@ final class TopicPrefsStore {
 
     func setJob(_ job: TopicJob?, for topicID: String) {
         prefs.jobs[topicID] = job
+        file.save(prefs)
+    }
+
+    func autoRoute(for topicID: String) -> AutoRoute? { prefs.autoRoutes?[topicID] }
+
+    /// nil turns it off.
+    func setAutoRoute(_ route: AutoRoute?, for topicID: String) {
+        var routes = prefs.autoRoutes ?? [:]
+        routes[topicID] = route
+        prefs.autoRoutes = routes.isEmpty ? nil : routes
         file.save(prefs)
     }
 

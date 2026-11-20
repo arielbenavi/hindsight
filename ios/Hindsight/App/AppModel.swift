@@ -376,6 +376,64 @@ final class AppModel {
         Task { await TodayNotifications.scheduleDaily(hasEligible: hasEligible) }
     }
 
+    // MARK: - Destinations (Maps, Reminders, Calendar, Markdown)
+
+    /// Writes to Reminders: EventKit in the app, in memory for tests and previews.
+    /// Made on first use, so launching never touches EventKit.
+    var sender: DestinationSender {
+        if let destinationSender { return destinationSender }
+        let made = DestinationSender(writer: remindersWriter ?? (persist ? EventKitRemindersWriter() : InMemoryRemindersWriter()))
+        destinationSender = made
+        return made
+    }
+
+    @ObservationIgnored private var destinationSender: DestinationSender?
+    @ObservationIgnored private var remindersWriter: RemindersWriter?
+
+    /// Tests: write to this instead of Reminders.
+    func useRemindersWriter(_ writer: RemindersWriter) {
+        remindersWriter = writer
+        destinationSender = nil
+    }
+
+    /// What the destination rules need about one save: its job and topic, a place
+    /// to search, a date still ahead in the caption, whether it lists ingredients.
+    func destinationInput(for post: ContractPost, library: LibraryIndex, now: Date = .now) -> DestinationInput {
+        let topic = library.topicByPost[post.id]
+        let places = data?.item(for: post.id)?.places ?? []
+        return DestinationInput(
+            job: library.job(forPost: post.id),
+            topicLabel: topic?.label,
+            legoScreen: topic?.legoScreen ?? data?.item(for: post.id)?.legoScreen,
+            placeQuery: Destinations.placeQuery(places: places, locationTag: post.locationTag),
+            date: DateFinder.find(in: post.caption, reference: now),
+            hasIngredients: !IngredientParser.parse(post.caption).isEmpty
+        )
+    }
+
+    /// For Markdown: the transcript lives on the import, not the contract post.
+    func exportEntry(_ post: ContractPost) -> MarkdownExporter.Entry {
+        let transcript = store?.posts.first { $0.id == post.id }?.transcript
+        return MarkdownExporter.Entry(post: post, transcript: transcript, note: saves.state(post.id).note)
+    }
+
+    /// Topics set to "Send new saves here automatically": add what's new to their
+    /// list, once each. On foreground and after a sync; only once Reminders access
+    /// was given (never asks from here).
+    func runAutoRoutes(now: Date = .now) async {
+        guard let routes = topicPrefs.prefs.autoRoutes, !routes.isEmpty else { return }
+        let library = library()
+        let byID = Dictionary(allPosts.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        for (topicID, route) in routes.sorted(by: { $0.key < $1.key }) {
+            guard let topic = library.topic(topicID) else { continue }
+            let ids = AutoRouting.pending(topicPostIDs: topic.postIDs, route: route, states: saves.states)
+            let posts = ids.compactMap { byID[$0] }
+            guard !posts.isEmpty else { continue }
+            let result = await sender.send(posts, to: route.list, saves: saves, now: now, askIfNeeded: false)
+            DebugLog.write("auto-route \(topic.label) → \(route.list.name): \(result.message)")
+        }
+    }
+
     // MARK: - Reminders
 
     /// Rebuild all practice notifications (after opens and any reminder change).

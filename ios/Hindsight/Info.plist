@@ -24,6 +24,10 @@
 	<string>$(HINDSIGHT_SERVER_URL)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>hindsight adds the lists you choose (groceries, watchlist) to Reminders.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>hindsight adds the lists you choose (groceries, watchlist) to Reminders.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
