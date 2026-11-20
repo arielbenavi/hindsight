@@ -10,6 +10,8 @@ struct TodayScreen: View {
     @State private var drag: CGSize = .zero
     @State private var answeredTick = 0
     @State private var sorting: SortProgress?
+    /// "Added to Groceries · 7 items", for a moment after a card was sent somewhere.
+    @State private var toast: String?
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -43,6 +45,17 @@ struct TodayScreen: View {
             .scrollBounceBehavior(.basedOnSize) .statusBarStrip()
             .themedScreen()
             .toolbar(.hidden, for: .navigationBar)
+            .overlay(alignment: .bottom) {
+                if let toast {
+                    Label(toast, systemImage: "checkmark.circle.fill")
+                        .font(Theme.body(15, weight: .bold))
+                        .foregroundStyle(Theme.onLime)
+                        .padding(.horizontal, 18).padding(.vertical, 12)
+                        .background(Theme.lime, in: Capsule())
+                        .padding(.bottom, 16)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answeredTick)
         .onAppear { prepare() }
@@ -131,6 +144,22 @@ struct TodayScreen: View {
             }
             .padding(.bottom, remaining > 2 ? 30 : remaining > 1 ? 15 : 0)
             actions(post)
+            // Where it's useful: one tap, and the card counts as handled today.
+            if let destination = Destinations.forToday(app.destinationInput(for: post, library: library)) {
+                TodaySendAction(app: app, post: post, destination: destination) { message in
+                    showToast(message)
+                    answer(post, .sent)
+                }
+                .id(post.id)
+            }
+        }
+    }
+
+    private func showToast(_ message: String) {
+        withAnimation(.snappy) { toast = message }
+        Task {
+            try? await Task.sleep(for: .seconds(2.5))
+            withAnimation(.snappy) { if toast == message { toast = nil } }
         }
     }
 

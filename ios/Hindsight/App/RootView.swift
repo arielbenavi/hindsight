@@ -29,7 +29,7 @@ struct RootView: View {
 enum AppTab: Hashable { case today, library, ask }
 
 /// The tab bar, and what used to hang off Home: Sources, the server pull, sorting
-/// new imports, practice reminders and Today's 9:00 notification.
+/// new imports, practice reminders, Today's 9:00 notification and topics' auto-route.
 struct MainTabs: View {
     let app: AppModel
     @State private var tab: AppTab = .today
@@ -73,8 +73,15 @@ struct MainTabs: View {
                 app.rescheduleReminders()
                 app.rescheduleToday()
             }
-            if phase == .active { Task { await app.syncWithServer() } }
+            if phase == .active {
+                Task {
+                    await app.syncWithServer()
+                    await app.runAutoRoutes()
+                }
+            }
         }
+        // Sorted saves landed in their topics: topics set to auto-route send the new ones.
+        .onChange(of: app.dataVersion) { _, _ in Task { await app.runAutoRoutes() } }
     }
 }
 

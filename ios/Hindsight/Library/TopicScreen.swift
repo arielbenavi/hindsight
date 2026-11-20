@@ -135,22 +135,99 @@ private struct TopicJobMenu: ViewModifier {
     let app: AppModel
     let topic: HomeTopic
     @State private var picking = false
+    /// "Send all to…" waiting for its confirmation (with the count).
+    @State private var confirming: BulkSend?
+    @State private var result: DestinationSender.Result?
+    @State private var share: SendToModel.ShareFile?
+    @Environment(\.openURL) private var openURL
+
+    enum BulkSend: Identifiable {
+        case reminders(ReminderList, count: Int)
+        case export(count: Int)
+        var id: String {
+            switch self {
+            case .reminders(let list, _): "r:\(list.rawValue)"
+            case .export: "export"
+            }
+        }
+    }
 
     func body(content: Content) -> some View {
+        let job = app.library().job(topic)
+        let list = Destinations.bulkList(topicLabel: topic.label, job: job)
         content
             .toolbar {
-                if topic.kind != .other {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        if topic.kind != .other {
                             Button("What is this for?", systemImage: "questionmark.circle") { picking = true }
-                        } label: {
-                            Image(systemName: "ellipsis")
                         }
-                        .accessibilityLabel("Topic options")
+                        // Keep close goes nowhere.
+                        if job != .keepClose {
+                            Menu("Send all to…", systemImage: "paperplane") {
+                                if let list {
+                                    Button("Reminders · \(list.shortName)", systemImage: list.symbol) {
+                                        let pending = app.posts(in: topic).filter { app.saves.state($0.id).sentDate(list.name) == nil }
+                                        confirming = .reminders(list, count: pending.count)
+                                    }
+                                }
+                                Button("Markdown (Notes, Files…)", systemImage: "square.and.arrow.up") {
+                                    confirming = .export(count: app.posts(in: topic).count)
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
                     }
+                    .accessibilityLabel("Topic options")
                 }
             }
             .sheet(isPresented: $picking) { JobPickerSheet(app: app, topic: topic) }
+            .sheet(item: $share) { file in ShareSheet(items: [file.url]).presentationDetents([.medium, .large]) }
+            .confirmationDialog(confirmTitle, isPresented: Binding(get: { confirming != nil }, set: { if !$0 { confirming = nil } }),
+                                titleVisibility: .visible, presenting: confirming) { bulk in
+                switch bulk {
+                case .reminders(let list, let count):
+                    if count > 0 {
+                        Button("Add \(count.counted("save"))") { Task { await sendAll(to: list) } }
+                    }
+                case .export(let count):
+                    Button("Export \(count.counted("save"))") { exportAll() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { bulk in
+                switch bulk {
+                case .reminders(let list, let count):
+                    Text(count == 0 ? "Every save here is already in \(list.shortName)."
+                         : "Each save becomes one reminder with its link, in the \u{201C}\(list.name)\u{201D} list. Saves already there are skipped.")
+                case .export:
+                    Text("One Markdown file with each save's link, caption, transcript and your notes.")
+                }
+            }
+            .alert(result?.message ?? "", isPresented: Binding(get: { result != nil }, set: { if !$0 { result = nil } })) {
+                if result == .denied {
+                    Button("Open Settings") { if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) } }
+                }
+                Button("OK", role: .cancel) {}
+            }
+    }
+
+    private var confirmTitle: String {
+        switch confirming {
+        case .reminders(let list, let count)?: count == 0 ? "Already in \(list.shortName)" : "Add \(count.counted("save")) to \(list.shortName)?"
+        case .export(let count)?: "Export \(count.counted("save")) from \(topic.label)?"
+        case nil: ""
+        }
+    }
+
+    private func sendAll(to list: ReminderList) async {
+        result = await app.sender.send(app.posts(in: topic), to: list, saves: app.saves)
+    }
+
+    private func exportAll() {
+        let entries = app.posts(in: topic).map(app.exportEntry)
+        let markdown = MarkdownExporter.document(topic: topic.label, entries: entries, now: .now)
+        if let url = MarkdownFile.write(markdown, title: topic.label) { share = SendToModel.ShareFile(url: url) }
     }
 }
 
@@ -160,6 +237,9 @@ struct JobPickerSheet: View {
     let app: AppModel
     let topic: HomeTopic
     @State private var selection: TopicJob?
+    /// "Send new saves here automatically": off unless the user turns it on.
+    @State private var autoRoute = false
+    @State private var autoList: ReminderList = .toTry
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -178,13 +258,20 @@ struct JobPickerSheet: View {
                     ForEach(TopicJob.libraryOrder) { job in
                         jobRow(job, selected: chosen == job, suggested: suggested == job)
                     }
+                    if chosen != .keepClose { autoRouteSection }
                 }
                 .padding(Theme.padding)
+            }
+            .onAppear {
+                let route = app.topicPrefs.autoRoute(for: topic.id)
+                autoRoute = route != nil
+                autoList = route?.list ?? Destinations.bulkList(topicLabel: topic.label, job: current) ?? .toTry
             }
             .safeAreaInset(edge: .bottom) {
                 Button(chosen == current ? "Keep it as \(current.title)" : "Make it \(chosen.title)") {
                     // The suggested job isn't stored, so a later better guess still applies.
                     app.topicPrefs.setJob(chosen == suggested ? nil : chosen, for: topic.id)
+                    saveAutoRoute(chosen)
                     dismiss()
                 }
                 .buttonStyle(.pill)
@@ -197,6 +284,50 @@ struct JobPickerSheet: View {
         }
         .tint(Theme.lime)
         .presentationDragIndicator(.visible)
+    }
+
+    private var autoRouteSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: $autoRoute.animation(.snappy)) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Send new saves here automatically").font(Theme.body(16, weight: .heavy))
+                    Text("New saves in \(topic.label) are added to a Reminders list, once each.")
+                        .font(Theme.body(13)).foregroundStyle(Theme.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(Theme.lime)
+            .onChange(of: autoRoute) { _, on in
+                // Ask for Reminders now, so it can run later without asking.
+                if on { Task { if await app.sender.writer.access() == .notDetermined { _ = await app.sender.writer.requestAccess() } } }
+            }
+            if autoRoute {
+                HStack {
+                    Text("List").font(Theme.body(15, weight: .bold)).foregroundStyle(Theme.secondary)
+                    Spacer()
+                    Picker("List", selection: $autoList) {
+                        ForEach(ReminderList.allCases) { list in
+                            Label(list.name, systemImage: list.symbol).tag(list)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+            }
+        }
+        .padding(14)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.stroke))
+        .padding(.top, 10)
+    }
+
+    /// Saves already in the topic stay put: only the ones that land later are sent.
+    private func saveAutoRoute(_ job: TopicJob) {
+        guard autoRoute, job != .keepClose else {
+            app.topicPrefs.setAutoRoute(nil, for: topic.id)
+            return
+        }
+        let existing = app.topicPrefs.autoRoute(for: topic.id)?.existing ?? topic.postIDs
+        app.topicPrefs.setAutoRoute(AutoRoute(list: autoList, existing: existing), for: topic.id)
     }
 
     private func jobRow(_ job: TopicJob, selected: Bool, suggested: Bool) -> some View {
