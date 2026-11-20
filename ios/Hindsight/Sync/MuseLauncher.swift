@@ -10,7 +10,14 @@ import UIKit
 @MainActor
 enum MuseLauncher {
     enum Outcome: Equatable {
+        /// The Muse app opened (universal link).
         case opened
+        /// The universal link didn't open an app, but muse.ai/chat opened in the
+        /// browser, which hands off to Muse or works on the web. Inside LiveContainer
+        /// (the owner's phone) universal links never open another app, so this is the
+        /// normal path there.
+        case openedInBrowser
+        /// Nothing opened: offer the App Store.
         case notInstalled
     }
 
@@ -22,10 +29,28 @@ enum MuseLauncher {
         return components.url!
     }
 
-    static func launch(prompt: String) async -> Outcome {
-        UIPasteboard.general.string = prompt
-        let opened = await UIApplication.shared.open(chatURL(prompt: prompt), options: [.universalLinksOnly: true])
-        return opened ? .opened : .notInstalled
+    /// Opens a URL; `universalLinksOnly` asks for an app or nothing.
+    typealias Opener = @MainActor (_ url: URL, _ universalLinksOnly: Bool) async -> Bool
+
+    static let systemOpener: Opener = { url, universalOnly in
+        await UIApplication.shared.open(url, options: universalOnly ? [.universalLinksOnly: true] : [:])
+    }
+
+    /// What happened, from the two tries. Pure. `browser` is nil when it wasn't tried
+    /// (the app opened first time).
+    nonisolated static func outcome(universalLink: Bool, browser: Bool?) -> Outcome {
+        if universalLink { return .opened }
+        return browser == true ? .openedInBrowser : .notInstalled
+    }
+
+    /// The prompt goes on the clipboard first, whatever happens next. Then the Muse
+    /// app by universal link; if that fails, the same URL without `universalLinksOnly`.
+    static func launch(prompt: String, copy: @MainActor (String) -> Void = { UIPasteboard.general.string = $0 },
+                       open: Opener = systemOpener) async -> Outcome {
+        copy(prompt)
+        let url = chatURL(prompt: prompt)
+        if await open(url, true) { return outcome(universalLink: true, browser: nil) }
+        return outcome(universalLink: false, browser: await open(url, false))
     }
 
     /// WhatsApp route. Muse's WhatsApp chat has no phone number and doesn't show

@@ -9,6 +9,11 @@ struct TodayScreen: View {
     @State private var exitEdge: Edge = .leading
     @State private var drag: CGSize = .zero
     @State private var answeredTick = 0
+    @State private var sorting: SortProgress?
+    /// "Added to Groceries · 7 items", for a moment after a card was sent somewhere.
+    @State private var toast: String?
+    /// Dev (beta menu): show the sorting state on demand.
+    @AppStorage("debugPreviewTodaySorting") private var previewSorting = false
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -23,12 +28,16 @@ struct TodayScreen: View {
                     header(record)
                     if posts.isEmpty {
                         EmptySavesCard(action: showSources)
+                    } else if previewSorting {
+                        sortingToday
                     } else if let record, let entry = record.current, let post = byID[entry.id] {
                         cardStack(post: post, entry: entry, record: record, library: library)
                     } else if let record, record.isFinished {
                         TodayDoneView(app: app, record: record, posts: byID, library: library,
                                       oneMore: { withAnimation(.snappy) { _ = app.today.oneMore(app.todayContext(library), saves: app.saves) } },
                                       showLibrary: showLibrary)
+                    } else if TodayPlan.empty(hasSaves: true, isSorting: isSorting) == .sorting {
+                        sortingToday
                     } else {
                         nothingToday
                     }
@@ -40,12 +49,39 @@ struct TodayScreen: View {
             .scrollBounceBehavior(.basedOnSize) .statusBarStrip()
             .themedScreen()
             .toolbar(.hidden, for: .navigationBar)
+            .overlay(alignment: .bottom) {
+                if let toast {
+                    Label(toast, systemImage: "checkmark.circle.fill")
+                        .font(Theme.body(15, weight: .bold))
+                        .foregroundStyle(Theme.onLime)
+                        .padding(.horizontal, 18).padding(.vertical, 12)
+                        .background(Theme.lime, in: Capsule())
+                        .padding(.bottom, 16)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answeredTick)
         .onAppear { prepare() }
-        // Sorting moves saves into topics (and jobs); a new day starts a new set.
-        .onChange(of: app.data?.posts.count) { _, _ in prepare() }
+        // Saves arriving (a pull, an import) and sorting (each rewrite reloads the data,
+        // moving saves into topics and jobs) can turn an empty set into a real one;
+        // a new day starts a new set.
+        .onChange(of: app.dataVersion) { _, _ in prepare() }
+        .onChange(of: app.allPosts.count) { _, _ in prepare() }
         .onChange(of: scenePhase) { _, phase in if phase == .active { prepare() } }
+        .task(id: app.sortRuns) { await followSorting() }
+    }
+
+    /// Still sorting the user's own saves (or the first sorted file isn't written yet).
+    private var isSorting: Bool { sorting != nil || (app.isMySaves && app.data == nil) }
+
+    private func followSorting() async {
+        guard app.isMySaves else { sorting = nil; return }
+        for await snapshot in app.sortProgress() {
+            sorting = snapshot.isComplete ? nil : snapshot
+        }
+        sorting = nil
+        prepare()
     }
 
     private func prepare() {
@@ -101,7 +137,8 @@ struct TodayScreen: View {
                 // Two cards peeking behind: what's left of the set.
                 if remaining > 2 { backCard(opacity: 0.45).scaleEffect(0.86, anchor: .bottom).offset(y: 30) }
                 if remaining > 1 { backCard(opacity: 0.85).scaleEffect(0.93, anchor: .bottom).offset(y: 15) }
-                TodayCard(post: post, reason: entry.reason, topic: library.topicByPost[post.id])
+                TodayCard(post: post, reason: entry.reason, topic: library.topicByPost[post.id],
+                          action: sendAction(post, library: library))
                     .offset(x: drag.width, y: drag.height * 0.15)
                     .rotationEffect(.degrees(Double(drag.width) / 22))
                     .overlay(alignment: .center) { swipeHint }
@@ -112,6 +149,25 @@ struct TodayScreen: View {
             }
             .padding(.bottom, remaining > 2 ? 30 : remaining > 1 ? 15 : 0)
             actions(post)
+        }
+    }
+
+    /// Where it's useful ("Open in Maps", "Add to Groceries"): one tap, and the card
+    /// counts as handled today. Sits at the card's bottom, so the three buttons stay
+    /// clear of the tab bar (LESSONS.md: 420pt card).
+    private func sendAction(_ post: ContractPost, library: LibraryIndex) -> AnyView? {
+        guard let destination = Destinations.forToday(app.destinationInput(for: post, library: library)) else { return nil }
+        return AnyView(TodaySendAction(app: app, post: post, destination: destination) { message in
+            showToast(message)
+            answer(post, .sent)
+        })
+    }
+
+    private func showToast(_ message: String) {
+        withAnimation(.snappy) { toast = message }
+        Task {
+            try? await Task.sleep(for: .seconds(2.5))
+            withAnimation(.snappy) { if toast == message { toast = nil } }
         }
     }
 
@@ -178,6 +234,23 @@ struct TodayScreen: View {
 
     // MARK: - Nothing to serve
 
+    /// Saves are here but topics aren't yet, so nothing can be picked honestly.
+    private var sortingToday: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ProgressView().controlSize(.large).tint(Theme.lime)
+            Text("Sorting your saves…").font(Theme.title(26))
+            Text("Today's three will be ready in a moment.")
+                .font(Theme.body(16)).foregroundStyle(Theme.secondary)
+            if let sorting {
+                Text("\(sorting.decided.formatted()) of \(sorting.total.formatted()) sorted")
+                    .font(Theme.body(14, weight: .semibold)).foregroundStyle(Theme.muted)
+                    .monospacedDigit()
+                    .contentTransition(.numericText(value: Double(sorting.decided)))
+            }
+        }
+        .card(padding: 22)
+    }
+
     private var nothingToday: some View {
         VStack(alignment: .leading, spacing: 14) {
             Image(systemName: "sun.haze.fill").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.lime)
@@ -195,6 +268,8 @@ struct TodayCard: View {
     let post: ContractPost
     let reason: String
     let topic: HomeTopic?
+    /// Today's "where it's useful" action, at the bottom of the card (`TodaySendAction`).
+    var action: AnyView?
 
     /// Fixed, so the cards behind it peek out by the same amount every time.
     static let height: CGFloat = 420
@@ -215,7 +290,7 @@ struct TodayCard: View {
                 Text(post.caption?.nilIfEmpty ?? "No caption")
                     .font(Theme.body(16))
                     .foregroundStyle(post.caption?.nilIfEmpty == nil ? Theme.muted : Theme.secondary)
-                    .lineLimit(4)
+                    .lineLimit(action == nil ? 4 : 3)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let topic {
@@ -229,6 +304,10 @@ struct TodayCard: View {
                     .background(Theme.surfaceRaised, in: Capsule())
                     .padding(.top, 2)
                 }
+                if let action {
+                    Spacer(minLength: 0)
+                    action
+                }
             }
             .padding(18)
             .frame(height: TodayCard.height - TodayCard.artHeight, alignment: .top)
@@ -237,7 +316,8 @@ struct TodayCard: View {
         .clipShape(.rect(cornerRadius: 28))
         .overlay(RoundedRectangle(cornerRadius: 28).strokeBorder(Theme.stroke))
         .shadow(color: .black.opacity(0.35), radius: 16, y: 8)
-        .accessibilityElement(children: .combine)
+        // One element to read, unless it holds a button VoiceOver must reach.
+        .accessibilityElement(children: action == nil ? .combine : .contain)
     }
 }
 

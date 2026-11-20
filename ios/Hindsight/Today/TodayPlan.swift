@@ -3,12 +3,16 @@ import Foundation
 /// How the user answered one of Today's cards.
 enum TodayOutcome: String, Codable, Sendable {
     case opened, done, letGo
+    /// Sent somewhere it's useful (Maps, Reminders, Calendar): handled for today.
+    /// The save's status stays `new`.
+    case sent
 
     var verb: String {
         switch self {
         case .opened: "Opened"
         case .done: "Did it"
         case .letGo: "Let go"
+        case .sent: "Sent"
         }
     }
 
@@ -17,6 +21,7 @@ enum TodayOutcome: String, Codable, Sendable {
         case .opened: "arrow.up.right.circle.fill"
         case .done: "checkmark.circle.fill"
         case .letGo: "xmark.circle.fill"
+        case .sent: "paperplane.circle.fill"
         }
     }
 }
@@ -42,7 +47,8 @@ struct TodayRecord: Codable, Equatable, Sendable {
 
 /// Which saves Today may serve and in what order. Pure.
 ///
-/// Eligible: state `new`, not snoozed (a reminder still ahead), and its topic's job
+/// Eligible: state `new`, not snoozed (a reminder still ahead), not sent to
+/// Reminders/Calendar in the last 30 days (`SaveState.isRouted`), and its topic's job
 /// allows Today (Do, Learn, Go; a save with no topic yet counts). Due reminders come
 /// first, then `Resurface` over the eligible ones.
 enum TodayPlan {
@@ -61,7 +67,7 @@ enum TodayPlan {
 
     static func isEligible(_ post: ContractPost, in ctx: Context) -> Bool {
         let state = ctx.state(post.id)
-        guard state.status == .new, !state.isSnoozed(now: ctx.now) else { return false }
+        guard state.status == .new, !state.isSnoozed(now: ctx.now), !state.isRouted(now: ctx.now) else { return false }
         return ctx.job(post.id)?.allowsToday ?? true
     }
 
@@ -91,13 +97,16 @@ enum TodayPlan {
         return out
     }
 
-    /// Today's set: the saved one if it's from today, else a fresh one. One
-    /// exception: a set nobody has answered yet is made again if a pick stopped
-    /// being eligible (the first sort just gave its topic a Know job, say).
+    /// Today's set: the saved one if it's from today, else a fresh one. Two
+    /// exceptions, both for a set nobody has answered yet: it's made again if a
+    /// pick stopped being eligible (the first sort just gave its topic a Know job,
+    /// say), and an empty set is never kept (it was made before the saves arrived
+    /// or were sorted; it used to stick all day as "Nothing for today").
     static func record(existing: TodayRecord?, _ ctx: Context) -> TodayRecord {
         let day = TodayPicker.dayKey(ctx.now, calendar: ctx.calendar)
         if let existing, existing.day == day {
             guard existing.outcomes.isEmpty else { return existing }
+            if existing.picks.isEmpty { return TodayRecord(day: day, picks: picks(ctx)) }
             let ok = Set(eligible(ctx).map(\.id)).union(dueReminders(ctx).map(\.id))
             let reminder = Resurface.Reason.reminder.label
             if existing.picks.allSatisfy({ ok.contains($0.id) || $0.reason == reminder }) { return existing }
@@ -123,6 +132,14 @@ enum TodayPlan {
         var next = record
         next.picks.append(extra)
         return next
+    }
+
+    /// What an empty Today says: no saves yet, still sorting (picks come once topics
+    /// are in), or everything that could come up is handled.
+    enum Empty: Equatable { case noSaves, sorting, allHandled }
+
+    static func empty(hasSaves: Bool, isSorting: Bool) -> Empty {
+        !hasSaves ? .noSaves : isSorting ? .sorting : .allHandled
     }
 
     /// Saves that arrived since the start of yesterday ("New since yesterday").

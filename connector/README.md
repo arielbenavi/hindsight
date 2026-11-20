@@ -45,3 +45,10 @@ claude mcp add --transport http hindsight "https://<host>/<token>/mcp"
 ```
 
 Then "what did I save about sidechain compression?" searches your saves. Word matching, no embeddings.
+
+**Consent switch.** Both read tools answer with a one-item list `[{"error": "The owner hasn't allowed…"}]`
+until the account's owner turns on "Let AI assistants search my saves" in the app (Sources → Use your saves
+in Claude). The app writes it with `PUT /<token>[/t/<tenant>]/settings` `{"assistant_search": true|false}`
+(only that key; `GET` reads it) into the account's `settings.json`. With no settings file yet it's off,
+except for the account named in `data/default_tenant` (the owner enabled the connector by hand before the
+switch existed). Notes (`kind == "note"`, WhatsApp notes) are never returned by the read tools.

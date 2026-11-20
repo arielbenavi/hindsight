@@ -32,6 +32,7 @@ final class TodayStore {
         case .opened: saves.recordOpen(id, now: now)
         case .done: saves.setStatus(id, .done)
         case .letGo: saves.setStatus(id, .letGo)
+        case .sent: break  // the destination already recorded it (`SaveStateStore.recordSent`)
         }
         set(next)
     }

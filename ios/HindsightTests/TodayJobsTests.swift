@@ -165,6 +165,52 @@ struct TodayJobsTests {
         #expect(TodayPlan.record(existing: answered, ctx(posts, jobs: jobs2, now: at("2026-11-20", hour: 11))) == answered)
     }
 
+    /// The owner's phone: Today opened before the pull/sort delivered anything, the
+    /// empty set was saved, and "Nothing for today" stuck with 1,415 saves in.
+    @Test func anEmptySetIsRemadeOnceSavesArriveOrGetSorted() throws {
+        let dir = tempDir()
+        let saves = SaveStateStore(directory: dir)
+        let store = TodayStore(directory: dir)
+        // 1. No saves yet (or none eligible: every save in a Know topic for now).
+        let early = olderPosts
+        let allKnow = Dictionary(uniqueKeysWithValues: early.map { ($0.id, TopicJob.know) })
+        store.prepare(ctx(early, jobs: allKnow, now: at("2026-11-20", hour: 9)), saves: saves)
+        #expect(store.record?.picks.isEmpty == true)
+        // 2. Sorting moved them into real topics: the next prepare picks three.
+        store.prepare(ctx(early, now: at("2026-11-20", hour: 9)), saves: saves)
+        #expect(store.record?.picks.count == 3)
+        // Same for a set made with no saves at all, then the pull lands.
+        let fresh = TodayPlan.record(existing: nil, ctx([], now: at("2026-11-20", hour: 9)))
+        #expect(fresh.picks.isEmpty)
+        #expect(TodayPlan.record(existing: fresh, ctx(early, now: at("2026-11-20", hour: 10))).picks.count == 3)
+        // And it survives a relaunch: the saved empty file doesn't win either.
+        let relaunched = TodayStore(directory: dir)
+        #expect(relaunched.record?.picks.count == 3)
+        try? FileManager.default.removeItem(at: dir)
+    }
+
+    @Test func emptyTodaySaysWhyHonestly() {
+        #expect(TodayPlan.empty(hasSaves: false, isSorting: true) == .noSaves)
+        #expect(TodayPlan.empty(hasSaves: true, isSorting: true) == .sorting)
+        #expect(TodayPlan.empty(hasSaves: true, isSorting: false) == .allHandled)
+    }
+
+    @Test func savesSentToRemindersStayOutOfTodayFor30Days() {
+        let now = at("2026-11-20")
+        let posts = [post("sent"), post("old-sent"), post("fresh")]
+        let states: [String: SaveState] = [
+            "sent": SaveState(routedAt: now.addingTimeInterval(-86_400 * 29)),
+            "old-sent": SaveState(routedAt: now.addingTimeInterval(-86_400 * 31)),
+        ]
+        #expect(Set(TodayPlan.eligible(ctx(posts, states: states, now: now)).map(\.id)) == ["old-sent", "fresh"])
+        // Recording a send marks both: where, and the 30 quiet days. Status stays new.
+        let store = SaveStateStore(directory: nil)
+        store.recordSent("fresh", to: "Groceries", now: now)
+        #expect(store.state("fresh").sentDate("Groceries") == now)
+        #expect(store.state("fresh").isRouted(now: now))
+        #expect(store.status("fresh") == .new)
+    }
+
     @Test func oneMoreAddsAnUnseenPick() throws {
         let posts = Array(olderPosts.prefix(4))
         var record = TodayPlan.record(existing: nil, ctx(posts, now: at("2026-11-20")))

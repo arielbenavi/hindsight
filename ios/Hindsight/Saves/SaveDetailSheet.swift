@@ -43,6 +43,11 @@ struct SaveDetailSheet: View {
                     }
                     .buttonStyle(.pill)
 
+                    let destinations = Destinations.applicable(app.destinationInput(for: post, library: library))
+                    if !destinations.isEmpty {
+                        SendToGroup(app: app, post: post, destinations: destinations)
+                    }
+
                     VStack(spacing: 0) {
                         doneRow(state)
                         divider

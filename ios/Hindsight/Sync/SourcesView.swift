@@ -17,6 +17,8 @@ struct SourcesView: View {
                     .foregroundStyle(OnboardingStyle.muted)
 
                 SourceCards(store: store)
+
+                AssistantAccessCard()
             } actions: {
                 Button("Run setup again") {
                     // Same as the beta menu's "Start onboarding over": back to onboarding,

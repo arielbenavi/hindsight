@@ -4,8 +4,8 @@
 
 | Part | Command | What it covers |
 |---|---|---|
-| iOS app (170 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), contract + old-data loading, store merge, sort engine (topics for every save, Unsorted, old caches, imports during a run), Today (picks by state/job/reminder, resume, one more, notification times), save states, topic jobs (default mapping incl. Hebrew, overrides, moves), Keep close needs, Do lists, Ask filters, Topics, layout, Map matching, Learn/Fitness/practice, onboarding, Muse prompts/links, server account URL rules + pull throttle, X PKCE + bookmarks |
-| Connector (8 tests) | `cd connector && .venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation, bot number route |
+| iOS app (187 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), contract + old-data loading, store merge, sort engine (topics for every save, Unsorted, old caches, imports during a run), Today (picks by state/job/reminder, resume, one more, notification times, an empty set re-picked once saves arrive, sorting empty state, sent saves quiet for 30 days), save states, topic jobs (default mapping incl. Hebrew, overrides, moves), Keep close needs, Do lists, Ask filters, Topics, layout, Map matching, Learn/Fitness/practice, onboarding, Muse prompts/links + "Open Muse" browser fallback, server account URL rules + pull throttle, X PKCE + bookmarks, **destinations** (which apply per job/content, ingredient parser EN/HE + no-list fallback, dates in captions, Markdown, Reminders dedupe + denial with the in-memory writer, auto-route once only, older state files still decode) |
+| Connector (14 tests) | `cd connector && python3 -m venv /tmp/hs-venv && /tmp/hs-venv/bin/pip -q install -r requirements.txt pytest && /tmp/hs-venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation, bot number route, search/recent, **assistant-search consent** (`…/settings`, off by default, the owner's existing account kept on, notes never returned) |
 | WhatsApp bot (11 tests) | `cd whatsapp-bot && npm test` | message → posts rules (links, owner-only notes, chat as collection, share-tracking params), chat-export parsing (iOS/Android formats, zip, note ids identical to the app's) |
 
 No test calls a real API (X, Muse, Gemini, WhatsApp).
@@ -55,6 +55,30 @@ Fresh install each time: `xcrun simctl uninstall booted com.reutrabin.hindsight`
    `/<token>/t/<tenant>/ingest`, leave the app > 1 min, come back: it shows in Library (All saves), and gets sorted.
 17. **One account per install:** relaunch with the same argument: no second `tenant_created`. DEBUG reset: Sources →
    Sync with Muse → **Fresh Muse test (new user)** (new account, local saves emptied).
+18. **Destinations** (after 14): 🐞 → **Add destination test saves** (recipes, places, events with a date ahead, films;
+   two of them saved on this day 1 and 2 years ago). Then:
+   - Food & recipes → "Crispy miso pasta" → **Send to: Add ingredients to Groceries · 5 ingredients**. First tap asks
+     for Reminders (copy: "hindsight adds the lists you choose…"); Allow → "Added to Groceries · 5 items" and the row
+     becomes **In Groceries · <date>**. A recipe with no list says **Add to Groceries** ("adds the recipe").
+   - Places → "Rooftop jazz night" → **Open in Maps** (+ Google) and **Add to Calendar · Sat, 5 Dec at 20:00** →
+     Apple's New Event sheet prefilled (title, time, location, link); ✓ → **In Calendar**. Cancel changes nothing.
+   - Ask "Perfect Days" → **Add to Watchlist** and **Export as Markdown** (share sheet with a .md file).
+   - Keep close saves show no Send to at all; a caption saying "today" never offers Calendar.
+   - 🐞 → **New Today set**: card 1 (L'Industrie) shows **Open in Maps** inside the card's bottom; tapping it opens
+     Maps and moves on ("Sent" in That's today.). Card 2 (Shakshuka) **Add to Groceries** → toast "Added to Groceries ·
+     4 items". The three round buttons stay above the tab bar.
+   - Topic "…" → **Send all to…** → Reminders list / Markdown, each confirmed with a count first; a second run says
+     "Already in …".
+   - Topic "…" → What is this for? → **Send new saves here automatically** (off by default) + list → Save. New saves
+     sorted into that topic later are added once, on foreground or after a sync.
+   - Reminders app (simulator): the lists hold the items (Groceries 9 after the two recipes, no duplicates).
+   - 🐞 → **Preview Today while sorting**: "Sorting your saves… Today's three will be ready in a moment."
+19. **Use your saves in Claude** (Sources, bottom): off by default, only the switch. Turning it on asks first (captions,
+   transcripts, links; never notes); with a server, `calls.log` shows `settings … assistant_search: true` and the card
+   shows the connector address + Copy. With the server unreachable the switch goes back off with a message.
+20. **Muse sheet**: Sources → **Connect with Muse** (primary; the Meta file import is the quiet link under it). The sheet
+   says "One-time setup…"; **Open Muse** in the simulator (no Muse app) opens muse.ai in Safari, and back in the app
+   the sheet says **Message copied. Open Muse and paste it.**
 
 ## Manual: phone (needs a phone, Muse or WhatsApp)
 
@@ -92,6 +116,20 @@ Use the **logo** Hindsight app (Reut's app + our work, installed from the Mac) u
 
 ### D. X
 App → Plug in your apps → **X → Connect** → authorize. Expected: "N bookmarks synced".
+
+### G. Destinations on a real phone (Reminders, Calendar, Maps)
+1. A recipe save → **Add ingredients to Groceries** → allow Reminders → open the Reminders app: a **Groceries** list
+   (made if it wasn't there; in your default account, so it syncs to iCloud) with one item per ingredient and the post
+   link. Tap again in hindsight → "Already in Groceries", nothing duplicated.
+2. Deny Reminders once (Settings → Privacy → Reminders → hindsight off) → the tap shows "hindsight can't add to
+   Reminders" with **Open Settings**, which lands on hindsight's settings page.
+3. A save with a date ahead → **Add to Calendar** → Apple's sheet → Add → it's in the Calendar app. No Calendar
+   permission prompt should ever appear (iOS 17+ write-only sheet).
+4. **Open in Maps** opens Apple Maps on the place; **Google** opens Google Maps if installed, else the web.
+5. Auto-route: turn it on for a topic, sync new saves that land there (Muse / seed), background + foreground the app →
+   they appear in the chosen list once.
+6. Inside LiveContainer: **Open Muse** should open Safari on muse.ai (which offers the Muse app); the sheet says the
+   message was copied.
 
 ### E. Sources page + restart
 Home's gear → **Sources**: every card shows its status, and syncing from there works. **Run setup again** goes back to onboarding without losing saves.

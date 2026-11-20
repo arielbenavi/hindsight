@@ -21,6 +21,15 @@ onboarding (Welcome → How it works → Plug in your apps → You're in) there'
   right now?"), Go/Learn/Know = the list (with Open map / Open tips). "…" → "What is this for?" changes the job.
   Tapping a save opens its detail sheet (done, remind me, note, move to another topic, let go).
 - **Ask**: a focused search (caption, author, hashtags, topic, notes) plus ready-made filters. No AI yet.
+- **Destinations** (branch `ariel/destinations`): saves go to the app the person already uses for that subject,
+  no setup. Save detail has a **Send to** group (best first, max 3): Go places → **Open in Maps** (+ Google);
+  recipes → **Add ingredients to Groceries** (parsed from the caption, else the recipe itself); workouts / Do →
+  "hindsight · To try"; films / books / music → Watchlist / Reading list / Listen later (Reminders); a date still
+  ahead in the caption → **Add to Calendar** (Apple's add-event sheet, user confirms); Learn / Know → **Export as
+  Markdown** (share sheet). Keep close: nothing. Once sent it shows "In Groceries". Today's card shows the best
+  one (not export) at its bottom: one tap handles the card for today. Topic "…" → **Send all to…** (its list, or
+  one Markdown file; count confirmed). Job picker → opt-in **Send new saves here automatically** (Reminders list).
+  Sources → **Use your saves in Claude**: consent switch (off by default) → server `assistant_search`.
 
 Library works from the raw imports the moment onboarding ends; sorting runs in the background and topics
 appear as they're ready. The server is pulled on launch and on every return to the app; each install gets
@@ -29,8 +38,10 @@ its own server account.
 User state lives outside the contract file, per dataset (`Application Support/Hindsight/<dataset>/`):
 `save-states.json` (`Saves/SaveStateStore`: new/done/letGo, note, remindAt, shownInToday, lastOpened, opens),
 `topic-prefs.json` (`TopicPrefsStore`: job overrides by topic id, moves post id → topic id, applied by
-`Library/LibraryIndex` on top of `HomeTopics`), `today.json` (`Today/TodayStore`). The default job is
-`TopicJobs.suggested` (the topic's view, else label keywords, EN + HE).
+`Library/LibraryIndex` on top of `HomeTopics`; `autoRoutes` topic id → {list, existing post ids}), `today.json`
+(`Today/TodayStore`). The default job is `TopicJobs.suggested` (the topic's view, else label keywords, EN + HE).
+Destinations add two optional fields to `SaveState`: `sentTo` (list name or "Calendar" → date; dedupes every send)
+and `routedAt` (last Reminders/Calendar add; Today skips the save for 30 days, status stays `new`).
 
 ### Architecture (~15 lines)
 - `Import/SavedPostStore` — every import (Muse, Meta export, X, WhatsApp, server pull), deduped. The source of truth.
@@ -47,8 +58,13 @@ User state lives outside the contract file, per dataset (`Application Support/Hi
   `TopicScreen` (+ job picker), `JobScreens` (Do list, Look board, Keep close shelf), `ShelfLogic` (pure);
   views pushed on the Library stack: `MapScreen`, `LearnScreen`, `FitnessScreen` (their setup is opt-in, inline).
 - `Saves/` — `SaveStateStore`, `TopicPrefsStore`, `SaveDetailSheet`, `SaveArt`. `Ask/` — `AskScreen`, `AskSearch`.
+- `Destinations/` — `Destination` (+ `ReminderList`, `DestinationSubject`, pure `Destinations.applicable` rules),
+  `IngredientParser`, `DateFinder` (NSDataDetector, absolute dates only), `MarkdownExporter` (all pure);
+  `RemindersWriter` (EventKit + in-memory fake), `DestinationSender` (+ `AutoRouting`), `SendToViews` (Send to rows,
+  Today action, EventKitUI sheet, share sheet). `AppModel.sender` / `destinationInput` / `runAutoRoutes`.
 - `Sync/MuseConnector` — server URL + this install's account (`ensureAccount`: tenant `…/<token>/t/<id>`).
-- `connector/server.py` — MCP connector Muse calls, `/saves` for the app, `/ingest` for the bot, `/tenants`.
+- `connector/server.py` — MCP connector Muse calls, `/saves` for the app, `/ingest` for the bot, `/tenants`,
+  `/settings` (`assistant_search`: the read tools refuse until the owner allows it; notes never returned).
 - `whatsapp-bot/` — Baileys bot on our number; posts notes/links to `/ingest` under the user's connect code (= tenant).
 
 ### Status
@@ -57,6 +73,8 @@ User state lives outside the contract file, per dataset (`Application Support/Hi
 | Home shell, background sorting, topics for every save | ✅ merged (PR #20 + this branch), simulator-checked |
 | Topics without a model (simulator, no Apple Intelligence, quota, refusals) | ✅ `Pipeline/TopicFallback`: collection → hashtags → caption words (EN/HE lexicon, 40 topics) → author → platform. Seed: 72% of captioned saves get a real topic (was 0%: all "Other"). Fallback decisions are marked in the sort cache and re-asked once a model is there (branch `ariel/topic-fallback`) |
 | Pull on launch/foreground, one account per install | ✅ built, simulator-checked against the local connector |
+| Destinations (Maps, Reminders, Calendar, Markdown, auto-route, Claude consent) | ✅ built, simulator-checked (items landed in the simulator's Reminders); real-phone pass in TESTING.md G pending |
+| Phone bugs 2026-11-20: Today stuck on "Nothing for today"; Open Muse dead in LiveContainer | ✅ fixed (empty set re-picked; browser fallback + "Message copied"); confirm on the phone |
 | Muse → connector → app | ✅ verified on device 2026-09-30 |
 | Meta export import, X bookmarks, WhatsApp export import | ✅ |
 | WhatsApp bot | ⛔ **logged out since 2026-10-17**: the bot phone stayed offline 15 days (confirms the ~14-day rule). Needs relinking from a phone that stays online |
@@ -72,6 +90,11 @@ User state lives outside the contract file, per dataset (`Application Support/Hi
 3. **Relink the WhatsApp bot** on a phone that stays online (or plan the relink every ~14 days).
 4. **Share extension** and **TestFlight** (Reut's account / Xcode Cloud).
 5. Still open with Reut: Info.plist document types ("Export chat → hindsight"); shared-group privacy rule ("links from anyone, text only from the owner").
+6. **Destinations, not done yet:** Google Maps is a link next to Apple Maps (no "is it installed" check: that needs
+   `LSApplicationQueriesSchemes`); auto-route only targets Reminders lists; ingredient lines aren't merged across
+   recipes ("2 eggs" + "3 eggs" stay two items); Do-list rows don't show "In Groceries" yet (only the detail sheet);
+   Calendar dates must be absolute ("Dec 5", "30.11.2026"), so "this Saturday at 8pm" is ignored on purpose.
+   Restart the connector after merging so `/settings` exists before the app's Claude switch is used.
 
 ### Running things locally
 - Connector + ngrok run under launchd on Ariel's Mac (`connector/install-launchd.sh`; logs in `connector/data/`). By hand: `cd connector && .venv/bin/python server.py` + `ngrok http 8765` (fixed domain). The token is in `connector/data/token` (never commit it).

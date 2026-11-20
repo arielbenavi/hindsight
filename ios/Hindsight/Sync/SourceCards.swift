@@ -8,6 +8,7 @@ struct SourceCards: View {
     @State private var isMuseSheetPresented = false
     @State private var isWhatsAppSheetPresented = false
     @State private var isMetaImportPresented = false
+    @AppStorage(MuseConnector.connectedKey) private var museConnected = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -45,15 +46,19 @@ struct SourceCards: View {
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text("Instagram + Facebook").font(OnboardingStyle.title)
-                Text("Through Muse, Meta's AI: it can already see your saves. Or import the file Meta can send you.")
+                Text(museConnected
+                     ? "Connected through Muse, Meta's AI. New saves arrive every day."
+                     : "Connect once through Muse, Meta's AI. It's a one-time setup: after that, your Instagram and Facebook saves arrive here every day.")
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
             }
-            Button("Sync with Muse") { isMuseSheetPresented = true }
-                .buttonStyle(.onboardingSecondary)
-            // The dependable second way while Muse is unreliable.
-            Button("Import your Meta data file") { isMetaImportPresented = true }
-                .buttonStyle(.onboardingSecondary)
+            Button(museConnected ? "Sync with Muse now" : "Connect with Muse") { isMuseSheetPresented = true }
+                .buttonStyle(.onboardingPrimary)
+            // The dependable second way while Muse is unreliable; deliberately quieter.
+            Button("Or import the file Meta can send you") { isMetaImportPresented = true }
+                .font(OnboardingStyle.caption.weight(.bold))
+                .foregroundStyle(OnboardingStyle.muted)
+                .frame(maxWidth: .infinity, minHeight: 36)
         }
         .onboardingCard()
     }

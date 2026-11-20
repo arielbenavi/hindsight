@@ -83,6 +83,52 @@ def tenant_from(headers: Any) -> str | None:
     return None
 
 
+# ── Per-account settings (data/tenants/<tenant>/settings.json, or data/settings.json) ──
+# Only `assistant_search` for now: may AI assistants (Claude, …) read this account's saves
+# through search_saves / recent_saves? Off unless the owner turns it on in the app.
+SETTINGS_KEYS = {"assistant_search"}
+ASSISTANT_SEARCH_OFF = (
+    "The owner hasn't allowed assistants to search their saves. "
+    "They can turn it on in hindsight → Sources → Use your saves in Claude."
+)
+
+
+def settings_path(tenant: str | None) -> Path:
+    return saves_path(tenant).parent / "settings.json"
+
+
+def load_settings(tenant: str | None) -> dict[str, Any]:
+    """Stored settings with defaults filled in. The single-user beta's owner turned
+    assistant search on by hand before this switch existed: the account named in
+    data/default_tenant keeps it on until it saves a settings file of its own."""
+    path = settings_path(tenant)
+    if path.exists():
+        try:
+            stored = json.loads(path.read_text())
+        except ValueError:
+            stored = {}
+        return {"assistant_search": bool(stored.get("assistant_search", False))}
+    default = DATA / "default_tenant"
+    owner = default.read_text().strip() if default.exists() else None
+    return {"assistant_search": bool(tenant) and tenant == owner}
+
+
+def save_settings(tenant: str | None, changes: dict[str, Any]) -> dict[str, Any]:
+    with _lock:
+        merged = {**load_settings(tenant), **changes}
+        settings_path(tenant).write_text(json.dumps(merged, indent=1))
+    return merged
+
+
+def assistant_search_allowed(tenant: str | None) -> bool:
+    return load_settings(tenant)["assistant_search"]
+
+
+def readable(posts: Any) -> list[dict[str, Any]]:
+    """What the read tools may show: never notes (WhatsApp notes are private text)."""
+    return [p for p in posts if p.get("kind") != "note"]
+
+
 def load_saves(tenant: str | None = None) -> dict[str, dict[str, Any]]:
     path = saves_path(tenant)
     return json.loads(path.read_text()) if path.exists() else {}
@@ -258,7 +304,10 @@ def brief(post: dict[str, Any], text_chars: int = 700) -> dict[str, Any]:
 )
 def search_saves(query: str, platform: str | None = None, limit: int = 10, ctx: Context | None = None) -> list[dict[str, Any]]:
     tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
-    results = search(list(load_saves(tenant).values()), query, platform, limit)
+    if not assistant_search_allowed(tenant):
+        log_call("search_saves", tenant=tenant, refused="assistant_search off")
+        return [{"error": ASSISTANT_SEARCH_OFF}]
+    results = search(readable(load_saves(tenant).values()), query, platform, limit)
     log_call("search_saves", tenant=tenant, query=query[:80], returned=len(results))
     return results
 
@@ -271,7 +320,10 @@ def search_saves(query: str, platform: str | None = None, limit: int = 10, ctx: 
 )
 def recent_saves(limit: int = 10, platform: str | None = None, ctx: Context | None = None) -> list[dict[str, Any]]:
     tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
-    saves = [p for p in load_saves(tenant).values() if not platform or p.get("platform") == platform]
+    if not assistant_search_allowed(tenant):
+        log_call("recent_saves", tenant=tenant, refused="assistant_search off")
+        return [{"error": ASSISTANT_SEARCH_OFF}]
+    saves = [p for p in readable(load_saves(tenant).values()) if not platform or p.get("platform") == platform]
     saves.sort(key=lambda p: str(p.get("saved_at") or p.get("posted_at") or p.get("received_at") or ""), reverse=True)
     log_call("recent_saves", tenant=tenant, returned=min(len(saves), limit))
     return [brief(p) for p in saves[: max(1, min(limit, 50))]]
@@ -369,6 +421,25 @@ async def saves_for_app(request: Request) -> JSONResponse:
         posts = [p for p in posts if p.get("received_at", "") > since]
     log_call("app_pull", tenant=tenant, returned=len(posts), since=since)
     return JSONResponse(posts)
+
+
+@mcp.custom_route(f"/{TOKEN}/settings", methods=["GET", "PUT"])
+async def settings_route(request: Request) -> JSONResponse:
+    """The app's switches for this account. PUT takes a JSON object with known keys only
+    (`assistant_search`: true/false); anything else is a 400, so a typo never silently does nothing."""
+    tenant = tenant_from(request.headers)
+    if request.method == "PUT":
+        try:
+            body = await request.json()
+        except ValueError:
+            return JSONResponse({"error": "body must be JSON"}, status_code=400)
+        if (not isinstance(body, dict) or not body or set(body) - SETTINGS_KEYS
+                or not all(isinstance(v, bool) for v in body.values())):
+            return JSONResponse({"error": f"only {sorted(SETTINGS_KEYS)} (true/false) can be set"}, status_code=400)
+        settings = save_settings(tenant, body)
+        log_call("settings", tenant=tenant, **body)
+        return JSONResponse(settings)
+    return JSONResponse(load_settings(tenant))
 
 
 @mcp.custom_route(f"/{TOKEN}/tenants", methods=["POST"])

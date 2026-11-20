@@ -29,7 +29,7 @@ struct RootView: View {
 enum AppTab: Hashable { case today, library, ask }
 
 /// The tab bar, and what used to hang off Home: Sources, the server pull, sorting
-/// new imports, practice reminders and Today's 9:00 notification.
+/// new imports, practice reminders, Today's 9:00 notification and topics' auto-route.
 struct MainTabs: View {
     let app: AppModel
     @State private var tab: AppTab = .today
@@ -73,8 +73,15 @@ struct MainTabs: View {
                 app.rescheduleReminders()
                 app.rescheduleToday()
             }
-            if phase == .active { Task { await app.syncWithServer() } }
+            if phase == .active {
+                Task {
+                    await app.syncWithServer()
+                    await app.runAutoRoutes()
+                }
+            }
         }
+        // Sorted saves landed in their topics: topics set to auto-route send the new ones.
+        .onChange(of: app.dataVersion) { _, _ in Task { await app.runAutoRoutes() } }
     }
 }
 
@@ -83,6 +90,8 @@ struct MainTabs: View {
 struct DevMenu: View {
     let app: AppModel
     @State private var showsModelTest = false
+    /// Dev: Today shows its "Sorting your saves…" state, to check it without a real first sort.
+    @AppStorage("debugPreviewTodaySorting") private var previewTodaySorting = false
 
     var body: some View {
         Menu {
@@ -93,6 +102,14 @@ struct DevMenu: View {
                 app.today.reset()
                 app.today.prepare(app.todayContext(app.library()), saves: app.saves)
             }
+            #if DEBUG
+            Button("Add destination test saves", systemImage: "paperplane") {
+                let added = app.store?.merge(DestinationSamples.posts()) ?? 0
+                DebugLog.write("beta menu: destination test saves, +\(added)")
+                app.importsChanged()
+            }
+            Toggle("Preview Today while sorting", systemImage: "hourglass", isOn: $previewTodaySorting)
+            #endif
             // Back to onboarding, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
                 AppModel.resetMySetup()

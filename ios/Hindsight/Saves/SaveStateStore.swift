@@ -18,10 +18,26 @@ struct SaveState: Codable, Hashable, Sendable {
     var lastOpened: Date?
     /// How many times it was opened (Keep close: "you've come back to this N times").
     var opens = 0
+    /// Where it was sent and when: a Reminders list name ("Groceries") or "Calendar"
+    /// (`Destination.sentKey`). Shows "In Groceries" instead of the button, and makes
+    /// auto-route and "Send all" add it once. Optional so older files still decode.
+    var sentTo: [String: Date]?
+    /// Last added to Reminders or Calendar: it lives there now, so Today leaves it
+    /// alone for `SaveState.routedQuietDays`. Its status stays `new`.
+    var routedAt: Date?
 
     static let initial = SaveState()
+    static let routedQuietDays = 30
 
     var hasNote: Bool { note?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false }
+
+    func sentDate(_ key: String) -> Date? { sentTo?[key] }
+
+    /// Sent to Reminders/Calendar within the last 30 days.
+    func isRouted(now: Date) -> Bool {
+        guard let routedAt else { return false }
+        return now.timeIntervalSince(routedAt) < Double(Self.routedQuietDays) * 86_400
+    }
 
     /// Snoozed: a reminder still ahead.
     func isSnoozed(now: Date) -> Bool { remindAt.map { $0 > now } ?? false }
@@ -70,6 +86,14 @@ final class SaveStateStore {
 
     func recordShownInToday(_ id: String) { update(id) { $0.shownInToday += 1 } }
 
+    /// It went to a Reminders list or Calendar (`key`): remembered, and quiet in Today for 30 days.
+    func recordSent(_ id: String, to key: String, now: Date = .now) {
+        update(id) { state in
+            state.sentTo = (state.sentTo ?? [:]).merging([key: now]) { _, new in new }
+            state.routedAt = now
+        }
+    }
+
     var letGoIDs: Set<String> { Set(states.filter { $0.value.status == .letGo }.keys) }
 
     /// Saves to show in default lists (let-go ones are hidden, still searchable).
@@ -87,6 +111,9 @@ final class TopicPrefsStore {
     struct Prefs: Codable, Equatable {
         var jobs: [String: TopicJob] = [:]
         var moves: [String: String] = [:]
+        /// Topic id → auto-route to a Reminders list (opt-in, off everywhere by
+        /// default). Optional so older files still decode.
+        var autoRoutes: [String: AutoRoute]?
     }
 
     private(set) var prefs: Prefs
@@ -102,6 +129,16 @@ final class TopicPrefsStore {
 
     func setJob(_ job: TopicJob?, for topicID: String) {
         prefs.jobs[topicID] = job
+        file.save(prefs)
+    }
+
+    func autoRoute(for topicID: String) -> AutoRoute? { prefs.autoRoutes?[topicID] }
+
+    /// nil turns it off.
+    func setAutoRoute(_ route: AutoRoute?, for topicID: String) {
+        var routes = prefs.autoRoutes ?? [:]
+        routes[topicID] = route
+        prefs.autoRoutes = routes.isEmpty ? nil : routes
         file.save(prefs)
     }
 

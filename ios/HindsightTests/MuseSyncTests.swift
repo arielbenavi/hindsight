@@ -26,6 +26,32 @@ struct MuseSyncTests {
         #expect(items?.first { $0.name == "q" }?.value == "list my saves & more")
     }
 
+    /// LiveContainer: the universal link never opens Muse, so fall back to the plain
+    /// URL (Safari → muse.ai/chat), and only then the App Store. Copied first, always.
+    @Test func openMuseFallsBackToTheBrowserThenTheAppStore() async {
+        #expect(MuseLauncher.outcome(universalLink: true, browser: nil) == .opened)
+        #expect(MuseLauncher.outcome(universalLink: false, browser: true) == .openedInBrowser)
+        #expect(MuseLauncher.outcome(universalLink: false, browser: false) == .notInstalled)
+
+        var copied: [String] = []
+        var tries: [Bool] = []
+        // A normal install: the app opens, the browser is never tried.
+        let normal = await MuseLauncher.launch(prompt: "hi", copy: { copied.append($0) }) { _, universalOnly in
+            tries.append(universalOnly); return true
+        }
+        #expect(normal == .opened && tries == [true] && copied == ["hi"])
+        // Inside LiveContainer: universal link fails, the plain URL opens.
+        tries = []
+        let container = await MuseLauncher.launch(prompt: "hi", copy: { copied.append($0) }) { _, universalOnly in
+            tries.append(universalOnly); return !universalOnly
+        }
+        #expect(container == .openedInBrowser && tries == [true, false])
+        // Nothing opens at all.
+        let nothing = await MuseLauncher.launch(prompt: "hi", copy: { copied.append($0) }) { _, _ in false }
+        #expect(nothing == .notInstalled)
+        #expect(copied.count == 3)
+    }
+
     @Test func sampleReplyMergesIntoSeedWithoutDuplicates() {
         let result = SavedPostParser.parse(MuseSampleReply.text)
         #expect(result.posts.count == 5)
