@@ -77,6 +77,10 @@ DATA_FETCHING_RESEARCH.md.)
   (ngrok static domain) or real hosting. (2026-09-30)
 - Users will tap our Paste button with our own prompt still on the clipboard. The
   sheet now detects that and explains. (2026-09-29)
+- **Inside LiveContainer, universal links never open another app**: `open(url, [.universalLinksOnly: true])`
+  returns false even with Muse installed, so "Open Muse" did nothing on the owner's phone. Fall back to a plain
+  `open(url)` (Safari on muse.ai/chat, which offers the app), then the App Store, and always say the message was
+  copied so switching apps by hand works. The decision is a pure function, tested with a fake opener. (2026-11-20)
 
 - **Muse carries chat context into new requests** (an old "after Sep 28" limit; an
   old broken connector). Our first-time message now says to replace any existing
@@ -84,6 +88,27 @@ DATA_FETCHING_RESEARCH.md.)
   a new connector tenant, so the URL is new too. (2026-10-01)
 
 ## iOS / Xcode
+
+- **An empty Today set stuck all day** ("Nothing for today" with 1,415 saves): it was made before the pull/sort
+  delivered anything, and the "remake if a pick became ineligible" check passes vacuously on an empty set
+  (`allSatisfy` on `[]` is true). An unanswered empty set is now always re-picked, and Today re-prepares on
+  `AppModel.dataVersion` (every reload), the save count, sorting ending and foreground. (2026-11-20)
+- **`NSDataDetector` reads relative words as dates**: "fix it today" became today, "this Saturday" the next one,
+  both relative to *now*, not to when the post was written. And "ends Nov 30" comes back as a range starting now
+  (`date` = now, `duration` to Nov 30). Only accept a month by name or a full numeric date, and for "ends/until/by"
+  take `date + duration`. It does *not* read "1/2 cup" as a date, but the filter guards that too. (2026-11-20)
+- **EventKitUI's delegate protocol isn't `@MainActor`**: a `@MainActor` coordinator conforming to
+  `EKEventEditViewDelegate` fails Swift 6 ("crosses into main actor-isolated code"). `@preconcurrency` on the
+  conformance fixes it (UIKit calls it on the main thread). `EKEventEditViewController` needs no Calendar
+  permission on iOS 17+; Reminders needs `requestFullAccessToReminders()` + `NSRemindersFullAccessUsageDescription`.
+  (2026-11-20)
+- New `Codable` fields on stored state must be optional (or get a custom decoder): synthesized `Decodable`
+  ignores default values and throws `keyNotFound` on older files. `SaveState.sentTo/routedAt` and
+  `Prefs.autoRoutes` are optional for that; a test decodes an old JSON. (2026-11-20)
+- Anything added under Today's card pushes the three buttons behind the floating tab bar (the 420pt card is
+  already the limit). Today's destination action lives inside the card's empty bottom instead. (2026-11-20)
+- A `+= 1` on an `@Observable` property inside `AppModel.init` is a read, so it becomes a dependency of the app's
+  body (see the AppModel entry below). Assign a fresh value (`dataVersion = UUID()`) to only write. (2026-11-20)
 
 - **Today's set was picked before the first sort finished**, when no save had a topic (so every save counted as
   eligible), and a Career (Know) save showed in Today on a fresh "Load seed saves". `TodayPlan.record` now remakes
