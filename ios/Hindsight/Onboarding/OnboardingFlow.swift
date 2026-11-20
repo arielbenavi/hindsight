@@ -5,6 +5,7 @@ struct OnboardingFlow: View {
     let store: SavedPostStore
     let onFinish: (OnboardingChoice) -> Void
     @State private var model: OnboardingModel
+    @Environment(\.scenePhase) private var scenePhase
 
     init(store: SavedPostStore, onFinish: @escaping (OnboardingChoice) -> Void) {
         self.store = store
@@ -35,6 +36,18 @@ struct OnboardingFlow: View {
         .background(OnboardingStyle.background.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .tint(OnboardingStyle.accent)
+        // The server may already hold this person's saves (a backfill, Muse, the WhatsApp bot):
+        // make the account and pull while they're still here, so Connect can show them.
+        .task { await pullFromServer() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await pullFromServer() } }
+        }
+    }
+
+    private func pullFromServer() async {
+        guard ServerSync.isConfigured, ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+        await MuseConnector.ensureAccount()
+        _ = try? await ServerSync.pull(into: store)
     }
 
     @ViewBuilder private var header: some View {
