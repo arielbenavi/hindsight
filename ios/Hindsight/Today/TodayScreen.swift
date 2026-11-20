@@ -9,6 +9,7 @@ struct TodayScreen: View {
     @State private var exitEdge: Edge = .leading
     @State private var drag: CGSize = .zero
     @State private var answeredTick = 0
+    @State private var sorting: SortProgress?
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -29,6 +30,8 @@ struct TodayScreen: View {
                         TodayDoneView(app: app, record: record, posts: byID, library: library,
                                       oneMore: { withAnimation(.snappy) { _ = app.today.oneMore(app.todayContext(library), saves: app.saves) } },
                                       showLibrary: showLibrary)
+                    } else if TodayPlan.empty(hasSaves: true, isSorting: isSorting) == .sorting {
+                        sortingToday
                     } else {
                         nothingToday
                     }
@@ -43,9 +46,25 @@ struct TodayScreen: View {
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answeredTick)
         .onAppear { prepare() }
-        // Sorting moves saves into topics (and jobs); a new day starts a new set.
-        .onChange(of: app.data?.posts.count) { _, _ in prepare() }
+        // Saves arriving (a pull, an import) and sorting (each rewrite reloads the data,
+        // moving saves into topics and jobs) can turn an empty set into a real one;
+        // a new day starts a new set.
+        .onChange(of: app.dataVersion) { _, _ in prepare() }
+        .onChange(of: app.allPosts.count) { _, _ in prepare() }
         .onChange(of: scenePhase) { _, phase in if phase == .active { prepare() } }
+        .task(id: app.sortRuns) { await followSorting() }
+    }
+
+    /// Still sorting the user's own saves (or the first sorted file isn't written yet).
+    private var isSorting: Bool { sorting != nil || (app.isMySaves && app.data == nil) }
+
+    private func followSorting() async {
+        guard app.isMySaves else { sorting = nil; return }
+        for await snapshot in app.sortProgress() {
+            sorting = snapshot.isComplete ? nil : snapshot
+        }
+        sorting = nil
+        prepare()
     }
 
     private func prepare() {
@@ -177,6 +196,23 @@ struct TodayScreen: View {
     }
 
     // MARK: - Nothing to serve
+
+    /// Saves are here but topics aren't yet, so nothing can be picked honestly.
+    private var sortingToday: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ProgressView().controlSize(.large).tint(Theme.lime)
+            Text("Sorting your saves…").font(Theme.title(26))
+            Text("Today's three will be ready in a moment.")
+                .font(Theme.body(16)).foregroundStyle(Theme.secondary)
+            if let sorting {
+                Text("\(sorting.decided.formatted()) of \(sorting.total.formatted()) sorted")
+                    .font(Theme.body(14, weight: .semibold)).foregroundStyle(Theme.muted)
+                    .monospacedDigit()
+                    .contentTransition(.numericText(value: Double(sorting.decided)))
+            }
+        }
+        .card(padding: 22)
+    }
 
     private var nothingToday: some View {
         VStack(alignment: .leading, spacing: 14) {

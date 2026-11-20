@@ -21,6 +21,11 @@ final class AppModel {
     private(set) var setupDone = false
     /// Bumped every time sorting starts, so Home can follow the new run.
     private(set) var sortRuns = 0
+    /// Bumped every time a dataset (re)loads, e.g. a rewrite after more saves were
+    /// sorted: topics and jobs may have changed even when the post count didn't.
+    /// A fresh UUID, so `select` only writes it (a `+= 1` would read it, and a read
+    /// in `init` makes it a dependency of the app's body; LESSONS.md).
+    private(set) var dataVersion = UUID()
 
     private(set) var places: PlaceStore
     private(set) var practice: PracticeStore
@@ -112,6 +117,7 @@ final class AppModel {
         topicPrefs = TopicPrefsStore(directory: directory)
         today = TodayStore(directory: directory)
         applyLayout()
+        dataVersion = UUID()
     }
 
     /// `data/fixtures/<id>.matches.json`: a warm MapKit cache so first launch
