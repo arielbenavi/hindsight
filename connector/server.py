@@ -71,7 +71,16 @@ def saves_path(tenant: str | None) -> Path:
 
 def tenant_from(headers: Any) -> str | None:
     value = (headers or {}).get(TENANT_HEADER) if headers is not None else None
-    return value if value and TENANT_RE.match(value) else None
+    if value and TENANT_RE.match(value):
+        return value
+    # Single-user beta: once an account has adopted the default store (see create_tenant),
+    # the plain `/<token>/…` URLs mean that account, so Muse, the bot and the backfill
+    # keep working whichever URL they were given.
+    default = DATA / "default_tenant"
+    if default.exists():
+        name = default.read_text().strip()
+        return name if TENANT_RE.match(name) else None
+    return None
 
 
 def load_saves(tenant: str | None = None) -> dict[str, dict[str, Any]]:
@@ -293,6 +302,7 @@ async def create_tenant(request: Request) -> JSONResponse:
         with _lock:
             saves_path(tenant).write_text(json.dumps(load_saves(None), ensure_ascii=False, indent=1))
         (DATA / "backfill_tenant").write_text(tenant)
+        (DATA / "default_tenant").write_text(tenant)
         flag.unlink()
         log_call("tenant_adopted_default", tenant=tenant, saves=len(load_saves(tenant)))
     return JSONResponse({"tenant": tenant, "base_path": f"/{TOKEN}/t/{tenant}"})
