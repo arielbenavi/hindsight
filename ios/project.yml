@@ -52,6 +52,8 @@ targets:
         CFBundleDisplayName: Hindsight
         # No custom encryption (HTTPS only), so TestFlight doesn't ask per build.
         ITSAppUsesNonExemptEncryption: false
+        # The hindsight server for this build; empty unless passed to xcodebuild (never committed).
+        HindsightServerURL: $(HINDSIGHT_SERVER_URL)
         UILaunchScreen:
           UIColorName: LaunchBackground
     settings:
@@ -62,6 +64,7 @@ targets:
           EXCLUDED_SOURCE_FILE_NAMES: saved_posts.json saved_collections.json ig-saved-posts-seed.md
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reutrabin.hindsight
+        HINDSIGHT_SERVER_URL: ""
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_CFBundleDisplayName: Hindsight
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
