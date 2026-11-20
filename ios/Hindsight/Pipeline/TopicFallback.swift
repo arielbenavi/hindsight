@@ -94,14 +94,12 @@ enum TopicFallback {
         for (index, topic) in lexicon.enumerated() {
             var score = 0, usernameHit = false
             var signal = Signal.author
-            for raw in topic.words {
-                let weak = raw.hasPrefix("~")
-                let entry = weak ? String(raw.dropFirst()) : raw
-                if text.tags.contains(where: { matchesWord(entry, $0) }) {
+            for entry in compiledWords[index] {
+                if text.tags.contains(where: entry.matches) {
                     score += hashtagWeight; signal = min(signal, .hashtag)
-                } else if text.hasWord(entry) {
-                    score += weak ? weakWeight : captionWeight; signal = min(signal, .caption)
-                } else if !weak, text.usernameParts.contains(where: { matchesWord(entry, $0) }) {
+                } else if text.has(entry) {
+                    score += entry.weak ? weakWeight : captionWeight; signal = min(signal, .caption)
+                } else if !entry.weak, text.usernameParts.contains(where: entry.matches) {
                     usernameHit = true
                 }
             }
@@ -190,16 +188,47 @@ enum TopicFallback {
             usernameParts = username.split { !$0.isLetter && !$0.isNumber }.map(String.init)
         }
 
-        func hasWord(_ entry: String) -> Bool {
-            if entry.contains(" ") { return joined.contains(" \(entry) ") }
-            if !entry.contains(where: \.isLetter) { return caption.contains(entry) }
-            if entry.hasSuffix("*") {
-                let stem = entry.dropLast()
-                return tokens.contains { $0.hasPrefix(stem) }
+        func has(_ entry: Entry) -> Bool {
+            switch entry.kind {
+            case .exact: entry.forms.contains(where: tokens.contains)
+            case .prefix: tokens.contains { $0.hasPrefix(entry.text) }
+            case .phrase: joined.contains(entry.text)
+            case .symbol: caption.contains(entry.text)
             }
-            return tokens.contains(entry) || tokens.contains(entry + "s") || tokens.contains(entry + "es")
         }
     }
+
+    /// A lexicon word, parsed once (scoring every save is on the sort's critical path).
+    struct Entry: Sendable {
+        enum Kind: Sendable { case exact, prefix, phrase, symbol }
+        var kind: Kind
+        /// The prefix stem, " the phrase ", or the symbol.
+        var text: String
+        /// Whole-token forms: the word + -s/-es, or the phrase run together (as a hashtag).
+        var forms: [String]
+        var weak: Bool
+
+        init(_ raw: String) {
+            weak = raw.hasPrefix("~")
+            let word = weak ? String(raw.dropFirst()) : raw
+            if word.contains(" ") {
+                kind = .phrase; text = " \(word) "; forms = [word.replacingOccurrences(of: " ", with: "")]
+            } else if !word.contains(where: \.isLetter) {
+                kind = .symbol; text = word; forms = [word]
+            } else if word.hasSuffix("*") {
+                kind = .prefix; text = String(word.dropLast()); forms = []
+            } else {
+                kind = .exact; text = word; forms = [word, word + "s", word + "es"]
+            }
+        }
+
+        /// Against one whole token: a hashtag or a username part.
+        func matches(_ token: String) -> Bool {
+            kind == .prefix ? token.hasPrefix(text) : forms.contains(token)
+        }
+    }
+
+    private static let compiledWords: [[Entry]] = lexicon.map { $0.words.map(Entry.init) }
 
     /// Caption words without #tags and @handles, folded: "Best #nyc pizza @joes" → ["best", "pizza"].
     static func words(_ text: String) -> [String] {
@@ -224,13 +253,6 @@ enum TopicFallback {
     }
 
     private static let hebrewPrefixes: Set<Character> = ["ה", "ו", "ב", "ל", "מ", "ש", "כ"]
-
-    /// A word entry (without "~") against one token (a caption word, a whole hashtag, a username part).
-    static func matchesWord(_ entry: String, _ token: String) -> Bool {
-        if entry.contains(" ") || !entry.contains(where: \.isLetter) { return token == entry.replacingOccurrences(of: " ", with: "") }
-        if entry.hasSuffix("*") { return token.hasPrefix(entry.dropLast()) }
-        return token == entry || token == entry + "s" || token == entry + "es"
-    }
 
     /// A hashtag stem against a hashtag (or a username).
     static func matchesTag(_ stem: String, _ tag: String) -> Bool {
@@ -330,7 +352,7 @@ enum TopicFallback {
         Topic(id: "books", label: "Books", symbol: "book.fill", emoji: "📚",
               words: ["~book", "~books", "novel*", "~reading", "~author", "kindle", "audiobook*", "~ספר", "~ספרים", "~קריאה"],
               tags: ["books", "booktok", "bookstagram", "reading", "booklover"]),
-        Topic(id: "movies-tv", label: "Movies & TV", symbol: "~film", emoji: "🎬",
+        Topic(id: "movies-tv", label: "Movies & TV", symbol: "tv.fill", emoji: "🎬",
               words: ["movie*", "film", "cinema", "netflix", "~series", "~episode*", "~season", "anime", "~actor", "~actress",
                       "hbo", "~trailer", "oscar*", "documentary", "cartoon*", "spongebob", "simpsons",
                       "~סרט", "סרטים", "~סדרה", "סדרות", "~פרק", "אנימה", "נטפליקס"],
@@ -402,7 +424,7 @@ enum TopicFallback {
         Topic(id: "cars", label: "Cars", symbol: "car.fill", emoji: "🚗",
               words: ["~car", "~engine", "~driving", "tesla", "bmw", "porsche", "ferrari", "used car", "~רכב", "~אוטו", "מכונית"],
               tags: ["car", "cartok", "automobile", "supercar", "jdm"]),
-        Topic(id: "parenting-family", label: "Parenting & family", symbol: "figure.2.and.child.holdinghand", emoji: "👶",
+        Topic(id: "parenting-family", label: "Parenting & family", symbol: "figure.and.child.holdinghands", emoji: "👶",
               words: ["~baby", "toddler*", "~parent*", "~kids", "~child", "~children", "~mom", "~dad", "pregnan*", "newborn",
                       "~ילדים", "~ילד", "תינוק*", "הורים", "~אמא", "~אבא"],
               tags: ["parenting", "momlife", "dadlife", "toddler", "kids"]),

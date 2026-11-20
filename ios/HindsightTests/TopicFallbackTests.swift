@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import Hindsight
 
 /// A model that can be switched on: none at first (simulator), then one that
@@ -127,7 +128,8 @@ struct TopicFallbackTests {
         let all = TopicFallback.lexicon + TopicFallback.platformTopics
         #expect(Set(all.map(\.id)).count == all.count)
         #expect(Set(all.map(\.label)).count == all.count)
-        #expect(all.allSatisfy { !$0.symbol.isEmpty && !$0.emoji.isEmpty })
+        #expect(all.allSatisfy { !$0.emoji.isEmpty })
+        for topic in all { #expect(UIImage(systemName: topic.symbol) != nil, "\(topic.symbol) isn't an SF Symbol") }
         #expect(all.allSatisfy { SortRules.slug($0.id) == $0.id })
         #expect(TopicFallback.symbol(forLabel: "guitar & INSTRUMENTS") == "guitars.fill")
     }

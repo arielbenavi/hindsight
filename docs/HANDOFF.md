@@ -32,6 +32,7 @@ and on every return to the app; each install gets its own server account.
 | Area | Status |
 |---|---|
 | Home shell, background sorting, topics for every save | ✅ merged (PR #20 + this branch), simulator-checked |
+| Topics without a model (simulator, no Apple Intelligence, quota, refusals) | ✅ `Pipeline/TopicFallback`: collection → hashtags → caption words (EN/HE lexicon, 40 topics) → author → platform. Seed: 72% of captioned saves get a real topic (was 0%: all "Other"). Fallback decisions are marked in the sort cache and re-asked once a model is there (branch `ariel/topic-fallback`) |
 | Pull on launch/foreground, one account per install | ✅ built, simulator-checked against the local connector |
 | Muse → connector → app | ✅ verified on device 2026-09-30 |
 | Meta export import, X bookmarks, WhatsApp export import | ✅ |

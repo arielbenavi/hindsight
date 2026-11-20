@@ -57,13 +57,16 @@ final class SortEngine {
 
     private let backend: SortBackend
     private let file: JSONFile<Cache>
-    private var cache: Cache
-    private(set) var progress: SortProgress?
-    private(set) var isSorting = false
-    private var task: Task<Void, Never>?
+    // Not observed: views follow `progressStream()`. `AppModel` starts sorting from
+    // its init, which runs inside `HindsightApp.body`; observed reads there made every
+    // sorted post rebuild the app model, and a new engine with it (LESSONS.md).
+    @ObservationIgnored private var cache: Cache
+    @ObservationIgnored private(set) var progress: SortProgress?
+    @ObservationIgnored private(set) var isSorting = false
+    @ObservationIgnored private var task: Task<Void, Never>?
     /// Posts that came in while a run was going: sorted right after it.
-    private var rerun: (posts: [ContractPost], onFinish: (@MainActor () -> Void)?)?
-    private var observers: [UUID: AsyncStream<SortProgress>.Continuation] = [:]
+    @ObservationIgnored private var rerun: (posts: [ContractPost], onFinish: (@MainActor () -> Void)?)?
+    @ObservationIgnored private var observers: [UUID: AsyncStream<SortProgress>.Continuation] = [:]
 
     /// `directory: nil` keeps the cache in memory (tests, previews).
     init(backend: SortBackend, directory: URL?) {
@@ -100,14 +103,6 @@ final class SortEngine {
             if !fresh.isEmpty { rerun = (posts, onFinish) }
             return
         }
-        // Fallback topics depend on the other saves too (an author's majority),
-        // so earlier fallback decisions follow the current picks. No model needed.
-        let picks = TopicFallback.picks(for: posts)
-        let freshIDs = Set(fresh.map(\.id))
-        for post in posts where cache.records[post.id]?.fallback != nil && !freshIDs.contains(post.id) {
-            let slug = picks[post.id]?.slug ?? TopicFallback.otherSlug
-            if cache.records[post.id]?.decision.screen == nil { cache.records[post.id]?.decision.slug = slug }
-        }
         let retry = posts.filter { p in cache.records[p.id].map { $0.fallback == .noModel && $0.captionHash == Self.hash(p.caption) } ?? false }
         publish(posts)
         guard !fresh.isEmpty || !retry.isEmpty else {
@@ -116,6 +111,15 @@ final class SortEngine {
         }
         isSorting = true
         task = Task {
+            // Off the main actor: scoring every save takes a moment. Fallback topics
+            // depend on the other saves too (an author's majority), so earlier
+            // fallback decisions follow the current picks. No model needed.
+            let picks = await Task.detached(priority: .utility) { TopicFallback.picks(for: posts) }.value
+            let freshIDs = Set(fresh.map(\.id))
+            for post in posts where cache.records[post.id]?.fallback != nil && !freshIDs.contains(post.id) {
+                let slug = picks[post.id]?.slug ?? TopicFallback.otherSlug
+                if cache.records[post.id]?.decision.screen == nil { cache.records[post.id]?.decision.slug = slug }
+            }
             var todo = fresh
             if !retry.isEmpty, await backend.isAvailable() { todo += retry }
             todo.sort { Self.hash($0.id) < Self.hash($1.id) }
