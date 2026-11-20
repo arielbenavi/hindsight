@@ -160,3 +160,14 @@ def test_new_account_can_adopt_the_default_store_once(server, tmp_path):
     assert len(client.get(f"{first['base_path']}/saves").json()) == 2
     second = client.post(f"/{TOKEN}/tenants").json()  # the flag is used up
     assert client.get(f"{second['base_path']}/saves").json() == []
+
+
+def test_a_resend_never_blanks_a_field_and_fills_missing_ones(server):
+    url = "https://www.instagram.com/p/MERGE1/"
+    server.ingest([{"url": url, "platform": "instagram", "author": "anna", "caption": "short"}], source="muse")
+    server.ingest([{"url": url, "platform": "instagram", "author": None, "caption": "a much longer caption", "transcript": "words"}], source="ig_cookie")
+    saved = next(iter(server.load_saves().values()))
+    assert saved["author"] == "anna" and saved["caption"] == "a much longer caption" and saved["transcript"] == "words"
+    server.ingest([{"url": url, "platform": "instagram", "caption": "x", "location_tag": "NYC"}], source="muse")
+    saved = next(iter(server.load_saves().values()))
+    assert saved["caption"] == "a much longer caption" and saved["location_tag"] == "NYC"
