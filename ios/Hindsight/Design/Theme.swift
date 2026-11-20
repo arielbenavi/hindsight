@@ -122,6 +122,12 @@ extension View {
             .toolbarBackground(.visible, for: .navigationBar)
     }
 
+    /// A tab's root screen hides its nav bar: paint the status bar's strip so
+    /// scrolled content never shows under the clock.
+    func statusBarStrip() -> some View {
+        self.overlay(alignment: .top) { Theme.background.ignoresSafeArea(edges: .top).frame(height: 0) }
+    }
+
     /// Full-screen dark background used by every screen.
     func themedScreen() -> some View {
         self.background(Theme.background.ignoresSafeArea())

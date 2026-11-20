@@ -9,7 +9,8 @@ struct AllSavesScreen: View {
     @State private var platform: Platform?
 
     var body: some View {
-        let all = app.allPosts
+        // Let-go saves only come back through search.
+        let all = query.isEmpty ? app.saves.visible(app.allPosts) : app.allPosts
         let shown = SaveSearch.filter(all, query: query, platform: platform)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 10) {
@@ -17,7 +18,7 @@ struct AllSavesScreen: View {
                     .padding(.bottom, 6)
                 SaveSearchField(text: $query)
                 PlatformFilterChips(posts: all, selection: $platform)
-                ForEach(shown) { SaveCardRow(post: $0) }
+                ForEach(shown) { SaveCardRow(post: $0, app: app) }
                 if shown.isEmpty {
                     Text(all.isEmpty ? "No saves yet." : query.isEmpty ? "Nothing from there." : "Nothing for \"\(query)\".")
                         .font(Theme.body(17, weight: .semibold))
@@ -48,6 +49,7 @@ struct AllSavesSheet: View {
     var body: some View {
         NavigationStack {
             AllSavesScreen(app: app, initialQuery: initialQuery)
+                .saveDetailHost(app: app)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
         .presentationDragIndicator(.visible)
