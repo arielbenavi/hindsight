@@ -1,18 +1,36 @@
 # hindsight — Handoff
 
-## Current status (2026-11-15)
+## Current status (2026-11-20)
 
 **Read [LESSONS.md](LESSONS.md) first**, then [TESTING.md](TESTING.md) and [HOSTING.md](HOSTING.md).
-The approved rework plan (Home shell, topics for everything, sync) is done through step 5.
+The approved rework plan (Home shell, topics for everything, sync) is done through step 5. On top of it,
+branch `ariel/today-and-jobs` replaced the single Home screen with **Today · Library · Ask** and gave every
+topic a **job**.
 
 ### What the app is now
-Bring saves in → see them organized → get old ones resurfaced. After onboarding (Welcome → How it
-works → Plug in your apps → You're in) there is **one fixed Home screen**, no tab bar, no setup chat:
-Today (3 resurfaced saves a day) → Views (Places / Tips / Workouts, only when they have content) →
-Topics (every save has one: AI topics, the user's own collections, small ones under "Other") →
-Recent. Search on top, gear = Sources. Home works from the raw imports the moment onboarding ends;
-sorting runs in the background and topics appear as they're ready. The server is pulled on launch
-and on every return to the app; each install gets its own server account.
+Bring saves in → see them organized by what they're for → get old ones back, three a day. After
+onboarding (Welcome → How it works → Plug in your apps → You're in) there's a bottom tab bar:
+- **Today** (the front door): one big card at a time, 3 a day ("1 of 3"), each answered with Not anymore /
+  Open it / Did it, then "That's today." (what happened, new since yesterday, "One more"). Picks come from
+  saves still `new`, not snoozed, whose topic's job allows Today (Go, Do, Learn); due reminders first. The
+  set is saved (`today.json`) so a relaunch resumes; a new day starts fresh. 9:00 local notification, asked
+  for the first time a set is finished, only scheduled when something is eligible.
+- **Library**: topics grouped by job — Go, Do, Learn, Keep close, Look, Know — with "N saves still need a
+  home", All saves and Let go at the end. Search on top, gear (Sources) and 🐞 in the header. A topic's page
+  has the job's shape: Do = checklist, Look = picture board, Keep close = the quiet shelf ("What do you need
+  right now?"), Go/Learn/Know = the list (with Open map / Open tips). "…" → "What is this for?" changes the job.
+  Tapping a save opens its detail sheet (done, remind me, note, move to another topic, let go).
+- **Ask**: a focused search (caption, author, hashtags, topic, notes) plus ready-made filters. No AI yet.
+
+Library works from the raw imports the moment onboarding ends; sorting runs in the background and topics
+appear as they're ready. The server is pulled on launch and on every return to the app; each install gets
+its own server account.
+
+User state lives outside the contract file, per dataset (`Application Support/Hindsight/<dataset>/`):
+`save-states.json` (`Saves/SaveStateStore`: new/done/letGo, note, remindAt, shownInToday, lastOpened, opens),
+`topic-prefs.json` (`TopicPrefsStore`: job overrides by topic id, moves post id → topic id, applied by
+`Library/LibraryIndex` on top of `HomeTopics`), `today.json` (`Today/TodayStore`). The default job is
+`TopicJobs.suggested` (the topic's view, else label keywords, EN + HE).
 
 ### Architecture (~15 lines)
 - `Import/SavedPostStore` — every import (Muse, Meta export, X, WhatsApp, server pull), deduped. The source of truth.
@@ -22,8 +40,13 @@ and on every return to the app; each install gets its own server account.
 - `assemble` writes the contract file (`Application Support/Hindsight/me/hindsight.json`, docs/data-contract.md).
 - `App/AppModel` — loads that file (or a bundled sample), sets the views' layout (`LayoutRules.propose`),
   owns `PlaceStore` (MapKit matching), `PracticeStore`, and `syncWithServer()` (pull, ≤ 1/min).
-- `Home/` — `HomeScreen` (Today via `Resurface`, Views, Topics via `HomeTopics`, Recent), `TopicScreen`;
-  views pushed on the same stack: `MapScreen`, `LearnScreen`, `FitnessScreen` (their setup is opt-in, inline).
+- `App/RootView` → `MainTabs` (Today · Library · Ask; Sources sheet, server pull, reminders).
+- `Today/` — `TodayScreen`, `TodayPlan` (pure: eligibility, picks, resume), `Resurface` (pure picks by day),
+  `TodayStore`, `TodayNotifications` ("hd." ids; Learn/Fitness keep "hs.").
+- `Library/` — `LibraryScreen` (sections by job), `TopicJob`/`TopicJobs`, `LibraryIndex`, `HomeTopics`,
+  `TopicScreen` (+ job picker), `JobScreens` (Do list, Look board, Keep close shelf), `ShelfLogic` (pure);
+  views pushed on the Library stack: `MapScreen`, `LearnScreen`, `FitnessScreen` (their setup is opt-in, inline).
+- `Saves/` — `SaveStateStore`, `TopicPrefsStore`, `SaveDetailSheet`, `SaveArt`. `Ask/` — `AskScreen`, `AskSearch`.
 - `Sync/MuseConnector` — server URL + this install's account (`ensureAccount`: tenant `…/<token>/t/<id>`).
 - `connector/server.py` — MCP connector Muse calls, `/saves` for the app, `/ingest` for the bot, `/tenants`.
 - `whatsapp-bot/` — Baileys bot on our number; posts notes/links to `/ingest` under the user's connect code (= tenant).
