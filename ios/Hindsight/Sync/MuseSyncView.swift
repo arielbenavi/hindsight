@@ -14,6 +14,9 @@ struct MuseSyncView: View {
     @State private var phase: Phase = .ready
     @State private var launchOutcome: MuseLauncher.Outcome?
     @State private var launchedViaWhatsApp = false
+    /// Our message is on the clipboard (after any "Open Muse", or "Copy message"):
+    /// said plainly, so switching apps by hand always works.
+    @State private var messageCopied = false
     @State private var method: Method = MuseConnector.baseURL == nil ? .paste : .connector
     @State private var pollID: UUID?
     /// Set by "Get older saves": the next prompt asks for saves before this date.
@@ -84,6 +87,24 @@ struct MuseSyncView: View {
                     .font(OnboardingStyle.body)
                     .foregroundStyle(OnboardingStyle.muted)
 
+                if method == .connector {
+                    Label(connectorConnected
+                          ? "Set up. Muse sends your new saves every day; open it only to sync right now."
+                          : "One-time setup. After this, your Instagram and Facebook saves arrive here every day on their own.",
+                          systemImage: "arrow.triangle.2.circlepath")
+                        .font(OnboardingStyle.caption.weight(.bold))
+                        .foregroundStyle(OnboardingStyle.accent)
+                }
+
+                if messageCopied {
+                    Label("Message copied. Open Muse and paste it.", systemImage: "doc.on.clipboard.fill")
+                        .font(OnboardingStyle.title)
+                        .foregroundStyle(OnboardingStyle.accent)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onboardingCard(padding: 14)
+                        .accessibilityAddTraits(.updatesFrequently)
+                }
+
                 if case .ready = phase {
                     MuseGuide(flow: method == .connector ? .connector : .paste)
                         .frame(maxWidth: .infinity)
@@ -130,7 +151,10 @@ struct MuseSyncView: View {
                         .textSelection(.enabled)
                         .onboardingCard(padding: 14)
                     HStack {
-                        Button("Copy message") { UIPasteboard.general.string = prompt }
+                        Button("Copy message") {
+                            UIPasteboard.general.string = prompt
+                            withAnimation(.snappy) { messageCopied = true }
+                        }
                         Spacer()
                         ShareLink("Share to Muse…", item: prompt)
                     }
@@ -263,6 +287,8 @@ struct MuseSyncView: View {
             launchedViaWhatsApp
                 ? "Message copied. Open your Muse chat in WhatsApp, paste it and send."
                 : "Our message is on your clipboard. If it isn't typed in already, paste it and send."
+        case .openedInBrowser:
+            "Opened muse.ai. If the Muse app doesn't take over, open it yourself and paste the message."
         case .notInstalled: "Couldn't open Muse. The message is copied, so paste it into Muse yourself."
         case nil:
             method == .connector && !connectorConnected
@@ -296,6 +322,7 @@ struct MuseSyncView: View {
         DebugLog.write("muse launch (\(viaWhatsApp ? "whatsapp" : "app"), \(method.rawValue), connected=\(connectorConnected)): \(outcome)")
         launchedViaWhatsApp = viaWhatsApp
         launchOutcome = outcome
+        withAnimation(.snappy) { messageCopied = true }
         phase = outcome == .notInstalled ? .ready : .waiting
     }
 
