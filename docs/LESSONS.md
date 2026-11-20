@@ -243,6 +243,12 @@ DATA_FETCHING_RESEARCH.md.)
 - Instagram cookies exported 2026-09-29 still worked on 2026-11-19 (the ~90-day estimate holds so far);
   the saved-posts endpoint returns thumbnails and captions but not which collection a save is in. (2026-11-19)
 
+- A free Apple ID allows 3 installed apps; Ariel's slots are full, so `device.sh install` fails with
+  `MIFreeProfileValidatedAppTracker` (looks like a signing error, isn't). hindsight runs inside
+  LiveContainer instead: `ios/scripts/ipa.sh` builds an unsigned IPA into iCloud Drive, then
+  LiveContainer → + → replace. Launch arguments don't reach an app in LiveContainer, so the server
+  URL is baked in at build time (`HINDSIGHT_SERVER_URL` → Info.plist `HindsightServerURL`). (2026-11-19)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.

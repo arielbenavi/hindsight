@@ -28,7 +28,13 @@ enum MuseConnector {
            !fromLaunch.isEmpty {
             defaults.set(fromLaunch, forKey: baseURLKey)
         }
-        return defaults.string(forKey: baseURLKey).flatMap(normalized)
+        return (defaults.string(forKey: baseURLKey) ?? bakedURL).flatMap(normalized)
+    }
+
+    /// Set at build time (`HINDSIGHT_SERVER_URL=… xcodebuild`, see ios/scripts/ipa.sh) for builds
+    /// that can't take launch arguments, like one running inside LiveContainer. Empty in the repo.
+    private static var bakedURL: String? {
+        (Bundle.main.object(forInfoDictionaryKey: "HindsightServerURL") as? String).flatMap { $0.isEmpty ? nil : $0 }
     }
 
     static var account: ServerAccount? {
