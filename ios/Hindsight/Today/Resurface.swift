@@ -1,7 +1,7 @@
 import Foundation
 
-/// Home's "Today": up to three old saves brought back, the same all day and
-/// different tomorrow. Pure. Order: saved on this day in an earlier year, then
+/// Today's picks: up to three old saves brought back, the same all day and
+/// different tomorrow. Pure; `TodayPlan` decides which saves may be picked. Order: saved on this day in an earlier year, then
 /// saves older than 30 days picked by a seed from the date, then the newest.
 enum Resurface {
     static let oldAfterDays = 30
@@ -12,9 +12,12 @@ enum Resurface {
         /// An older save; `months` is nil when we don't know when it was saved.
         case fromThePast(months: Int?)
         case new
+        /// The user asked to be reminded (Save detail → Remind me), and it's time.
+        case reminder
 
         var label: String {
             switch self {
+            case .reminder: "You asked to be reminded"
             case .anniversary(let years): "Saved \(years) \(years == 1 ? "year" : "years") ago today"
             case .fromThePast(let months?) where months >= 12:
                 "From \(months / 12) \(months / 12 == 1 ? "year" : "years") ago"
