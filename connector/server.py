@@ -285,6 +285,16 @@ async def create_tenant(request: Request) -> JSONResponse:
     tenant = "t-" + secrets.token_hex(4)
     saves_path(tenant)  # creates the folder
     log_call("tenant_created", tenant=tenant)
+    # One-time hand-over (single-user beta): if data/adopt_default exists, the next new
+    # account starts with everything in the default store (the Mac's backfill) and becomes
+    # the backfill's target (data/backfill_tenant).
+    flag = DATA / "adopt_default"
+    if flag.exists():
+        with _lock:
+            saves_path(tenant).write_text(json.dumps(load_saves(None), ensure_ascii=False, indent=1))
+        (DATA / "backfill_tenant").write_text(tenant)
+        flag.unlink()
+        log_call("tenant_adopted_default", tenant=tenant, saves=len(load_saves(tenant)))
     return JSONResponse({"tenant": tenant, "base_path": f"/{TOKEN}/t/{tenant}"})
 
 

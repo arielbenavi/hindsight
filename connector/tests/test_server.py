@@ -146,3 +146,14 @@ def test_whatsapp_bot_number(server, monkeypatch):
     monkeypatch.setenv("HINDSIGHT_WHATSAPP_BOT", "+1 555 123-4567")
     assert client.get(f"/{TOKEN}/whatsapp").json() == {"number": "15551234567"}
     assert client.get(f"/{TOKEN}/t/t-abc123/whatsapp").json() == {"number": "15551234567"}  # same from a tenant URL
+
+
+def test_new_account_can_adopt_the_default_store_once(server, tmp_path):
+    client = TestClient(server.RequestLog(server.app))
+    client.post(f"/{TOKEN}/ingest", json={"source": "ig_cookie", "posts": [{"url": "https://www.instagram.com/p/ADOPT1/", "platform": "instagram"}]})
+    (tmp_path / "adopt_default").write_text("")
+    first = client.post(f"/{TOKEN}/tenants").json()
+    assert len(client.get(f"{first['base_path']}/saves").json()) == 1
+    assert (tmp_path / "backfill_tenant").read_text() == first["tenant"]
+    second = client.post(f"/{TOKEN}/tenants").json()  # the flag is used up
+    assert client.get(f"{second['base_path']}/saves").json() == []
