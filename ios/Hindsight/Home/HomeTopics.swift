@@ -32,7 +32,15 @@ enum HomeTopics {
     static let minimumSize = 3
     static let otherID = "other"
     /// Default folders some sources report as collections; they say nothing.
-    static let genericCollections: Set<String> = ["saved", "all posts", "all", "saved posts"]
+    static let genericCollections = TopicFallback.genericCollections
+
+    /// The view's symbol, a lexicon topic's (`TopicFallback`), or a folder for a
+    /// topic named after the user's own collection.
+    private static func symbol(for topic: ContractTopic) -> String {
+        if let symbol = topic.legoScreen?.symbol ?? TopicFallback.symbol(forLabel: topic.label) { return symbol }
+        let label = TextMatch.fold(topic.label)
+        return topic.sourceCollections.contains { TextMatch.fold($0) == label } ? "folder.fill" : "sparkles"
+    }
 
     static func build(data: HindsightData?, posts: [ContractPost]) -> [HomeTopic] {
         let order = Dictionary(posts.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { first, _ in first })
@@ -48,7 +56,7 @@ enum HomeTopics {
             represented.insert(TextMatch.fold(topic.label))
             topic.sourceCollections.forEach { represented.insert(TextMatch.fold($0)) }
             topics.append(HomeTopic(id: "ai:\(topic.id)", label: topic.label, emoji: topic.emoji,
-                                    symbol: topic.legoScreen?.symbol ?? "sparkles", postIDs: ids,
+                                    symbol: Self.symbol(for: topic), postIDs: ids,
                                     legoScreen: topic.legoScreen, kind: .ai, topicID: topic.id))
         }
 
