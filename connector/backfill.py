@@ -12,6 +12,8 @@ ingest, so running this again only fetches what's new.
     cd connector && ../venv/bin/python backfill.py --dry-run     # count only, nothing written
     cd connector && ../venv/bin/python backfill.py               # fetch + ingest
     ... --only ig | --only x       ... --tenant t-xxxxxxxx       ... --cap 300
+
+Without --tenant it uses the account named in data/backfill_tenant (the phone's), else the default store.
 """
 from __future__ import annotations
 
@@ -176,6 +178,10 @@ def main() -> None:
     parser.add_argument("--cap", type=int, default=200, help="max new items per source per run")
     args = parser.parse_args()
     load_env()
+    # The phone's account, once known (written when the app first creates its tenant).
+    default_tenant = Path(__file__).parent / "data" / "backfill_tenant"
+    if not args.tenant and default_tenant.is_file():
+        args.tenant = default_tenant.read_text().strip() or None
     import sweep
 
     for name, source, fetch, save in (
