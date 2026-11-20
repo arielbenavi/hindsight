@@ -248,7 +248,14 @@ def ingest(posts: list[dict[str, Any]], source: str, tenant: str | None = None) 
                 duplicates += 1
                 old = saves[pid]
                 if len(post.get("caption") or "") > len(old.get("caption") or ""):
-                    saves[pid] = {**old, **post, "id": pid, "received_at": old.get("received_at", now)}
+                    # The longer caption wins, but a field the new record lacks keeps its old value.
+                    filled = {k: v for k, v in post.items() if v not in (None, "", [])}
+                    saves[pid] = {**old, **filled, "id": pid, "received_at": old.get("received_at", now)}
+                else:
+                    # Same or shorter caption: still take fields we didn't have (a transcript, an author).
+                    extra = {k: v for k, v in post.items() if v not in (None, "", []) and old.get(k) in (None, "", [])}
+                    if extra:
+                        saves[pid] = {**old, **extra}
                 continue
             saves[pid] = {**post, "id": pid, "received_at": now}
             accepted += 1
