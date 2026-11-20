@@ -1,6 +1,12 @@
 # Hindsight Backfill — Status & Lessons Learned
 
-Last updated: 2026-09-29
+Last updated: 2026-11-19
+
+> **Current way to backfill (2026-11-19):** `cd connector && ../venv/bin/python backfill.py` (add `--dry-run` to count only).
+> It fetches new Instagram saves (cookie API) and X bookmarks since the last run and posts them to the connector's `/ingest`,
+> so they reach the app on its next pull. No Gemini, no legacy database. It runs every 6 hours via launchd
+> (`connector/install-launchd.sh`, log in `connector/data/backfill.log`). Last run: 79 new Instagram saves + 3 X bookmarks.
+> The legacy server below (`web/backend`, port 8000) no longer runs; its notes are kept for the platform lessons.
 
 ---
 

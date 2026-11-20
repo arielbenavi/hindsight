@@ -233,6 +233,12 @@ DATA_FETCHING_RESEARCH.md.)
 - ngrok 3.39 with `--log=stdout` outside a terminal printed nothing and the tunnel never
   came up (public URL 404). `--log=<file>` works. (2026-11-15)
 
+- The repo's `.env` has `X_CLIENT_SECRET` twice (consumer secret, then the OAuth client secret).
+  dotenv keeps the last one; a hand-rolled loader that keeps the first makes X token refresh
+  fail with `unauthorized_client`. (2026-11-19)
+- Instagram cookies exported 2026-09-29 still worked on 2026-11-19 (the ~90-day estimate holds so far);
+  the saved-posts endpoint returns thumbnails and captions but not which collection a save is in. (2026-11-19)
+
 ## Testing loop
 
 - DEBUG builds write `Library/Application Support/debug-log.txt`.
