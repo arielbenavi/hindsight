@@ -166,6 +166,25 @@ enum MuseConnector {
         }
     }
 
+    // MARK: - Assistant access (the consent switch)
+
+    /// "Let AI assistants search my saves": on this device until the server confirms.
+    static let assistantSearchKey = "assistantSearchEnabled"
+
+    static func settingsURL(base: URL) -> URL { base.appending(path: "settings") }
+
+    /// Tells the server (connector/server.py `PUT …/settings`). The read tools refuse
+    /// while it's off.
+    static func setAssistantSearch(_ on: Bool, base: URL) async throws {
+        var request = URLRequest(url: settingsURL(base: base))
+        request.httpMethod = "PUT"
+        request.timeoutInterval = 15
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["assistant_search": on])
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+    }
+
     // MARK: - Pull
 
     /// Everything the connector has received, as the JSON `SavedPostParser` reads.
