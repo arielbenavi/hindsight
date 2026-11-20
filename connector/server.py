@@ -200,6 +200,83 @@ def get_sync_status(ctx: Context | None = None) -> dict[str, Any]:
     return status
 
 
+SEARCH_FIELDS = (("caption", 3), ("transcript", 2), ("on_screen_text", 2), ("author", 3),
+                 ("author_display_name", 2), ("hashtags", 3), ("collections", 3), ("url", 1))
+
+
+def _terms(text: str) -> list[str]:
+    return [t for t in re.findall(r"[^\W_]+", text.lower()) if len(t) > 1]
+
+
+def search(saves: list[dict[str, Any]], query: str, platform: str | None = None, limit: int = 10) -> list[dict[str, Any]]:
+    """Rank saves by how many query words they contain (caption, transcript, author, tags…),
+    newest first on ties. Plain word matching: no embeddings, runs anywhere."""
+    wanted = set(_terms(query))
+    scored: list[tuple[float, str, dict[str, Any]]] = []
+    for post in saves:
+        if platform and post.get("platform") != platform:
+            continue
+        score, matched = 0.0, set()
+        for field, weight in SEARCH_FIELDS:
+            value = post.get(field)
+            words = set(_terms(" ".join(map(str, value)) if isinstance(value, list) else str(value or "")))
+            hits = wanted & words
+            # A query word also matches as a prefix ("recipe" finds "recipes").
+            hits |= {w for w in wanted if len(w) > 3 and any(x.startswith(w) for x in words)}
+            score += weight * len(hits)
+            matched |= hits
+        if matched:
+            score += 5 * len(matched)  # covering more of the query beats repeating one word
+            scored.append((score, str(post.get("saved_at") or post.get("posted_at") or ""), post))
+    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return [brief(post) for _, _, post in scored[: max(1, min(limit, 50))]]
+
+
+def brief(post: dict[str, Any], text_chars: int = 700) -> dict[str, Any]:
+    """A save trimmed for a model's context: the link, who, when, and the words in it."""
+    def cut(value: Any) -> str | None:
+        text = " ".join(str(value or "").split())
+        return (text[:text_chars] + "…" if len(text) > text_chars else text) or None
+    out = {
+        "id": post.get("id"), "url": post.get("url"), "platform": post.get("platform"), "kind": post.get("kind"),
+        "author": post.get("author"), "saved_at": post.get("saved_at") or post.get("posted_at"),
+        "collections": post.get("collections") or None,
+        "caption": cut(post.get("caption")), "transcript": cut(post.get("transcript")),
+        "on_screen_text": cut(post.get("on_screen_text")),
+    }
+    return {k: v for k, v in out.items() if v}
+
+
+@mcp.tool(
+    description=(
+        "Search the user's saved posts (Instagram, X, Facebook, WhatsApp notes…) by words: topic, "
+        "author, technique, place. Returns the best matches with the link, author, date, caption "
+        "and, when hindsight has it, the video's transcript and on-screen text. Use this to answer "
+        "from what the user saved (\"what did I save about sidechain compression?\"). "
+        "platform is optional: 'instagram', 'x', 'facebook', 'whatsapp', 'web'. limit up to 50."
+    )
+)
+def search_saves(query: str, platform: str | None = None, limit: int = 10, ctx: Context | None = None) -> list[dict[str, Any]]:
+    tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
+    results = search(list(load_saves(tenant).values()), query, platform, limit)
+    log_call("search_saves", tenant=tenant, query=query[:80], returned=len(results))
+    return results
+
+
+@mcp.tool(
+    description=(
+        "The user's most recently saved posts, newest first (optionally one platform). "
+        "Same fields as search_saves. limit up to 50."
+    )
+)
+def recent_saves(limit: int = 10, platform: str | None = None, ctx: Context | None = None) -> list[dict[str, Any]]:
+    tenant = tenant_from(ctx.headers if ctx else None) or CURRENT_TENANT.get()
+    saves = [p for p in load_saves(tenant).values() if not platform or p.get("platform") == platform]
+    saves.sort(key=lambda p: str(p.get("saved_at") or p.get("posted_at") or p.get("received_at") or ""), reverse=True)
+    log_call("recent_saves", tenant=tenant, returned=min(len(saves), limit))
+    return [brief(p) for p in saves[: max(1, min(limit, 50))]]
+
+
 @mcp.tool(description="Check that the hindsight connector is reachable. Returns 'pong'.")
 def ping(ctx: Context | None = None) -> str:
     log_call("ping", tenant=tenant_from(ctx.headers if ctx else None))

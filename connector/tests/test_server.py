@@ -88,7 +88,7 @@ def test_http_routes(server):
     with client:
         tools = client.post(f"/{TOKEN}/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
                             headers=MCP_HEADERS).json()["result"]["tools"]
-        assert {t["name"] for t in tools} == {"ping", "get_sync_status", "submit_saved_posts"}
+        assert {t["name"] for t in tools} == {"ping", "get_sync_status", "submit_saved_posts", "search_saves", "recent_saves"}
         assert client.get(f"/{TOKEN}/mcp").status_code == 405  # no open SSE stream (Muse timed out on it)
 
         result = mcp_call(client, "submit_saved_posts", {
@@ -171,3 +171,19 @@ def test_a_resend_never_blanks_a_field_and_fills_missing_ones(server):
     server.ingest([{"url": url, "platform": "instagram", "caption": "x", "location_tag": "NYC"}], source="muse")
     saved = next(iter(server.load_saves().values()))
     assert saved["caption"] == "a much longer caption" and saved["location_tag"] == "NYC"
+
+
+def test_search_saves_ranks_by_words_and_reads_transcripts(server):
+    server.ingest([
+        {"url": "https://www.instagram.com/reel/S1/", "platform": "instagram", "author": "mixwithmike",
+         "caption": "How I glue my drums", "transcript": "sidechain compression on the 808 so the kick punches through", "saved_at": "2026-01-02T00:00:00Z"},
+        {"url": "https://www.instagram.com/reel/S2/", "platform": "instagram", "author": "chef.anna", "caption": "Crispy rice salad recipes", "saved_at": "2026-03-01T00:00:00Z"},
+        {"url": "https://x.com/karpathy/status/9", "platform": "x", "author": "karpathy", "caption": "Compression is intelligence", "saved_at": "2026-02-01T00:00:00Z"},
+    ], source="test")
+    saves = list(server.load_saves().values())
+    hits = server.search(saves, "sidechain compression 808")
+    assert hits[0]["author"] == "mixwithmike" and "sidechain" in hits[0]["transcript"]
+    assert [h["author"] for h in server.search(saves, "recipe")] == ["chef.anna"]  # prefix match
+    assert [h["author"] for h in server.search(saves, "compression", platform="x")] == ["karpathy"]
+    assert server.search(saves, "nothing-like-this") == []
+    assert server.recent_saves(limit=1)[0]["author"] == "chef.anna"
