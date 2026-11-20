@@ -180,6 +180,7 @@ def test_search_saves_ranks_by_words_and_reads_transcripts(server):
         {"url": "https://www.instagram.com/reel/S2/", "platform": "instagram", "author": "chef.anna", "caption": "Crispy rice salad recipes", "saved_at": "2026-03-01T00:00:00Z"},
         {"url": "https://x.com/karpathy/status/9", "platform": "x", "author": "karpathy", "caption": "Compression is intelligence", "saved_at": "2026-02-01T00:00:00Z"},
     ], source="test")
+    server.save_settings(None, {"assistant_search": True})
     saves = list(server.load_saves().values())
     hits = server.search(saves, "sidechain compression 808")
     assert hits[0]["author"] == "mixwithmike" and "sidechain" in hits[0]["transcript"]
@@ -187,3 +188,58 @@ def test_search_saves_ranks_by_words_and_reads_transcripts(server):
     assert [h["author"] for h in server.search(saves, "compression", platform="x")] == ["karpathy"]
     assert server.search(saves, "nothing-like-this") == []
     assert server.recent_saves(limit=1)[0]["author"] == "chef.anna"
+
+
+def test_assistant_search_is_off_until_the_owner_turns_it_on(server):
+    client = TestClient(server.RequestLog(server.app))
+    with client:
+        base = client.post(f"/{TOKEN}/tenants").json()["base_path"]
+        client.post(f"{base}/ingest", json={"source": "muse", "posts": [
+            {"url": "https://www.instagram.com/reel/Q1/", "platform": "instagram", "caption": "miso pasta recipe"}]})
+        assert client.get(f"{base}/settings").json() == {"assistant_search": False}
+
+        def call(name, arguments):
+            body = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": name, "arguments": arguments}}
+            res = client.post(f"{base}/mcp", json=body, headers=MCP_HEADERS)
+            assert res.status_code == 200, res.text
+            return res.json()["result"]["structuredContent"]["result"]
+
+        refused = call("search_saves", {"query": "miso"})
+        assert len(refused) == 1 and "hasn't allowed" in refused[0]["error"]
+        assert "error" in call("recent_saves", {})[0]
+
+        # Only the known key, as a bool.
+        assert client.put(f"{base}/settings", json={"assistant_search": "yes"}).status_code == 400
+        assert client.put(f"{base}/settings", json={"other": True}).status_code == 400
+        assert client.put(f"{base}/settings", content=b"not json").status_code == 400
+        assert client.put(f"{base}/settings", json={"assistant_search": True}).json() == {"assistant_search": True}
+        assert client.get(f"{base}/settings").json() == {"assistant_search": True}
+        assert call("search_saves", {"query": "miso"})[0]["url"] == "https://www.instagram.com/reel/Q1/"
+
+        # Another account is unaffected, and switching it off works.
+        other = client.post(f"/{TOKEN}/tenants").json()["base_path"]
+        assert client.get(f"{other}/settings").json() == {"assistant_search": False}
+        client.put(f"{base}/settings", json={"assistant_search": False})
+        assert "error" in call("search_saves", {"query": "miso"})[0]
+
+
+def test_the_owners_existing_account_keeps_assistant_search(server, tmp_path):
+    # The owner enabled the connector by hand before the switch existed (data/default_tenant).
+    (tmp_path / "default_tenant").write_text("t-owner01")
+    assert server.load_settings("t-owner01") == {"assistant_search": True}
+    assert server.load_settings("t-someone") == {"assistant_search": False}
+    assert server.load_settings(None) == {"assistant_search": False}
+    server.save_settings("t-owner01", {"assistant_search": False})  # once they choose, that wins
+    assert server.load_settings("t-owner01") == {"assistant_search": False}
+
+
+def test_read_tools_never_return_notes(server):
+    server.ingest([
+        {"id": "whatsapp:N1", "platform": "whatsapp", "kind": "note", "url": "hindsight-note:whatsapp/N1",
+         "caption": "pasta night with the doctor results", "saved_at": "2026-05-01T00:00:00Z"},
+        {"url": "https://www.instagram.com/reel/P1/", "platform": "instagram", "caption": "pasta",
+         "saved_at": "2026-01-01T00:00:00Z"},
+    ], source="test")
+    server.save_settings(None, {"assistant_search": True})
+    assert [h["url"] for h in server.search_saves("pasta")] == ["https://www.instagram.com/reel/P1/"]
+    assert [h["url"] for h in server.recent_saves(limit=10)] == ["https://www.instagram.com/reel/P1/"]
