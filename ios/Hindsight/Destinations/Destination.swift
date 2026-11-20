@@ -11,8 +11,8 @@ enum ReminderList: String, Codable, Sendable, CaseIterable, Identifiable {
     var id: String { rawValue }
     /// The list's name in Reminders, and the key in `SaveState.sentTo`.
     var name: String { rawValue }
-    /// For buttons and confirmations: "Add to To try", "In Groceries".
-    var shortName: String { self == .toTry ? "To try" : rawValue }
+    /// For buttons and confirmations: "Add to To try list", "In Groceries".
+    var shortName: String { self == .toTry ? "To try list" : rawValue }
 
     var symbol: String {
         switch self {
@@ -223,6 +223,18 @@ enum Destinations {
             .trimmingCharacters(in: .whitespaces)
         guard !line.isEmpty else { return "\(post.byline)'s \(post.kind.rawValue)" }
         return line.count > 70 ? String(line.prefix(69)).trimmingCharacters(in: .whitespaces) + "…" : line
+    }
+
+    /// An event's name: what the first line says before the date ("Rooftop jazz night",
+    /// not "Rooftop jazz night 🎷 Saturday, December 5…"), else the save's title.
+    static func eventTitle(for post: ContractPost, dateText: String) -> String {
+        let fallback = title(for: post)
+        guard !dateText.isEmpty, let line = post.firstLine, let range = line.range(of: dateText) else { return fallback }
+        let before = String(line[..<range.lowerBound])
+            .trimmingCharacters(in: .whitespaces.union(.punctuationCharacters).union(.symbols))
+        let clean = before.unicodeScalars.filter { !($0.properties.isEmojiPresentation) }.map(String.init).joined()
+            .trimmingCharacters(in: .whitespaces.union(.punctuationCharacters))
+        return clean.count >= 3 ? clean : fallback
     }
 
     /// What to add for one save: for Groceries one item per ingredient (or the recipe

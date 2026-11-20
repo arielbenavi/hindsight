@@ -12,6 +12,8 @@ struct TodayScreen: View {
     @State private var sorting: SortProgress?
     /// "Added to Groceries · 7 items", for a moment after a card was sent somewhere.
     @State private var toast: String?
+    /// Dev (beta menu): show the sorting state on demand.
+    @AppStorage("debugPreviewTodaySorting") private var previewSorting = false
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -26,6 +28,8 @@ struct TodayScreen: View {
                     header(record)
                     if posts.isEmpty {
                         EmptySavesCard(action: showSources)
+                    } else if previewSorting {
+                        sortingToday
                     } else if let record, let entry = record.current, let post = byID[entry.id] {
                         cardStack(post: post, entry: entry, record: record, library: library)
                     } else if let record, record.isFinished {
@@ -133,7 +137,8 @@ struct TodayScreen: View {
                 // Two cards peeking behind: what's left of the set.
                 if remaining > 2 { backCard(opacity: 0.45).scaleEffect(0.86, anchor: .bottom).offset(y: 30) }
                 if remaining > 1 { backCard(opacity: 0.85).scaleEffect(0.93, anchor: .bottom).offset(y: 15) }
-                TodayCard(post: post, reason: entry.reason, topic: library.topicByPost[post.id])
+                TodayCard(post: post, reason: entry.reason, topic: library.topicByPost[post.id],
+                          action: sendAction(post, library: library))
                     .offset(x: drag.width, y: drag.height * 0.15)
                     .rotationEffect(.degrees(Double(drag.width) / 22))
                     .overlay(alignment: .center) { swipeHint }
@@ -144,15 +149,18 @@ struct TodayScreen: View {
             }
             .padding(.bottom, remaining > 2 ? 30 : remaining > 1 ? 15 : 0)
             actions(post)
-            // Where it's useful: one tap, and the card counts as handled today.
-            if let destination = Destinations.forToday(app.destinationInput(for: post, library: library)) {
-                TodaySendAction(app: app, post: post, destination: destination) { message in
-                    showToast(message)
-                    answer(post, .sent)
-                }
-                .id(post.id)
-            }
         }
+    }
+
+    /// Where it's useful ("Open in Maps", "Add to Groceries"): one tap, and the card
+    /// counts as handled today. Sits at the card's bottom, so the three buttons stay
+    /// clear of the tab bar (LESSONS.md: 420pt card).
+    private func sendAction(_ post: ContractPost, library: LibraryIndex) -> AnyView? {
+        guard let destination = Destinations.forToday(app.destinationInput(for: post, library: library)) else { return nil }
+        return AnyView(TodaySendAction(app: app, post: post, destination: destination) { message in
+            showToast(message)
+            answer(post, .sent)
+        })
     }
 
     private func showToast(_ message: String) {
@@ -260,6 +268,8 @@ struct TodayCard: View {
     let post: ContractPost
     let reason: String
     let topic: HomeTopic?
+    /// Today's "where it's useful" action, at the bottom of the card (`TodaySendAction`).
+    var action: AnyView?
 
     /// Fixed, so the cards behind it peek out by the same amount every time.
     static let height: CGFloat = 420
@@ -280,7 +290,7 @@ struct TodayCard: View {
                 Text(post.caption?.nilIfEmpty ?? "No caption")
                     .font(Theme.body(16))
                     .foregroundStyle(post.caption?.nilIfEmpty == nil ? Theme.muted : Theme.secondary)
-                    .lineLimit(4)
+                    .lineLimit(action == nil ? 4 : 3)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let topic {
@@ -294,6 +304,10 @@ struct TodayCard: View {
                     .background(Theme.surfaceRaised, in: Capsule())
                     .padding(.top, 2)
                 }
+                if let action {
+                    Spacer(minLength: 0)
+                    action
+                }
             }
             .padding(18)
             .frame(height: TodayCard.height - TodayCard.artHeight, alignment: .top)
@@ -302,7 +316,8 @@ struct TodayCard: View {
         .clipShape(.rect(cornerRadius: 28))
         .overlay(RoundedRectangle(cornerRadius: 28).strokeBorder(Theme.stroke))
         .shadow(color: .black.opacity(0.35), radius: 16, y: 8)
-        .accessibilityElement(children: .combine)
+        // One element to read, unless it holds a button VoiceOver must reach.
+        .accessibilityElement(children: action == nil ? .combine : .contain)
     }
 }
 

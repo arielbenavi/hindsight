@@ -268,7 +268,8 @@ struct JobPickerSheet: View {
                 autoList = route?.list ?? Destinations.bulkList(topicLabel: topic.label, job: current) ?? .toTry
             }
             .safeAreaInset(edge: .bottom) {
-                Button(chosen == current ? "Keep it as \(current.title)" : "Make it \(chosen.title)") {
+                let routeChanged = app.topicPrefs.autoRoute(for: topic.id).map { autoRoute ? $0.list != autoList : true } ?? autoRoute
+                Button(chosen != current ? "Make it \(chosen.title)" : routeChanged ? "Save" : "Keep it as \(current.title)") {
                     // The suggested job isn't stored, so a later better guess still applies.
                     app.topicPrefs.setJob(chosen == suggested ? nil : chosen, for: topic.id)
                     saveAutoRoute(chosen)
@@ -307,10 +308,12 @@ struct JobPickerSheet: View {
                     Spacer()
                     Picker("List", selection: $autoList) {
                         ForEach(ReminderList.allCases) { list in
-                            Label(list.name, systemImage: list.symbol).tag(list)
+                            Text(list.name).tag(list)
                         }
                     }
                     .pickerStyle(.menu)
+                    .lineLimit(1)
+                    .fixedSize()
                 }
             }
         }

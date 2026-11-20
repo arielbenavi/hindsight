@@ -142,6 +142,10 @@ struct DestinationsTests {
         let due = at(2026, 11, 21, 20)
         #expect(Destinations.drafts(for: video, list: .toTry, due: due).first?.due == due)
         #expect(Destinations.title(for: post("R3", caption: nil)) == "@chef.anna's reel")
+        // Calendar: the words before the date name the event.
+        let gig = post("E1", caption: "Rooftop jazz night 🎷 Saturday, December 5, 2026 at 8pm. Tickets in bio")
+        #expect(Destinations.eventTitle(for: gig, dateText: "Saturday, December 5, 2026 at 8pm") == "Rooftop jazz night")
+        #expect(Destinations.eventTitle(for: gig, dateText: "not in it") == Destinations.title(for: gig))
     }
 
     // MARK: - Dates
@@ -163,6 +167,10 @@ struct DestinationsTests {
         #expect(DateFinder.find(in: "1/2 cup sugar\n3/4 cup flour", reference: ref) == nil)
         #expect(DateFinder.find(in: "No dates here, just vibes", reference: ref) == nil)
         #expect(DateFinder.looksLikeADate("30.11.2026") && !DateFinder.looksLikeADate("1/2"))
+        // Relative dates meant the day it was posted, not today.
+        #expect(DateFinder.find(in: "Don't do these and you'll stay stiff. Fix it today", reference: ref) == nil)
+        #expect(DateFinder.find(in: "Join us this Saturday at 8pm!", reference: ref) == nil)
+        #expect(!DateFinder.looksLikeADate("tomorrow") && DateFinder.looksLikeADate("Dec 5"))
     }
 
     // MARK: - Markdown

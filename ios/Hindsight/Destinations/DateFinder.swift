@@ -31,13 +31,21 @@ enum DateFinder {
         return nil
     }
 
-    /// The detector also reads "1/2 cup" as January 2 and "3.5" as a date. Keep
-    /// matches that name a month or a day, give a time, or carry a 4-digit year.
+    /// Only absolute dates: a month by name ("Dec 5", "December 5, 2026") or a full
+    /// numeric date ("30.11.2026", "2026-11-30"). Relative ones ("today", "Saturday at
+    /// 8pm", "tomorrow") meant the day it was posted, not today, and the detector also
+    /// reads "1/2 cup" as January 2.
     static func looksLikeADate(_ words: String) -> Bool {
-        if words.contains(where: \.isLetter) { return true }   // "Dec 5", "Saturday", "tomorrow"
-        if hasTime(words) { return true }                        // "20:00"
-        return words.range(of: #"\d{4}"#, options: .regularExpression) != nil  // "30.11.2026"
+        let lower = words.lowercased()
+        let tokens = lower.split(whereSeparator: { !$0.isLetter }).map(String.init)
+        if tokens.contains(where: { months.contains($0) }) { return true }
+        return lower.range(of: #"\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{4}-\d{1,2}-\d{1,2}"#, options: .regularExpression) != nil
     }
+
+    private static let months: Set<String> = [
+        "jan", "january", "feb", "february", "mar", "march", "apr", "april", "may", "jun", "june", "jul", "july",
+        "aug", "august", "sep", "sept", "september", "oct", "october", "nov", "november", "dec", "december",
+    ]
 
     static func isDeadline(_ words: String) -> Bool {
         let first = words.lowercased().split(whereSeparator: { !$0.isLetter }).first.map(String.init) ?? ""

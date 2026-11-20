@@ -19,6 +19,7 @@ final class SendToModel {
         var postID: String
         var title: String
         var found: DateFinder.Found
+        var location: String?
         var notes: String
         var url: URL
     }
@@ -49,7 +50,8 @@ final class SendToModel {
             if result.succeeded { onSent?(result.message) }
         case .calendar(let found):
             pendingCalendarSent = onSent
-            calendar = CalendarDraft(postID: post.id, title: Destinations.title(for: post), found: found,
+            calendar = CalendarDraft(postID: post.id, title: Destinations.eventTitle(for: post, dateText: found.text), found: found,
+                                     location: app.destinationInput(for: post, library: app.library()).placeQuery,
                                      notes: [post.caption?.nilIfBlank, post.url.absoluteString].compactMap { $0 }.joined(separator: "\n\n"),
                                      url: post.url)
         case .export:
@@ -142,7 +144,7 @@ struct SendToGroup: View {
                         Image(systemName: destination.symbol).font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(Theme.lime).frame(width: 28)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(destination.title).font(Theme.body(16, weight: .bold))
+                            Text(title(destination)).font(Theme.body(16, weight: .bold))
                             if let detail = detail(destination) {
                                 Text(detail).font(Theme.body(13)).foregroundStyle(Theme.secondary).lineLimit(1)
                             }
@@ -168,6 +170,12 @@ struct SendToGroup: View {
                 }
             }
         }
+    }
+
+    /// "Add ingredients to Groceries" only when there's a list to add.
+    private func title(_ destination: Destination) -> String {
+        if destination == .reminders(.groceries), IngredientParser.parse(post.caption).isEmpty { return "Add to Groceries" }
+        return destination.title
     }
 
     private func detail(_ destination: Destination) -> String? {
@@ -221,7 +229,8 @@ struct TodaySendAction: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
+            if let notice = model.notice, !notice.ok { NoticeLine(notice: notice) }
             Button {
                 Task { await model.perform(destination, post: post, app: app, openURL: openURL, onSent: onSent) }
             } label: {
@@ -230,16 +239,15 @@ struct TodaySendAction: View {
                     Text(destination.shortTitle)
                 }
                 .font(Theme.body(15, weight: .bold))
-                .foregroundStyle(Theme.text)
-                .padding(.horizontal, 16).frame(minHeight: 40)
-                .background(Theme.surface, in: Capsule())
-                .overlay(Capsule().strokeBorder(Theme.stroke))
+                .foregroundStyle(Theme.lime)
+                .padding(.horizontal, 16).frame(minHeight: 44)
+                .background(Theme.lime.opacity(0.12), in: Capsule())
+                .overlay(Capsule().strokeBorder(Theme.lime.opacity(0.35)))
             }
             .buttonStyle(.plain)
             .disabled(model.busy != nil)
-            if let notice = model.notice, !notice.ok { NoticeLine(notice: notice) }
+            .accessibilityHint("Counts as handled for today")
         }
-        .frame(maxWidth: .infinity)
         .sendToSheets(model, app: app)
     }
 }
@@ -280,6 +288,7 @@ struct EventEditor: UIViewControllerRepresentable {
         let store = EKEventStore()
         let event = EKEvent(eventStore: store)
         event.title = draft.title
+        event.location = draft.location
         event.notes = draft.notes
         event.url = draft.url
         event.isAllDay = !draft.found.hasTime

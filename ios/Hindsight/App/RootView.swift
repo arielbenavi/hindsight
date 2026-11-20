@@ -90,6 +90,8 @@ struct MainTabs: View {
 struct DevMenu: View {
     let app: AppModel
     @State private var showsModelTest = false
+    /// Dev: Today shows its "Sorting your saves…" state, to check it without a real first sort.
+    @AppStorage("debugPreviewTodaySorting") private var previewTodaySorting = false
 
     var body: some View {
         Menu {
@@ -100,6 +102,14 @@ struct DevMenu: View {
                 app.today.reset()
                 app.today.prepare(app.todayContext(app.library()), saves: app.saves)
             }
+            #if DEBUG
+            Button("Add destination test saves", systemImage: "paperplane") {
+                let added = app.store?.merge(DestinationSamples.posts()) ?? 0
+                DebugLog.write("beta menu: destination test saves, +\(added)")
+                app.importsChanged()
+            }
+            Toggle("Preview Today while sorting", systemImage: "hourglass", isOn: $previewTodaySorting)
+            #endif
             // Back to onboarding, keeping everything imported so far.
             Button("Start onboarding over", systemImage: "arrow.counterclockwise") {
                 AppModel.resetMySetup()
