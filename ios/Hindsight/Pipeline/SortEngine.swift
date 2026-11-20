@@ -12,8 +12,9 @@ import Observation
 ///
 /// Every result is cached by post id + caption, so a restart resumes and later
 /// syncs only sort new posts. Models never block anything: a post no model can
-/// answer falls back to the rules (a topic named from its slug at worst). Only
-/// posts not sorted yet sit in "Unsorted".
+/// answer gets its topic from `TopicFallback` (collections, hashtags, caption
+/// words) and its screen from the rules, and is asked again once a model is
+/// there. Only posts not sorted yet sit in "Unsorted".
 @Observable
 @MainActor
 final class SortEngine {
@@ -23,6 +24,17 @@ final class SortEngine {
         var places: [ExtractedPlace]?
         var tip: ExtractedTip?
         var routine: ExtractedRoutine?
+        /// Set when no model answered and `TopicFallback` picked the topic.
+        /// nil: a model (or a certain rule) decided. Older caches have none.
+        var fallback: Fallback?
+    }
+
+    enum Fallback: String, Codable, Sendable {
+        /// No model on this device at the time: ask again once there is one.
+        case noModel
+        /// A model was there but gave no answer (refusal, unsupported language):
+        /// not asked again until the caption changes.
+        case declined
     }
 
     struct TopicInfo: Codable, Sendable {
@@ -39,24 +51,40 @@ final class SortEngine {
         var topicByHint: [String: String] = [:]
         var topics: [String: TopicInfo] = [:]
         var usage = SortUsage()
+        /// nil: written before fallback decisions were marked (see `init`).
+        var version: Int?
     }
 
     private let backend: SortBackend
     private let file: JSONFile<Cache>
-    private var cache: Cache
-    private(set) var progress: SortProgress?
-    private(set) var isSorting = false
-    private var task: Task<Void, Never>?
+    // Not observed: views follow `progressStream()`. `AppModel` starts sorting from
+    // its init, which runs inside `HindsightApp.body`; observed reads there made every
+    // sorted post rebuild the app model, and a new engine with it (LESSONS.md).
+    @ObservationIgnored private var cache: Cache
+    @ObservationIgnored private(set) var progress: SortProgress?
+    @ObservationIgnored private(set) var isSorting = false
+    @ObservationIgnored private var task: Task<Void, Never>?
     /// Posts that came in while a run was going: sorted right after it.
-    private var rerun: (posts: [ContractPost], onFinish: (@MainActor () -> Void)?)?
-    private var observers: [UUID: AsyncStream<SortProgress>.Continuation] = [:]
+    @ObservationIgnored private var rerun: (posts: [ContractPost], onFinish: (@MainActor () -> Void)?)?
+    @ObservationIgnored private var observers: [UUID: AsyncStream<SortProgress>.Continuation] = [:]
 
     /// `directory: nil` keeps the cache in memory (tests, previews).
     init(backend: SortBackend, directory: URL?) {
         self.backend = backend
         file = JSONFile(name: "sort-cache", directory: directory)
-        cache = file.load() ?? Cache()
+        cache = file.load() ?? Cache(version: Self.cacheVersion)
+        if cache.version == nil {
+            // Older builds put every post no model answered under "none/other"
+            // without saying so: mark those, so they get a fallback topic now and
+            // a model's answer later.
+            for (id, record) in cache.records where record.decision == SortDecision(screen: nil, slug: TopicFallback.otherSlug) {
+                cache.records[id]?.fallback = .noModel
+            }
+            cache.version = Self.cacheVersion
+        }
     }
+
+    private static let cacheVersion = 1
 
     var usage: SortUsage { cache.usage }
 
@@ -65,28 +93,43 @@ final class SortEngine {
     /// Starts sorting whatever isn't sorted yet. Runs on its own: observers can
     /// stop listening (setup hands off at 90%) without stopping the sort. Called
     /// again while running (new imports), it sorts the newcomers right after.
+    /// Posts that got a fallback topic for want of a model are asked again when
+    /// one is there now.
     func start(_ posts: [ContractPost], concurrency: Int = 4, onFinish: (@MainActor () -> Void)? = nil) {
         // A stable shuffle, not newest-first: whatever is sorted by the hand-off
         // is a fair sample of the whole history, so the proposal's topics are too.
-        let todo = posts.filter { cache.records[$0.id]?.captionHash != Self.hash($0.caption) }
-            .sorted { Self.hash($0.id) < Self.hash($1.id) }
+        let fresh = posts.filter { cache.records[$0.id]?.captionHash != Self.hash($0.caption) }
         if task != nil {
-            if !todo.isEmpty { rerun = (posts, onFinish) }
+            if !fresh.isEmpty { rerun = (posts, onFinish) }
             return
         }
+        let retry = posts.filter { p in cache.records[p.id].map { $0.fallback == .noModel && $0.captionHash == Self.hash(p.caption) } ?? false }
         publish(posts)
-        guard !todo.isEmpty else {
+        guard !fresh.isEmpty || !retry.isEmpty else {
             finishStreams(); onFinish?()
             return
         }
         isSorting = true
-        DebugLog.write("sort: \(todo.count) of \(posts.count) posts to sort")
         task = Task {
+            // Off the main actor: scoring every save takes a moment. Fallback topics
+            // depend on the other saves too (an author's majority), so earlier
+            // fallback decisions follow the current picks. No model needed.
+            let picks = await Task.detached(priority: .utility) { TopicFallback.picks(for: posts) }.value
+            let freshIDs = Set(fresh.map(\.id))
+            for post in posts where cache.records[post.id]?.fallback != nil && !freshIDs.contains(post.id) {
+                let slug = picks[post.id]?.slug ?? TopicFallback.otherSlug
+                if cache.records[post.id]?.decision.screen == nil { cache.records[post.id]?.decision.slug = slug }
+            }
+            var todo = fresh
+            if !retry.isEmpty, await backend.isAvailable() { todo += retry }
+            todo.sort { Self.hash($0.id) < Self.hash($1.id) }
+            DebugLog.write("sort: \(todo.count) of \(posts.count) posts to sort")
             await withTaskGroup(of: (String, Record).self) { group in
                 var queue = todo[...]
                 func next() {
                     guard let post = queue.popFirst() else { return }
-                    group.addTask { [backend] in (post.id, await Self.sortOne(post, backend: backend)) }
+                    let pick = picks[post.id]
+                    group.addTask { [backend] in (post.id, await Self.sortOne(post, backend: backend, fallback: pick)) }
                 }
                 for _ in 0..<concurrency { next() }
                 var done = 0
@@ -114,6 +157,13 @@ final class SortEngine {
         }
     }
 
+    /// Whether some posts only have a fallback topic and a model could now do
+    /// better (the app asks on launch, after a phone gets Apple Intelligence).
+    func canImproveFallbacks(_ posts: [ContractPost]) async -> Bool {
+        guard posts.contains(where: { cache.records[$0.id]?.fallback == .noModel }) else { return false }
+        return await backend.isAvailable()
+    }
+
     /// Progress for Home's "Sorting your saves…" strip.
     func progressStream() -> AsyncStream<SortProgress> {
         AsyncStream { continuation in
@@ -125,14 +175,20 @@ final class SortEngine {
         }
     }
 
-    private static func sortOne(_ post: ContractPost, backend: SortBackend) async -> Record {
+    private static func sortOne(_ post: ContractPost, backend: SortBackend, fallback pick: TopicFallback.Pick?) async -> Record {
         let decision: SortDecision
+        var fallback: Fallback?
         if let certain = SortRules.certain(post) {
             decision = certain
+        } else if let answer = await backend.bucket(post) {
+            decision = answer
         } else {
-            decision = await backend.bucket(post) ?? SortRules.fallback(post)
+            // No answer: the topic from the post's own signals, no view (the rules
+            // found none). Not a guess at places, tips or routines.
+            decision = SortDecision(screen: nil, slug: pick?.slug ?? TopicFallback.otherSlug)
+            fallback = await backend.isAvailable() ? .declined : .noModel
         }
-        var record = Record(captionHash: hash(post.caption), decision: decision)
+        var record = Record(captionHash: hash(post.caption), decision: decision, fallback: fallback)
         if decision.screen == .map {
             // Places now, not later: the Map tab and the place check need them.
             record.places = SortRules.places(await backend.places(post) ?? [], in: post)
@@ -151,8 +207,9 @@ final class SortEngine {
         var topics: [SortProgress.TopicCount] = []
         for (key, value) in counts {
             let info: TopicInfo? = cache.topicByHint[key].flatMap { cache.topics[$0] }
-            let label: String = info?.label ?? SortRules.label(forSlug: value.0.slug)
-            let emoji: String = info?.emoji ?? value.0.screen?.defaultEmoji ?? "•"
+            let named = TopicFallback.name(forSlug: value.0.slug, collections: [])
+            let label: String = info?.label ?? named?.label ?? SortRules.label(forSlug: value.0.slug)
+            let emoji: String = info?.emoji ?? named?.emoji ?? value.0.screen?.defaultEmoji ?? "•"
             topics.append(SortProgress.TopicCount(id: key, label: label, emoji: emoji, count: value.1))
         }
         topics.sort { $0.count != $1.count ? $0.count > $1.count : $0.label < $1.label }
@@ -277,10 +334,13 @@ final class SortEngine {
                 }
             }
         }
+        // Unnamed: a fallback topic keeps its lexicon or collection name; any
+        // other slug is named after itself.
         for (key, hint) in remaining {
-            let id = newID(hint.slug)
-            cache.topics[id] = TopicInfo(id: id, label: SortRules.label(forSlug: hint.slug), emoji: hint.screen?.defaultEmoji ?? "•",
-                                         screen: hint.screen, question: nil)
+            let named = TopicFallback.name(forSlug: hint.slug, collections: hint.collections)
+            let id = newID(named?.label ?? hint.slug)
+            cache.topics[id] = TopicInfo(id: id, label: named?.label ?? SortRules.label(forSlug: hint.slug),
+                                         emoji: named?.emoji ?? hint.screen?.defaultEmoji ?? "•", screen: hint.screen, question: nil)
             cache.topicByHint[key] = id
         }
     }

@@ -5,7 +5,7 @@ import FoundationModels
 /// swap in a fake without Apple Intelligence.
 protocol SortBackend: Sendable {
     /// Bucket + topic slug for one post. nil when no model can answer (the
-    /// engine falls back to the rules).
+    /// engine falls back to the rules and `TopicFallback`).
     func bucket(_ post: ContractPost) async -> SortDecision?
     /// Places named in a map post (names as written + type).
     func places(_ post: ContractPost) async -> [(name: String, type: PlaceType)]?
@@ -15,6 +15,9 @@ protocol SortBackend: Sendable {
     func routine(_ post: ContractPost) async -> ExtractedRoutine?
     /// Tokens used so far and which model answered, for the usage record.
     func usage() async -> SortUsage
+    /// Whether any model can answer right now. When it can't, posts get
+    /// `TopicFallback` topics and are asked again once it can.
+    func isAvailable() async -> Bool
 }
 
 struct SortDecision: Codable, Sendable, Hashable {
@@ -109,6 +112,13 @@ actor AppleSortBackend: SortBackend {
     }
 
     func usage() async -> SortUsage { tally }
+
+    func isAvailable() async -> Bool {
+#if compiler(>=6.3)
+        if #available(iOS 27, *), !cloudExhausted, PrivateCloudComputeLanguageModel().isAvailable { return true }
+#endif
+        return SystemLanguageModel.default.isAvailable
+    }
 
     // MARK: - Requests
 

@@ -6,17 +6,13 @@ enum SortRules {
     // MARK: - Certain decisions (no model call)
 
     /// Only near-certain cases: a location sticker or a 📍 line is a place post.
-    /// The rest goes to the model (the model beat broad rules: 86% vs 82%).
+    /// The rest goes to the model (the model beat broad rules: 86% vs 82%), or,
+    /// with no model, to `TopicFallback` for a topic and no view.
     static func certain(_ post: ContractPost) -> SortDecision? {
         if post.locationTag?.name?.nilIfEmpty != nil || (post.caption ?? "").contains("📍") {
             return SortDecision(screen: .map, slug: post.collections.first.map(slug) ?? "places")
         }
         return nil
-    }
-
-    /// When no model can answer: a place post if the rules say so, else "other" (no view).
-    static func fallback(_ post: ContractPost) -> SortDecision {
-        certain(post) ?? SortDecision(screen: nil, slug: "other")
     }
 
     // MARK: - Checking a model's places

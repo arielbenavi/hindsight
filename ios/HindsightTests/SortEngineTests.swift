@@ -32,6 +32,7 @@ actor FixtureBackend: SortBackend {
     func tip(_ post: ContractPost) async -> ExtractedTip? { answers ? data.item(for: post.id)?.tip : nil }
     func routine(_ post: ContractPost) async -> ExtractedRoutine? { answers ? data.item(for: post.id)?.routine : nil }
     func usage() async -> SortUsage { SortUsage() }
+    func isAvailable() async -> Bool { answers }
 }
 
 /// Answers every post the same way and names nothing.
@@ -44,6 +45,7 @@ actor StubBackend: SortBackend {
     func tip(_ post: ContractPost) async -> ExtractedTip? { nil }
     func routine(_ post: ContractPost) async -> ExtractedRoutine? { nil }
     func usage() async -> SortUsage { SortUsage() }
+    func isAvailable() async -> Bool { true }
 }
 
 @MainActor

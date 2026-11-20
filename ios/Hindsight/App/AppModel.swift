@@ -159,7 +159,13 @@ final class AppModel {
         if setupDone {
             // Saves imported since: they join the topics when sorted (`rewriteMySaves`).
             // A cache from an older build may also have topics to name.
-            if hasNewImports || sortEngine().hasUnnamedHints(myPosts) { startSorting() }
+            if hasNewImports || sortEngine().hasUnnamedHints(myPosts) {
+                startSorting()
+            } else {
+                // Saves sorted without a model (no Apple Intelligence then): ask it now if it's here.
+                let engine = sortEngine(), posts = myPosts
+                Task { [weak self] in if await engine.canImproveFallbacks(posts) { self?.startSorting() } }
+            }
             return
         }
         guard setupTask == nil else { return }
