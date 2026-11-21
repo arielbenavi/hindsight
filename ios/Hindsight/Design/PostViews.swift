@@ -1,11 +1,16 @@
 import SwiftUI
 
 /// Opens a saved post in its own app (Instagram etc.), falling back to the browser.
-/// ⚠️ In-app playback is the known gap (mvp-sprint.md → Video).
+/// Playing it inside hindsight is `PlayerSheet` / `EmbedPlayer` (Player/).
 @MainActor
 enum PostOpener {
     static func open(_ post: ContractPost, openURL: OpenURLAction) {
-        openURL(post.url)
+        open(post.url, openURL: openURL)
+    }
+
+    /// A link out of the in-app player ("View on Instagram", a profile).
+    static func open(_ url: URL, openURL: OpenURLAction) {
+        openURL(url)
     }
 }
 

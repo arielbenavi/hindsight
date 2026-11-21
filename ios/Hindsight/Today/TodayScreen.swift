@@ -14,6 +14,12 @@ struct TodayScreen: View {
     @State private var toast: String?
     /// Dev (beta menu): show the sorting state on demand.
     @AppStorage("debugPreviewTodaySorting") private var previewSorting = false
+    /// Sources → Viewing: "Open it" plays the save here (`PlayerSheet`).
+    @AppStorage(PlayerGate.playInAppKey) private var playsInApp = true
+    /// The save in the player; closing it counts as opened unless answered inside.
+    @State private var playing: ContractPost?
+    /// Same save, kept past the sheet's binding going nil for `finishPlaying`.
+    @State private var played: ContractPost?
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -59,6 +65,11 @@ struct TodayScreen: View {
                         .padding(.bottom, 16)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+            }
+        }
+        .sheet(item: $playing, onDismiss: finishPlaying) { post in
+            if case .player(let source) = PlayerGate.choice(for: post, playInApp: true) {
+                PlayerSheet(app: app, post: post, source: source) { outcome in answer(post, outcome) }
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answeredTick)
@@ -202,14 +213,20 @@ struct TodayScreen: View {
     }
 
     private func actions(_ post: ContractPost) -> some View {
-        HStack(alignment: .top, spacing: 18) {
+        let plays = PlayerGate.choice(for: post, playInApp: playsInApp) != .external
+        return HStack(alignment: .top, spacing: 18) {
             RoundAction(symbol: "xmark", label: "Not anymore") { answer(post, .letGo) }
             Button {
-                PostOpener.open(post, openURL: openURL)
-                // Counts the open (TodayStore.answer) and moves on.
-                answer(post, .opened)
+                if plays {
+                    played = post
+                    playing = post  // counted when the player closes (`finishPlaying`)
+                } else {
+                    PostOpener.open(post, openURL: openURL)
+                    // Counts the open (TodayStore.answer) and moves on.
+                    answer(post, .opened)
+                }
             } label: {
-                Label("Open it", systemImage: "arrow.up.right")
+                Label("Open it", systemImage: plays ? "play.fill" : "arrow.up.right")
                     .font(Theme.body(19, weight: .heavy))
                     .foregroundStyle(Theme.onLime)
                     .frame(maxWidth: .infinity, minHeight: 64)
@@ -218,6 +235,14 @@ struct TodayScreen: View {
             .buttonStyle(PressableStyle())
             RoundAction(symbol: "checkmark", label: "Did it") { answer(post, .done) }
         }
+    }
+
+    /// The player closed: "I did this" / "Not interested" / a destination inside it
+    /// already answered; otherwise it counts as opened and Today moves on.
+    private func finishPlaying() {
+        guard let post = played else { return }
+        played = nil
+        if app.today.record?.outcomes[post.id] == nil { answer(post, .opened) }
     }
 
     private func answer(_ post: ContractPost, _ outcome: TodayOutcome) {
