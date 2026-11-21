@@ -76,4 +76,11 @@ enum SaveOpener {
         app.saves.recordOpen(post.id)
         PostOpener.open(post, openURL: openURL)
     }
+
+    /// Plays it inside hindsight when it can (`PlayerGate`, Sources → Viewing), else
+    /// opens it outside. `PlayerSheet` counts the open.
+    static func playOrOpen(_ post: ContractPost, app: AppModel, openURL: OpenURLAction,
+                           play: (ContractPost) -> Void) {
+        if case .player = PlayerGate.choice(for: post) { play(post) } else { open(post, app: app, openURL: openURL) }
+    }
 }

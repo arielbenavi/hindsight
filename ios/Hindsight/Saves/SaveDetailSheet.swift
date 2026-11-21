@@ -1,14 +1,17 @@
 import SwiftUI
 
 /// One save, from the Library or Ask: picture, where it's from, caption, its topic
-/// (and "Move"), "Open in <Platform>", and what the user can do with it: done,
-/// a reminder, a note, let it go.
+/// (and "Move"), "Watch here" (the picture becomes the player) or "Open in <Platform>",
+/// and what the user can do with it: done, a reminder, a note, let it go.
 struct SaveDetailSheet: View {
     let app: AppModel
     let post: ContractPost
     @State private var note = ""
     @State private var editingNote = false
     @FocusState private var noteFocused: Bool
+    /// The picture area is the player (`EmbedPlayer`).
+    @State private var playing = false
+    @AppStorage(PlayerGate.playInAppKey) private var playsInApp = true
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
@@ -17,14 +20,13 @@ struct SaveDetailSheet: View {
         let topic = library.topicByPost[post.id]
         let job = library.job(forPost: post.id)
         let state = app.saves.state(post.id)
+        let choice = PlayerGate.choice(for: post, playInApp: playsInApp)
         NavigationStack {
+            ScrollViewReader { scroll in
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    SaveArt(post: post, glyphSize: 72)
-                        .frame(height: 230)
-                        .frame(maxWidth: .infinity)
-                        .clipShape(.rect(cornerRadius: Theme.radius))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.stroke))
+                    art(choice) { play(scroll) }
+                        .id("art")
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(metaLine.uppercased())
@@ -38,10 +40,27 @@ struct SaveDetailSheet: View {
 
                     topicRow(topic, library: library)
 
-                    Button { SaveOpener.open(post, app: app, openURL: openURL) } label: {
-                        Label("Open in \(post.platform.displayName)", systemImage: "arrow.up.right")
+                    if case .player = choice {
+                        let article = EmbedURL.isArticle(post.url, platform: post.platform)
+                        VStack(spacing: 4) {
+                            Button { play(scroll) } label: {
+                                Label(article ? "Read here" : "Watch here", systemImage: article ? "doc.text" : "play.fill")
+                            }
+                            .buttonStyle(.pill)
+                            Button { SaveOpener.open(post, app: app, openURL: openURL) } label: {
+                                Label("Open in \(post.platform.displayName)", systemImage: "arrow.up.right")
+                                    .font(Theme.body(15, weight: .bold))
+                                    .frame(minHeight: 44)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Theme.lime)
+                        }
+                    } else {
+                        Button { SaveOpener.open(post, app: app, openURL: openURL) } label: {
+                            Label("Open in \(post.platform.displayName)", systemImage: "arrow.up.right")
+                        }
+                        .buttonStyle(.pill)
                     }
-                    .buttonStyle(.pill)
 
                     let destinations = Destinations.applicable(app.destinationInput(for: post, library: library))
                     if !destinations.isEmpty {
@@ -69,6 +88,7 @@ struct SaveDetailSheet: View {
                 }
                 .padding(Theme.padding)
             }
+            }
             .scrollDismissesKeyboard(.interactively)
             .themedScreen()
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
@@ -77,6 +97,52 @@ struct SaveDetailSheet: View {
         .presentationDragIndicator(.visible)
         .onAppear { note = state.note ?? "" }
         .onDisappear { saveNote() }
+    }
+
+    // MARK: - Picture / player
+
+    /// The picture; tapping it (or "Watch here") plays the save right there.
+    @ViewBuilder private func art(_ choice: PlayerGate.Choice, play: @escaping () -> Void) -> some View {
+        if playing, case .player(let source) = choice {
+            let tall = EmbedURL.isTall(post.url, platform: post.platform, kind: post.kind)
+            let height: CGFloat = tall ? 560 : EmbedURL.isArticle(post.url, platform: post.platform) ? 520 : 440
+            EmbedPlayer(post: post, source: source)
+                .frame(width: tall ? height * 9 / 16 : nil, height: height)
+                .clipShape(.rect(cornerRadius: Theme.radius))
+                .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.stroke))
+                .frame(maxWidth: .infinity)
+        } else if case .player = choice {
+            Button(action: play) {
+                picture.overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundStyle(Theme.text)
+                        .frame(width: 52, height: 52)
+                        .background(.black.opacity(0.55), in: Circle())
+                        .padding(12)
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Play it here")
+        } else {
+            picture
+        }
+    }
+
+    private var picture: some View {
+        SaveArt(post: post, glyphSize: 72)
+            .frame(height: 230)
+            .frame(maxWidth: .infinity)
+            .clipShape(.rect(cornerRadius: Theme.radius))
+            .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.stroke))
+    }
+
+    private func play(_ scroll: ScrollViewProxy) {
+        if !playing { app.saves.recordOpen(post.id) }
+        withAnimation(.snappy) {
+            playing = true
+            scroll.scrollTo("art", anchor: .top)
+        }
     }
 
     private var divider: some View { Rectangle().fill(Theme.stroke).frame(height: 1).padding(.leading, 56) }

@@ -216,6 +216,7 @@ struct KeepCloseScreen: View {
     @State private var need: KeepCloseNeed?
     @State private var round = 0
     @State private var showsAll = false
+    @State private var playing: ContractPost?
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -265,6 +266,7 @@ struct KeepCloseScreen: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .tint(ShelfStyle.accent)
         .topicJobMenu(app: app, topic: topic)
+        .playerSheet($playing, app: app)
     }
 
     /// Every Keep close topic's saves (the shelf is the job's, not one topic's).
@@ -374,6 +376,6 @@ struct KeepCloseScreen: View {
     }
 
     private func open(_ post: ContractPost) {
-        SaveOpener.open(post, app: app, openURL: openURL)
+        SaveOpener.playOrOpen(post, app: app, openURL: openURL) { playing = $0 }
     }
 }

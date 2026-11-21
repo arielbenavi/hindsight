@@ -18,6 +18,8 @@ struct SourcesView: View {
 
                 SourceCards(store: store)
 
+                ViewingCard()
+
                 AssistantAccessCard()
             } actions: {
                 Button("Run setup again") {
