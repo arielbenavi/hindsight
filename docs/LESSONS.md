@@ -5,6 +5,34 @@ starting a session; add to it when something surprises you. Newest first.
 (Platform-by-platform fetching history lives in BACKFILL_STATUS.md and
 DATA_FETCHING_RESEARCH.md.)
 
+## In-app player (embeds in WKWebView)
+
+Checked in the iOS 26 simulator with real network, 2026-11-20 (`ios/Hindsight/Player/`).
+- **Instagram:** `https://www.instagram.com/p/<code>/embed/` plays reels, old reels (2022, 2024) and photo/carousel
+  posts inline in a plain `WKWebView`, logged out, no login wall. `/p/` works for reel codes too, so we never
+  need `/reel/<code>/embed/`. The embed page is IG's white card (header, media, "View more on Instagram", likes) with
+  empty white space under it; it has no visible mute button (tap the video to play/pause). Don't use
+  `embed/captioned/` (we show our own caption). (2026-11-20)
+- **YouTube: loading `youtube.com/embed/<id>` as the page itself fails with "Error 153 / Video player
+  configuration error"**: YouTube now wants a referrer from the embedding page, and a top-level load has none. Wrapping
+  it in our own HTML with an `<iframe>` and `baseURL` `https://<bundle id>` (YouTube's advice for apps) plays inline.
+  Our dead-end text check only sees the outer page, so an iframe that errors can't be caught. (2026-11-20)
+- **X:** the official widget (`platform.twitter.com/widgets.js` + `blockquote.twitter-tweet`, `data-theme="dark"`)
+  in `loadHTMLString(…, baseURL: https://twitter.com)` renders the tweet in ~2 s, no login. The tweet lives in an
+  iframe, so `document.body.innerText` of our page is empty. (2026-11-20)
+- **TikTok:** `https://www.tiktok.com/embed/v2/<id>` plays inline with its own controls (play, volume, fullscreen).
+  `vm.`/`vt.` short links need a network redirect to find the id, so they open outside. (2026-11-20)
+- **Facebook:** `plugins/video.php?href=…` redirects to `m.facebook.com/plugins/…` and plays, but **jumps to iOS's
+  fullscreen player** on the second tap (the plugin doesn't ask for inline). Plugins only take `www.facebook.com`
+  permalinks, so `m.`/`web.` hosts are rewritten. (2026-11-20)
+- What helped / didn't matter: `allowsInlineMediaPlayback = true` is required for inline; a Safari user agent and
+  `mediaTypesRequiringUserActionForPlayback = []` are set but nothing needed them in this pass (no embed autoplays;
+  every one waits for a tap). Default (persistent) data store, so an Instagram login in the player would stick.
+- Links inside an embed ("View more on Instagram", X's links with `target=_blank`) must be caught in
+  `decidePolicyFor` (main frame, `.linkActivated`) and `createWebViewWith`, or the player navigates to instagram.com.
+  Iframe navigations (X, YouTube) have to be allowed. (2026-11-20)
+- Sound: the simulator can't confirm audio; check on a phone with the silent switch on and off. (2026-11-20)
+
 ## Apple Intelligence / on-device AI
 
 - **On a real iPhone (17 Pro, iOS 27.0), both Apple models beat the Mac test by a lot** (115 fixture posts, 2026-09-30):

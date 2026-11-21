@@ -4,7 +4,7 @@
 
 | Part | Command | What it covers |
 |---|---|---|
-| iOS app (187 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), contract + old-data loading, store merge, sort engine (topics for every save, Unsorted, old caches, imports during a run), Today (picks by state/job/reminder, resume, one more, notification times, an empty set re-picked once saves arrive, sorting empty state, sent saves quiet for 30 days), save states, topic jobs (default mapping incl. Hebrew, overrides, moves), Keep close needs, Do lists, Ask filters, Topics, layout, Map matching, Learn/Fitness/practice, onboarding, Muse prompts/links + "Open Muse" browser fallback, server account URL rules + pull throttle, X PKCE + bookmarks, **destinations** (which apply per job/content, ingredient parser EN/HE + no-list fallback, dates in captions, Markdown, Reminders dedupe + denial with the in-memory writer, auto-route once only, older state files still decode) |
+| iOS app (211 tests) | `cd ios && xcodegen && xcodebuild test -project Hindsight.xcodeproj -scheme Hindsight -destination 'platform=iOS Simulator,name=iPhone 17'` | parsers (seed, Muse JSON, IG/FB/TikTok exports, WhatsApp export), contract + old-data loading, store merge, sort engine (topics for every save, Unsorted, old caches, imports during a run), Today (picks by state/job/reminder, resume, one more, notification times, an empty set re-picked once saves arrive, sorting empty state, sent saves quiet for 30 days), save states, topic jobs (default mapping incl. Hebrew, overrides, moves), Keep close needs, Do lists, Ask filters, Topics, layout, Map matching, Learn/Fitness/practice, onboarding, Muse prompts/links + "Open Muse" browser fallback, server account URL rules + pull throttle, X PKCE + bookmarks, **destinations** (which apply per job/content, ingredient parser EN/HE + no-list fallback, dates in captions, Markdown, Reminders dedupe + denial with the in-memory writer, auto-route once only, older state files still decode), **in-app player** (`EmbedURL` for every Instagram/TikTok/X/YouTube/Facebook link shape, short links and notes → none, dead-end page text, player sizes, the Sources switch deciding what "Open it" does) |
 | Connector (14 tests) | `cd connector && python3 -m venv /tmp/hs-venv && /tmp/hs-venv/bin/pip -q install -r requirements.txt pytest && /tmp/hs-venv/bin/python -m pytest -q tests` | Muse's real field names → contract, id rules = the app's, dedupe, notes, `get_sync_status`, MCP tools over HTTP, `/ingest`, `/saves`, secret-path auth, tenant isolation, bot number route, search/recent, **assistant-search consent** (`…/settings`, off by default, the owner's existing account kept on, notes never returned) |
 | WhatsApp bot (11 tests) | `cd whatsapp-bot && npm test` | message → posts rules (links, owner-only notes, chat as collection, share-tracking params), chat-export parsing (iOS/Android formats, zip, note ids identical to the app's) |
 
@@ -79,6 +79,15 @@ Fresh install each time: `xcrun simctl uninstall booted com.reutrabin.hindsight`
 20. **Muse sheet**: Sources → **Connect with Muse** (primary; the Meta file import is the quiet link under it). The sheet
    says "One-time setup…"; **Open Muse** in the simulator (no Muse app) opens muse.ai in Safari, and back in the app
    the sheet says **Message copied. Open Muse and paste it.**
+21. **In-app player** (after 14, simulator with network): Today → **Open it** (play icon) opens the player sheet:
+   the Instagram embed on top (reels 9:16, posts wider), @author + our caption, **I did this** / **Not interested**
+   (+ the save's one destination), ✕ and ↗ (Open in Instagram) in the top bar. Tap the video: it plays inline.
+   **I did this** closes the sheet and the card moves on ("Did it"); just closing counts "Opened". "View more on
+   Instagram" inside the embed leaves for Safari/Instagram instead of navigating the player. Library → a save →
+   **Watch here** (or tapping the picture) turns the picture into the player in place; **Open in Instagram** is the
+   text link under it; a web link says **Read here**. Gear → Sources → Viewing → turn **Play saves inside hindsight**
+   off: "Open it" shows ↗ again and opens Instagram/Safari like before. A removed post shows **Can't play this one
+   here** + Open in <Platform>.
 
 ## Manual: phone (needs a phone, Muse or WhatsApp)
 
